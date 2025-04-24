@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerenciar Logotipos - Logo Gallery Admin</title>
+    <!-- Link para o CSS do Bootstrap 
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />-->
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="manage-logos.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Gerenciar Logotipos</h1>
+        <div class="user-info">
+          <span>Usuário</span>
+          <button class="logout-btn">Sair</button>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="logo-management">
+          <div class="logo-form-container">
+            <h2>Adicionar Novo Logotipo</h2>
+            <form id="logo-form">
+              <div class="form-group">
+                <label for="client-name">Razão Social:</label>
+                <input type="text" id="client-name" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-cnpj">CNPJ:</label>
+                <input
+                  type="text"
+                  id="client-cnpj"
+                  placeholder="00.000.000/0000-00"
+                  required
+                />
+                <span
+                  id="cnpj-feedback"
+                  style="color: red; font-size: 0.9em"
+                ></span>
+              </div>
+
+              <div class="form-group">
+                <label for="client-city">Cidade:</label>
+                <input type="text" id="client-city" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-uf">UF:</label>
+                <select id="client-uf" required>
+                  <option value="">Selecione</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="client-website">Website:</label>
+                <input type="url" id="client-website" />
+              </div>
+
+              <div class="form-group">
+                <label for="logo-category">Categoria:</label>
+                <select id="logo-category" required>
+                  <option value="">Selecione uma categoria</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="logo-description">Descrição:</label>
+                <textarea id="logo-description"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="logo-image">Imagem do Logotipo:</label>
+                <input type="file" id="logo-image" accept="image/*" required />
+                <small
+                  >Formatos aceitos: JPG, PNG, SVG. Tamanho máximo: 2MB.</small
+                >
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="save-btn">Salvar</button>
+                <button type="reset" class="cancel-btn">Cancelar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="logos-list">
+            <h2>Logotipos Cadastrados</h2>
+            <div class="search-filter">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Buscar por nome..."
+              />
+              <select id="filter-category">
+                <option value="">Todas as Categorias</option>
+              </select>
+            </div>
+            <div class="logos-grid" id="logos-grid"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="manage-logos.js"></script>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galeria de Logos Corporativos</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo">
+          <h1>Logo Gallery</h1>
+        </div>
+        <div class="nav-links">
+          <a href="#gallery">Galeria</a>
+          <a href="#about">Sobre</a>
+          <a href="#contact">Contato</a>
+          <a href="admin.html" class="admin-btn">Área Administrativa</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="hero">
+        <h2>Descubra Marcas Incríveis</h2>
+        <p>
+          Uma galeria interativa de logos corporativos que conecta você às
+          melhores empresas
+        </p>
+      </section>
+
+      <section id="search">
+        <div class="search-container">
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Pesquisar por nome..."
+            />
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="category-filter">
+            <select id="category-select">
+              <option value="">Todas as Categorias</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section id="gallery">
+        <div class="gallery-container" id="logo-container">
+          <!-- Logos serão carregados dinamicamente aqui -->
+        </div>
+      </section>
+
+      <section id="about">
+        <h2>Sobre a Galeria</h2>
+        <p>
+          Nossa plataforma é um espaço dedicado à exibição criativa de logos
+          corporativos, conectando marcas e público em uma experiência visual
+          única.
+        </p>
+      </section>
+
+      <section id="contact">
+        <h2>Entre em Contato</h2>
+        <p>
+          Interessado em incluir sua marca em nossa galeria? Entre em contato
+          conosco!
+        </p>
+        <form id="contact-form">
+          <input type="text" placeholder="Nome" required />
+          <input type="email" placeholder="Email" required />
+          <textarea placeholder="Mensagem" required></textarea>
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Logo Gallery. Todos os direitos reservados.</p>
+    </footer>
+
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
