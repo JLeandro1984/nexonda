@@ -122,17 +122,21 @@ document.addEventListener("DOMContentLoaded", () => {
     logoForm.addEventListener("submit", (e) => {
         e.preventDefault();
         debugger
-
+                
         const clientCNPJ = document.getElementById("client-cnpj").value;        
-        const clientName = document.getElementById("client-name").value;        
+        const clientName = document.getElementById("client-name").value;  
+        const clientFantasyName = document.getElementById("client-fantasy-name").value; 
+        const cellphone = document.getElementById("cellphone").value;
+        const telephone = document.getElementById("telephone").value;
+        const clientCity = document.getElementById("client-city").value;
+        const clientUf = document.getElementById("client-uf").value;
+        const websiteUrl = document.getElementById("client-website").value;
         const description = document.getElementById("logo-description").value;
         const imageInput = document.getElementById("logo-image");
         
         const selectElement = logoCategorySelect
         const category = selectElement.querySelector(`option[value="${selectElement.value}"]`).text
-    // Agora obtendo diretamente o valor do select
-        const websiteUrl = document.getElementById("client-website").value;
-
+          
         const file = imageInput.files[0];
         if (!file) return alert("Selecione uma imagem!");
 
@@ -141,6 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const newLogo = {
                 clientName,
                 clientCNPJ,
+                clientFantasyName,
+                cellphone,
+                telephone,
+                clientCity,
+                clientUf,
                 category,
                 description,
                 websiteUrl,
@@ -271,5 +280,26 @@ cnpjInput.addEventListener('input', function () {
   cnpjInput.value = value;
 });
 
+function aplicarMascaraTelefone(input, isCelular = false) {
+    input.addEventListener('input', function (e) {
+      let valor = input.value.replace(/\D/g, '');
+      if (isCelular) {
+        // Celular: (00) 00000-0000
+        valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+      } else {
+        // Telefone fixo: (00) 0000-0000
+        valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+      }
+      input.value = valor;
+    });
+  }
 
+  // Aplica a máscara nos inputs
+  document.addEventListener('DOMContentLoaded', function () {
+    const telefoneInput = document.getElementById('telefone');
+    const celularInput = document.getElementById('celular');
+
+    aplicarMascaraTelefone(telefoneInput);
+    aplicarMascaraTelefone(celularInput, true);
+  });
 

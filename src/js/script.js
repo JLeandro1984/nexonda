@@ -97,3 +97,27 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', updateLogoDisplay);
     categorySelect.addEventListener('change', updateLogoDisplay);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const colorThief = new ColorThief();
+  const logoItems = document.querySelectorAll(".logo-item img");
+
+  logoItems.forEach((img) => {
+    // Aguarda a imagem carregar para extrair a cor
+    if (img.complete) {
+      applyColor(img);
+    } else {
+      img.addEventListener("load", () => applyColor(img));
+    }
+  });
+
+  function applyColor(img) {
+    try {
+      const dominantColor = colorThief.getColor(img);
+      const rgb = `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`;
+      img.parentElement.style.backgroundColor = rgb;
+    } catch (e) {
+      console.warn("Não foi possível obter a cor do logo:", e);
+    }
+  }
+});

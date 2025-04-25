@@ -85,6 +85,7 @@ section {
   margin-bottom: 1rem;
 }
 
+/* Grade responsiva para a galeria */
 .gallery-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -92,13 +93,21 @@ section {
   padding: 2rem 0;
 }
 
+/* inicio css img logo */
 .logo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background: white;
   padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  aspect-ratio: 1 / 1; /* Garante miniaturas quadradas, mais harmonia visual */
+  overflow: hidden;
   text-align: center;
 }
 
@@ -107,48 +116,20 @@ section {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* Imagem do logotipo */
 .logo-item img {
   max-width: 100%;
-  height: 100%;
-  margin-bottom: 1rem;
-}
-
-/* Container principal */
-#logo-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-}
-
-/* Estilo para o item individual */
-#logo-container .logo-item {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
-  max-width: 200px;
-  aspect-ratio: 3 / 2;
-  text-align: center;
-  border: 1px solid #ccc;
-  padding: 10px;
-  box-sizing: border-box;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Estilo para a imagem */
-#logo-container .logo-item img {
-  width: 100%;
-  height: 100%;
-  /*object-fit: cover;*/
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
   display: block;
-  margin-bottom: 0;
+  transition: transform 0.3s ease;
+  filter: brightness(1.1) contrast(1.2);
 }
 
-/* Títulos e descrições ocultos visualmente */
-#logo-container .logo-item h3,
-#logo-container .logo-item p {
+/* Acessibilidade: título e descrição ocultos visualmente */
+.logo-item h3,
+.logo-item p {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -159,6 +140,7 @@ section {
   border: 0;
   margin: 0;
 }
+/* fim css img logo */
 
 #contact-form {
   display: flex;
