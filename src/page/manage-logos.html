@@ -32,8 +32,8 @@
                 <input type="text" id="client-name" required />
               </div>
               <div class="form-group">
-                <label for="client-name">Nome Fantasia:</label>
-                <input type="text" id="client-name" required />
+                <label for="client-fantasy-name">Nome Fantasia:</label>
+                <input type="text" id="client-fantasy-name" />
               </div>
               <div class="form-group">
                 <label for="client-cnpj">CNPJ:</label>
@@ -62,21 +62,21 @@
               </div>
 
               <div class="form-group">
-                <label for="telefone">Telefone:</label>
+                <label for="telephone">Telefone:</label>
                 <input
                   type="text"
-                  id="telefone"
-                  name="telefone"
+                  id="telephone"
+                  name="telephone"
                   placeholder="(XX) XXXX-XXXX"
                 />
               </div>
 
               <div class="form-group">
-                <label for="celular">Celular:</label>
+                <label for="cellphone">Celular:</label>
                 <input
                   type="text"
-                  id="celular"
-                  name="celular"
+                  id="cellphone"
+                  name="cellphone"
                   placeholder="(XX) XXXXX-XXXX"
                 />
               </div>
@@ -100,7 +100,7 @@
 
               <div class="form-group">
                 <label for="logo-image">Imagem do Logotipo:</label>
-                <input type="file" id="logo-image" accept="image/*" required />
+                <input type="file" id="logo-image" accept="image/*" />
                 <small
                   >Formatos aceitos: JPG, PNG, SVG. Tamanho máximo: 2MB.</small
                 >
@@ -109,6 +109,9 @@
               <div class="form-actions">
                 <button type="submit" class="save-btn">Salvar</button>
                 <button type="reset" class="cancel-btn">Cancelar</button>
+                <button type="button" id="cancel-button" style="display: none">
+                  Cancelar Edição
+                </button>
               </div>
             </form>
           </div>
@@ -130,7 +133,19 @@
         </div>
       </main>
     </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Confirmar Exclusão</h2>
+        <p>Tem certeza que deseja excluir este logotipo?</p>
+        <div class="modal-actions">
+          <button id="confirm-delete" class="btn confirm">Excluir</button>
+          <button id="cancel-delete" class="btn cancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="../js/manage-logos.js"></script>
-    <script src="../js/treatment.js"></script>
   </body>
 </html>
