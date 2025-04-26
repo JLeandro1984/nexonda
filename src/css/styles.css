@@ -85,6 +85,17 @@ section {
   margin-bottom: 1rem;
 }
 
+#hero p {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+#about p,
+#contact p {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
 /* Grade responsiva para a galeria */
 .gallery-container {
   display: grid;
