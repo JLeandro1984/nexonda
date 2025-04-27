@@ -364,11 +364,12 @@ footer {
     margin-bottom: 0.8rem;
   }
 
+  #about p,
+  #contact p,
   #hero p {
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     margin-bottom: 1rem;
   }
-
   .search-container {
     flex-direction: column;
   }
