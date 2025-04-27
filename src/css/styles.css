@@ -312,6 +312,25 @@ footer {
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  margin: 2rem 0;
+}
+
+.no-results p {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.no-results p:first-child {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
 @media (max-width: 768px) {
   nav {
     padding: 0.5rem 1rem;
@@ -336,7 +355,7 @@ footer {
 
   #hero {
     padding: 3rem 1rem;
-    margin-top: 2rem;
+    margin-top: 12rem;
   }
 
   #hero h2 {
@@ -361,23 +380,4 @@ footer {
     max-width: 100%;
     aspect-ratio: 16 / 9;
   }
-}
-
-.no-results {
-  text-align: center;
-  padding: 2rem;
-  background-color: #f8f9fa;
-  border-radius: 10px;
-  margin: 2rem 0;
-}
-
-.no-results p {
-  color: #666;
-  margin-bottom: 0.5rem;
-}
-
-.no-results p:first-child {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--primary-color);
 }
