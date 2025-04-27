@@ -14,20 +14,47 @@
     <header>
       <nav>
         <div class="logo">
-          <h1>BrandConnect</h1>
+          <h1 data-lang="brand-name">BrandConnect</h1>
         </div>
         <div class="nav-links">
-          <a href="#gallery">Galeria</a>
-          <a href="#about">Sobre</a>
-          <a href="#contact">Contato</a>
-          <a href="admin.html" class="admin-btn">Área Administrativa</a>
+          <a href="#gallery" data-lang="gallery">Galeria</a>
+          <a href="#about" data-lang="about">Sobre</a>
+          <a href="#contact" data-lang="contact">Contato</a>
+          <a href="admin.html" class="admin-btn" data-lang="admin-area"
+            >Área Administrativa</a
+          >
+
+          <!-- Seletor de Idiomas -->
+          <div id="language-selector-container" class="language-selector">
+            <button id="language-button" class="language-button">
+              <img
+                id="current-flag"
+                src="../images/flags/br.png"
+                alt="Current Language"
+              />
+            </button>
+            <div class="language-options">
+              <div class="language-option" data-lang-code="pt-BR">
+                <img src="../images/flags/br.png" alt="Português" />
+                <span data-lang="language-portuguese">Português</span>
+              </div>
+              <div class="language-option" data-lang-code="en-US">
+                <img src="../images/flags/us.png" alt="English" />
+                <span data-lang="language-english">English</span>
+              </div>
+              <div class="language-option" data-lang-code="es-MX">
+                <img src="../images/flags/mx.png" alt="Español" />
+                <span data-lang="language-spanish">Español</span>
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
     </header>
     <main>
       <section id="hero">
-        <h2>Descubra as Marcas que Lideram o Mercado</h2>
-        <p>
+        <h2 data-lang="hero-title">Descubra as Marcas que Lideram o Mercado</h2>
+        <p data-lang="hero-description">
           Uma galeria interativa de logos corporativos que conecta você às
           melhores empresas
         </p>
@@ -39,13 +66,16 @@
             <input
               type="text"
               id="search-input"
+              data-lang-placeholder="search-by-name"
               placeholder="Pesquisar por nome..."
             />
             <i class="fas fa-search"></i>
           </div>
           <div class="category-filter">
             <select id="category-select">
-              <option value="">Todas as Categorias</option>
+              <option value="" data-lang="all-categories">
+                Todas as Categorias
+              </option>
             </select>
           </div>
         </div>
@@ -58,8 +88,8 @@
       </section>
 
       <section id="about">
-        <h2>Sobre a Galeria</h2>
-        <p>
+        <h2 data-lang="about-title">Sobre a Galeria</h2>
+        <p data-lang="about-description">
           Nossa plataforma é o ponto de encontro entre grandes marcas e seu
           público, oferecendo uma exposição visual de alto impacto que destaca
           logos corporativos e fortalece conexões entre empresas e consumidores.
@@ -67,8 +97,8 @@
       </section>
 
       <section id="contact">
-        <h2>Entre em Contato</h2>
-        <p>
+        <h2 data-lang="contact-title">Entre em Contato</h2>
+        <p data-lang="contact-description">
           Sua marca merece destaque! Apresente-a para novos públicos fazendo
           parte da nossa galeria exclusiva. Entre em contato conosco!
         </p>
@@ -76,15 +106,19 @@
           <input type="text" placeholder="Nome" required />
           <input type="email" placeholder="Email" required />
           <textarea placeholder="Mensagem" required></textarea>
-          <button type="submit">Enviar</button>
+          <button type="submit"><span data-lang="submit">Enviar</span></button>
         </form>
       </section>
     </main>
 
     <footer>
-      <p>&copy; 2025 Logo Gallery. Todos os direitos reservados.</p>
+      <p data-lang="footer-text">
+        &copy; 2025 BrandConnect. Todos os direitos reservados. BrandConnect -
+        Conectando marcas ao mundo.
+      </p>
     </footer>
 
+    <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/script.js"></script>
   </body>
 </html>

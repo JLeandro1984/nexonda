@@ -19,6 +19,31 @@
         <div class="user-info">
           <span>Usuário</span>
           <a href="index.html" class="logout-btn">Sair</a>
+
+          <!-- Seletor de Idiomas -->
+          <div id="language-selector-container" class="language-selector">
+            <button id="language-button" class="language-button">
+              <img
+                id="current-flag"
+                src="../images/flags/br.png"
+                alt="Current Language"
+              />
+            </button>
+            <div class="language-options">
+              <div class="language-option" data-lang-code="pt-BR">
+                <img src="../images/flags/br.png" alt="Português" />
+                <span data-lang="language-portuguese">Português</span>
+              </div>
+              <div class="language-option" data-lang-code="en-US">
+                <img src="../images/flags/us.png" alt="English" />
+                <span data-lang="language-english">English</span>
+              </div>
+              <div class="language-option" data-lang-code="es-MX">
+                <img src="../images/flags/mx.png" alt="Español" />
+                <span data-lang="language-spanish">Español</span>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -145,7 +170,7 @@
         </div>
       </div>
     </div>
-
+    <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/manage-logos.js"></script>
   </body>
 </html>

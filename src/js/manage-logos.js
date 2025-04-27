@@ -100,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.createElement('tbody');
         
         list.forEach((logo, index) => {
+          
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><img src="${logo.imagem}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
@@ -108,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${logo.clientCNPJ || '-'}</td>
                 <td>${logo.cellphone || '-'}</td>
                 <td>${logo.clientCity}/${logo.clientUf}</td>
-                <td>${logo.category}</td>
+                <td data-lang="${logo.category}">${logo.category}</td>
                 <td class="actions">
                     <button data-index="${index}" class="edit-btn">Editar</button>
                     <button data-index="${index}" class="delete-btn">Excluir</button>
@@ -240,9 +241,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const description = document.getElementById("logo-description").value;
         const imageInput = document.getElementById("logo-image");
         
-        const selectElement = logoCategorySelect
-        const category = selectElement.querySelector(`option[value="${selectElement.value}"]`).text
+        //const selectElement = logoCategorySelect
+       // const category = selectElement.querySelector(`option[value="${selectElement.value}"]`).text
           
+        const category = logoCategorySelect.value;
         const file = imageInput.files[0];
         
         // Se estiver editando

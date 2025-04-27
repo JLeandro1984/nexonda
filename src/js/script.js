@@ -46,12 +46,21 @@ function loadLogos() {
 // Popula categorias no select de filtro
 function populateFilterCategories() {
     categories.forEach(group => {
+        // Cria o optgroup e define o label diretamente
         const optgroup = document.createElement("optgroup");
-        optgroup.label = group.label;
+        
+         // Adiciona o atributo data-lang ao optgroup
+         //optgroup.setAttribute('data-lang', group.value);
+        optgroup.label = group.label; 
+        
         group.options.forEach(option => {
             const optionElement = document.createElement("option");
-            optionElement.value = option.label; // o valor comparado com logo.category
+            optionElement.value = option.value; // O valor comparado com logo.category
             optionElement.textContent = option.label;
+
+            // Adiciona um atributo "data-lang" ao option
+            optionElement.setAttribute('data-lang', option.value);
+            
             optgroup.appendChild(optionElement);
         });
         categorySelect.appendChild(optgroup);
