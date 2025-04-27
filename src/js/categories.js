@@ -1,5 +1,3 @@
-// categories.js
-
 export const categories = [
   {
     value: "industry_and_production",
