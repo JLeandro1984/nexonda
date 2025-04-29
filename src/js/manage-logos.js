@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const cnpjInput = document.getElementById("client-cnpj");
     const saveBtn = document.querySelector('.save-btn');
     const cancelBtn = document.querySelector('.cancel-btn');
+    const startDateInput = document.getElementById('start-date');
+    const contractMonthsSelect = document.getElementById('contract-months');
+    const endDateInput = document.getElementById('end-date');
+    const contractActiveRadios = document.getElementsByName('contract-active');
 
     cnpjInput.addEventListener("blur", validarCNPJNoCampo);
 
@@ -91,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <th class="col-celular">Celular</th>
                 <th class="col-cidade">Cidade/UF</th>
                 <th class="col-categoria">Categoria</th>
+                <th class="col-contrato">Contrato</th>
                 <th class="col-acoes">Ações</th>
           </tr>
         `;
@@ -100,7 +105,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const tbody = document.createElement('tbody');
         
         list.forEach((logo, index) => {
-          
+            const startDate = new Date(logo.startDate);
+            const endDate = new Date(logo.endDate);
+            const formattedStartDate = startDate.toLocaleDateString('pt-BR');
+            const formattedEndDate = endDate.toLocaleDateString('pt-BR');
+            const status = logo.contractActive ? 'Ativo' : 'Inativo';
+            const statusClass = logo.contractActive ? 'active' : 'inactive';
+            const dataContrato = logo.contractActive ? `${formattedStartDate} a ${formattedEndDate}` : "";
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><img src="${logo.imagem}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
@@ -110,6 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${logo.cellphone || '-'}</td>
                 <td>${logo.clientCity}/${logo.clientUf}</td>
                 <td data-lang="${logo.category}">${logo.category}</td>
+                <td>
+                    <span class="contract-status ${statusClass}">${status}</span><br>
+                    <small>${dataContrato}</small>
+                </td>
                 <td class="actions">
                     <button data-index="${index}" class="edit-btn">Editar</button>
                     <button data-index="${index}" class="delete-btn">Excluir</button>
@@ -136,7 +152,18 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("cellphone").value = logo.cellphone || '';
         document.getElementById("client-website").value = logo.websiteUrl || '';
         document.getElementById("logo-description").value = logo.description || '';
+        document.getElementById("logo-category").value = logo.category || '';
+        document.getElementById("start-date").value = logo.startDate || '';
+        document.getElementById("contract-months").value = logo.contractMonths || '';
+        document.getElementById("end-date").value = logo.endDate || '';
         
+        // Define o radio button correto
+        if (logo.contractActive) {
+            document.getElementById("ativo-true").checked = true;
+        } else {
+            document.getElementById("ativo-false").checked = true;
+        }
+
         // Mostra a imagem atual
         const imagePreview = document.createElement('div');
         imagePreview.innerHTML = `
@@ -239,11 +266,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const clientUf = document.getElementById("client-uf").value;
         const websiteUrl = document.getElementById("client-website").value;
         const description = document.getElementById("logo-description").value;
+        const startDate = document.getElementById("start-date").value;
+        const contractMonths = document.getElementById("contract-months").value;
+        const endDate = document.getElementById("end-date").value;
+        const contractActive = document.querySelector('input[name="contract-active"]:checked').value === 'true';
         const imageInput = document.getElementById("logo-image");
         
-        //const selectElement = logoCategorySelect
-       // const category = selectElement.querySelector(`option[value="${selectElement.value}"]`).text
-          
         const category = logoCategorySelect.value;
         const file = imageInput.files[0];
         
@@ -260,7 +288,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 clientUf,
                 category,
                 description,
-                websiteUrl
+                websiteUrl,
+                startDate,
+                contractMonths,
+                endDate,
+                contractActive
             };
             
             // Se uma nova imagem foi selecionada, processa ela
@@ -294,6 +326,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 category,
                 description,
                 websiteUrl,
+                startDate,
+                contractMonths,
+                endDate,
+                contractActive,
                 imagem: reader.result,
             };
             logos.push(logoData);
@@ -424,6 +460,32 @@ document.addEventListener("DOMContentLoaded", () => {
           input.style.borderColor = 'red';
         }
     }
+
+    // Função para calcular data final baseada na data inicial e meses
+function calculateEndDate() {
+    if (!startDateInput.value || !contractMonthsSelect.value) return;
+    
+    const startDate = new Date(startDateInput.value);
+    const monthsToAdd = parseInt(contractMonthsSelect.value);
+    
+    let endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + monthsToAdd);
+    
+    // Ajuste para o último dia do mês se o dia original não existir no novo mês
+    if (startDate.getDate() !== endDate.getDate()) {
+        endDate.setDate(0);
+    }
+    
+    const year = endDate.getFullYear();
+    const month = String(endDate.getMonth() + 1).padStart(2, '0');
+    const day = String(endDate.getDate()).padStart(2, '0');
+    
+    endDateInput.value = `${year}-${month}-${day}`;
+}
+
+// Event listeners para calcular data final
+startDateInput.addEventListener('change', calculateEndDate);
+contractMonthsSelect.addEventListener('change', calculateEndDate);
 });
 
 const cnpjInput = document.getElementById('client-cnpj');
@@ -464,3 +526,4 @@ document.addEventListener('DOMContentLoaded', function () {
     aplicarMascaraTelefone(telefoneInput);
     aplicarMascaraTelefone(celularInput, true);
 });
+

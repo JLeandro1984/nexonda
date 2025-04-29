@@ -123,6 +123,60 @@
                 <textarea id="logo-description"></textarea>
               </div>
 
+              <!-- Data Inicial -->
+              <div class="form-group">
+                <label for="start-date">Contrato - Data Inicial::</label>
+                <input type="date" id="start-date" required />
+              </div>
+
+              <!-- Seletor de Meses -->
+              <div class="form-group">
+                <label for="contract-months">Tempo de Contrato:</label>
+                <select id="contract-months">
+                  <option value="">Selecione</option>
+                  <option value="6">6 meses</option>
+                  <option value="12">12 meses</option>
+                  <option value="24">24 meses</option>
+                  <option value="36">36 meses</option>
+                </select>
+              </div>
+
+              <!-- Data Final -->
+              <div class="form-group">
+                <label for="end-date">Contrato - Data Final:</label>
+                <input type="date" id="end-date" readonly required />
+              </div>
+
+              <div
+                class="form-group"
+                style="display: flex; flex-direction: column"
+              >
+                <label>Ativo:</label>
+                <div style="display: flex; gap: 20px; margin-top: 5px">
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="ativo-true"
+                      name="contract-active"
+                      value="true"
+                      required
+                    />
+                    Sim
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="ativo-false"
+                      name="contract-active"
+                      value="false"
+                      required
+                    />
+                    Não
+                  </label>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label for="logo-image">Imagem do Logotipo:</label>
                 <input type="file" id="logo-image" accept="image/*" />
@@ -141,7 +195,7 @@
             </form>
           </div>
 
-          <div class="logos-list">
+          <div id="logos-list" class="logos-list">
             <h2>Logotipos Cadastrados</h2>
             <div class="search-filter">
               <input

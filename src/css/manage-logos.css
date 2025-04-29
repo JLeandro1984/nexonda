@@ -269,8 +269,24 @@ header {
 }
 
 /* Estilos para a tabela de logos */
-.logos-table {
+/* Container principal da lista de logos */
+#logos-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Div que segura a tabela */
+#logos-grid {
   width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Estilos para a tabela de logos */
+.logos-table {
+  width: 95%; /* ocupa 95% da div logos-list */
+  max-width: 1200px; /* limite opcional para não estourar em telas muito largas */
   border-collapse: collapse;
   margin-top: 20px;
   font-size: 0.9em;
@@ -304,45 +320,6 @@ header {
   background-color: #f1f1f1;
 }
 
-/* Define larguras fixas colunas tabela */
-/* .col-logo {
-  width: 100px;
-}
-.col-razao {
-  width: 200px;
-}
-.col-fantasia {
-  width: 200px;
-}
-.col-cnpj {
-  width: 140px;
-}
-.col-celular {
-  width: 120px;
-}
-.col-cidade {
-  width: 120px;
-}
-.col-categoria {
-  width: 150px;
-}
-.col-acoes {
-  width: 150px;
-} */
-
-/* Impede que o conteúdo estoure a largura */
-/* .logos-table th,
-.logos-table td {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-} */
-
-/* .logos-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-} */
 /*Fim css tabela*/
 
 .logo-thumbnail {
@@ -490,6 +467,13 @@ header {
 
   .logos-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    overflow-x: auto;
+  }
+
+  .logos-table {
+    width: 800px;
+    min-width: 600px;
+    font-size: 0.8em;
   }
 
   #logo-container {
