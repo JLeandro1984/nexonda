@@ -38,11 +38,28 @@ function loadLogos() {
     const logos = loadLogosFromStorage();
 
     logos.forEach(logo => {
+        if (!contratoAtivo(logo)) return;
+        
         const logoElement = createLogoElement(logo);
         container.appendChild(logoElement);
     });
 }
 
+function contratoAtivo(logo) {
+    const endDate = new Date(logo.endDate);
+    const today = new Date();
+
+        // Zera o horário de hoje para comparação apenas por data (opcional)
+        today.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+
+    if (endDate < today) return false;
+
+    if (!logo.contractActive) return false; 
+    
+
+    return true
+}
 // Popula categorias no select de filtro
 function populateFilterCategories() {
     categories.forEach(group => {
@@ -74,6 +91,8 @@ function updateLogoDisplay() {
     const logos = loadLogosFromStorage();
 
     const filteredLogos = logos.filter(logo => {
+        if (!contratoAtivo(logo)) return;
+
         const matchesSearch = logo.clientName.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = !selectedCategory || logo.category === selectedCategory;
         return matchesSearch && matchesCategory;
