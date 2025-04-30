@@ -1,4 +1,5 @@
 import { categories } from './categories.js';
+import { ufs } from './ufs.js';  
 
 document.addEventListener("DOMContentLoaded", () => {
     const logoForm = document.getElementById("logo-form");
@@ -13,49 +14,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const startDateInput = document.getElementById('start-date');
     const contractMonthsSelect = document.getElementById('contract-months');
     const endDateInput = document.getElementById('end-date');
-    const contractActiveRadios = document.getElementsByName('contract-active');
+
 
     cnpjInput.addEventListener("blur", validarCNPJNoCampo);
 
     const STORAGE_KEY = 'logoGalleryData';
     let editingIndex = null;
 
-    // Lista das UFs brasileiras
-    const ufs = [
-        { sigla: 'AC', nome: 'Acre' },
-        { sigla: 'AL', nome: 'Alagoas' },
-        { sigla: 'AP', nome: 'Amapá' },
-        { sigla: 'AM', nome: 'Amazonas' },
-        { sigla: 'BA', nome: 'Bahia' },
-        { sigla: 'CE', nome: 'Ceará' },
-        { sigla: 'DF', nome: 'Distrito Federal' },
-        { sigla: 'ES', nome: 'Espírito Santo' },
-        { sigla: 'GO', nome: 'Goiás' },
-        { sigla: 'MA', nome: 'Maranhão' },
-        { sigla: 'MT', nome: 'Mato Grosso' },
-        { sigla: 'MS', nome: 'Mato Grosso do Sul' },
-        { sigla: 'MG', nome: 'Minas Gerais' },
-        { sigla: 'PA', nome: 'Pará' },
-        { sigla: 'PB', nome: 'Paraíba' },
-        { sigla: 'PR', nome: 'Paraná' },
-        { sigla: 'PE', nome: 'Pernambuco' },
-        { sigla: 'PI', nome: 'Piauí' },
-        { sigla: 'RJ', nome: 'Rio de Janeiro' },
-        { sigla: 'RN', nome: 'Rio Grande do Norte' },
-        { sigla: 'RS', nome: 'Rio Grande do Sul' },
-        { sigla: 'RO', nome: 'Rondônia' },
-        { sigla: 'RR', nome: 'Roraima' },
-        { sigla: 'SC', nome: 'Santa Catarina' },
-        { sigla: 'SP', nome: 'São Paulo' },
-        { sigla: 'SE', nome: 'Sergipe' },
-        { sigla: 'TO', nome: 'Tocantins' }
-    ];
-
+    // Lista das UFs brasileiras    
     ufs.forEach(uf => {
         const option = document.createElement('option');
         option.value = uf.sigla;
-        option.textContent = uf.sigla;
-        ufSelect.appendChild(option);
+        option.textContent = uf.nome;  // Exibe o nome completo do estado
+        ufSelect.appendChild(option);   // Adiciona a opção ao select
     });
     
     // Função para carregar logos do localStorage
@@ -96,6 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <th class="col-cidade">Cidade/UF</th>
                 <th class="col-categoria">Categoria</th>
                 <th class="col-contrato">Contrato</th>
+                <th class="col-contrato">Valor Contrato</th>
                 <th class="col-acoes">Ações</th>
           </tr>
         `;
@@ -104,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Corpo da tabela
         const tbody = document.createElement('tbody');
         
-        list.forEach((logo, index) => {
+        list.forEach((logo) => {
             const startDate = new Date(logo.startDate);
             const endDate = new Date(logo.endDate);
             const formattedStartDate = startDate.toLocaleDateString('pt-BR');
@@ -112,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const status = logo.contractActive ? 'Ativo' : 'Inativo';
             const statusClass = logo.contractActive ? 'active' : 'inactive';
             const dataContrato = logo.contractActive ? `${formattedStartDate} a ${formattedEndDate}` : "";
+            const categoria = getCategoryLabelByValue(logo.category);
 
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -121,28 +94,85 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${logo.clientCNPJ || '-'}</td>
                 <td>${logo.cellphone || '-'}</td>
                 <td>${logo.clientCity}/${logo.clientUf}</td>
-                <td data-lang="${logo.category}">${logo.category}</td>
+                <td data-lang="${logo.category}">${categoria}</td>
                 <td>
                     <span class="contract-status ${statusClass}">${status}</span><br>
                     <small>${dataContrato}</small>
                 </td>
+                <td>${logo.contractValue || '0,00'}</td>
                 <td class="actions">
-                    <button data-index="${index}" class="edit-btn">Editar</button>
-                    <button data-index="${index}" class="delete-btn">Excluir</button>
+                    <button data-id="${logo.clientCNPJ}" class="edit-btn">Editar</button>
+                    <button data-id="${logo.clientCNPJ}" class="delete-btn">Excluir</button>
                 </td>
             `;
             tbody.appendChild(row);
         });
         
+        // Inicializa totalContractValue como 0
+        let totalContractValue = 0;
+
+        // Itera pela lista para somar os valores dos contratos
+        list.forEach(logo => {
+            const contractValue = !logo.contractValue || !contratoAtivo(logo) ? 0 : parseFloat(logo.contractValue.replace(/[^\d,-]/g, '').replace(',', '.'));            
+            if (!isNaN(contractValue)) {
+                totalContractValue += contractValue;
+            }
+        });
+        
+        // Adiciona uma linha com o total geral da coluna "Valor Contrato"
+        const totalRow = document.createElement('tr');
+        totalRow.innerHTML = `
+            <td colspan="8" class="lbl-valor-contrato">Total Geral:</td>
+            <td id="table-valor-contrato">${totalContractValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+            <td></td>
+        `;
+
+        tbody.appendChild(totalRow);
+        
         table.appendChild(tbody);
         logosGrid.appendChild(table);
     }
 
-    // Carrega os dados de um logo no formulário para edição
-    function loadLogoForEdit(index) {
-        editingIndex = index;
-        const logo = logos[index];
+    function getCategoryLabelByValue(value) {
+        for (const category of categories) {
+            // Verifica se é o valor do grupo principal
+            if (category.value === value) {
+                return category.label;
+            }
+    
+            // Procura nas subcategorias (options)
+            const subcategory = category.options.find(option => option.value === value);
+            if (subcategory) {
+                return subcategory.label;
+            }
+        }
+    
+        return null; // Não encontrado
+    }
+
+    function contratoAtivo(logo) {
+        const endDate = new Date(logo.endDate);
+        const today = new Date();
+    
+            // Zera o horário de hoje para comparação apenas por data (opcional)
+            today.setHours(0, 0, 0, 0);
+            endDate.setHours(0, 0, 0, 0);
+    
+        if (endDate < today) return false;
+    
+        if (!logo.contractActive) return false; 
         
+    
+        return true
+    }
+
+    // Carrega os dados de um logo no formulário para edição
+    function loadLogoForEdit(cnpj) {
+        const logo = logos.find(l => l.clientCNPJ === cnpj);
+        if (!logo) return;
+    
+        editingIndex = logos.findIndex(l => l.clientCNPJ === cnpj);
+    
         document.getElementById("client-name").value = logo.clientName;
         document.getElementById("client-fantasy-name").value = logo.clientFantasyName || '';
         document.getElementById("client-cnpj").value = logo.clientCNPJ || '';
@@ -155,15 +185,15 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("logo-category").value = logo.category || '';
         document.getElementById("start-date").value = logo.startDate || '';
         document.getElementById("contract-months").value = logo.contractMonths || '';
-        document.getElementById("end-date").value = logo.endDate || '';
-        
+        document.getElementById("end-date").value = logo.endDate || ''; 
+        document.getElementById("email").value = logo.email || '';
+        document.getElementById("plan_type").value = logo.planType || '';
+        document.getElementById("contract_value").value = logo.contractValue || "0,00";
+    
         // Define o radio button correto
-        if (logo.contractActive) {
-            document.getElementById("ativo-true").checked = true;
-        } else {
-            document.getElementById("ativo-false").checked = true;
-        }
-
+        document.getElementById("ativo-true").checked = !!logo.contractActive;
+        document.getElementById("ativo-false").checked = !logo.contractActive;
+    
         // Mostra a imagem atual
         const imagePreview = document.createElement('div');
         imagePreview.innerHTML = `
@@ -171,32 +201,20 @@ document.addEventListener("DOMContentLoaded", () => {
             <img src="${logo.imagem}" alt="Logo atual" style="max-width: 100px; margin: 10px 0;" />
             <p>Se desejar alterar, selecione uma nova imagem abaixo:</p>
         `;
-        
+    
         const imageInputContainer = document.getElementById("logo-image").parentNode;
-        // Remove o preview anterior se existir
         const oldPreview = document.getElementById("current-image-preview");
         if (oldPreview) oldPreview.remove();
-        
+    
         imagePreview.id = "current-image-preview";
         imageInputContainer.insertBefore(imagePreview, document.getElementById("logo-image"));
-        
-         // Remover o required do campo de imagem
+    
         document.getElementById("logo-image").required = false;
         
-        // Define a categoria correta no select
-        const categoryOptions = logoCategorySelect.querySelectorAll('option');
-        categoryOptions.forEach(option => {
-            if (option.textContent === logo.category) {
-                option.selected = true;
-            }
-        });
-        
-        // Altera o texto do botão para indicar que está editando
         saveBtn.textContent = 'Atualizar';
         document.querySelector('.logo-form-container').classList.add('editing-mode');
     }
-    
-
+ 
     // Filtra e atualiza a lista exibida
     function applyFilters() {
         const searchTerm = searchInput.value.toLowerCase();
@@ -209,41 +227,46 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const filtered = logos.filter(logo => {
             const matchesName = logo.clientName.toLowerCase().includes(searchTerm);
+            const matchesFantasyName = logo.clientFantasyName.toLowerCase().includes(searchTerm);
+            const matchesCNPJ = logo.clientCNPJ.toLowerCase().includes(searchTerm);
+            const matchesCity = logo.clientCity.toLowerCase().includes(searchTerm);
+            const matchesUF = logo.clientUf.toLowerCase().includes(searchTerm);
+            const matchesPlanType =  (logo.planType || "").toLowerCase().includes(searchTerm);
             const matchesCategory = category === "" || logo.category === category;
-            return matchesName && matchesCategory;
+            return (matchesPlanType || matchesName || matchesFantasyName || matchesCNPJ || matchesCity || matchesUF) && matchesCategory;
         });
 
         renderLogos(filtered);
     }
 
     // Lida com exclusão e edição
-    let indexToDelete = null;
+    let cnpjDelete = null;
 
     logosGrid.addEventListener("click", (e) => {
         if (e.target.classList.contains("delete-btn")) {
-            indexToDelete = e.target.dataset.index;
+            cnpjDelete = e.target.dataset.id;
             document.getElementById("delete-modal").classList.remove("hidden");
         }
 
         if (e.target.classList.contains("edit-btn")) {
-            const index = e.target.dataset.index;
-            loadLogoForEdit(index);
+            const cnpjEditar = e.target.dataset.id;
+            loadLogoForEdit(cnpjEditar);
             document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
         }
     });
 
     document.getElementById("confirm-delete").addEventListener("click", () => {
-        if (indexToDelete !== null) {
-            logos.splice(indexToDelete, 1);
+        if (cnpjDelete !== null) {
+            logos.splice(cnpjDelete, 1);
             saveLogos();
             applyFilters();
-            indexToDelete = null;
+            cnpjDelete = null;
         }
         document.getElementById("delete-modal").classList.add("hidden");
     });
 
     document.getElementById("cancel-delete").addEventListener("click", () => {
-        indexToDelete = null;
+        cnpjDelete = null;
         document.getElementById("delete-modal").classList.add("hidden");
     });
 
@@ -271,7 +294,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const endDate = document.getElementById("end-date").value;
         const contractActive = document.querySelector('input[name="contract-active"]:checked').value === 'true';
         const imageInput = document.getElementById("logo-image");
-        
+        const email = document.getElementById("email").value;
+        const planType = document.getElementById('plan_type').value;
+        const contractValue = document.getElementById("contract_value").value;
+
         const category = logoCategorySelect.value;
         const file = imageInput.files[0];
         
@@ -286,13 +312,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 telephone,
                 clientCity,
                 clientUf,
+                email,
                 category,
                 description,
                 websiteUrl,
                 startDate,
                 contractMonths,
                 endDate,
-                contractActive
+                contractActive,
+                planType,
+                contractValue
             };
             
             // Se uma nova imagem foi selecionada, processa ela
@@ -323,6 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 telephone,
                 clientCity,
                 clientUf,
+                email,
                 category,
                 description,
                 websiteUrl,
@@ -330,8 +360,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 contractMonths,
                 endDate,
                 contractActive,
+                planType,
+                contractValue,
                 imagem: reader.result,
             };
+
+            // Verifica se o CNPJ já existe (evita duplicidade)
+            const cnpjExists = logos.some((logo, index) =>
+                logo.clientCNPJ === clientCNPJ && index !== editingIndex
+            );
+            if (cnpjExists) {
+                showAlert("CNPJ já cadastrado!");
+                return;
+            }
+            
             logos.push(logoData);
             saveLogos();
             applyFilters();
@@ -339,7 +381,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         reader.readAsDataURL(file);
     });
-
+    
     function completeLogoUpdate(updatedLogo) {
         logos[editingIndex] = updatedLogo;
         saveLogos();
@@ -483,9 +525,11 @@ function calculateEndDate() {
     endDateInput.value = `${year}-${month}-${day}`;
 }
 
-// Event listeners para calcular data final
-startDateInput.addEventListener('change', calculateEndDate);
-contractMonthsSelect.addEventListener('change', calculateEndDate);
+    // Event listeners para calcular data final
+    startDateInput.addEventListener('change', calculateEndDate);
+    contractMonthsSelect.addEventListener('change', calculateEndDate);
+    
+
 });
 
 const cnpjInput = document.getElementById('client-cnpj');
@@ -527,3 +571,49 @@ document.addEventListener('DOMContentLoaded', function () {
     aplicarMascaraTelefone(celularInput, true);
 });
 
+//Validar valor contrato
+const inputValorContrato = document.getElementById('contract_value');
+function formatToMoney(value) {
+    value = value.replace(/\D/g, '');
+    if (value === '') return '0,00';
+    value = (parseInt(value, 10) / 100).toFixed(2);
+    return value
+      .replace('.', ',')
+      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  inputValorContrato.addEventListener('input', function (e) {
+    e.target.value = formatToMoney(e.target.value);
+  });
+
+  inputValorContrato.addEventListener('focus', function () {
+    if (inputValorContrato.value === '0,00') {
+        inputValorContrato.value = '';
+    }
+  });
+
+  inputValorContrato.addEventListener('blur', function () {
+    if (inputValorContrato.value === '') {
+        inputValorContrato.value = '0,00';
+    }
+  });
+
+//Validar email
+const emailInput = document.getElementById('email');
+const emailError = document.getElementById('email-error');
+
+function isValidEmail(email) {
+  // Expressão regular simples para validação de e-mail
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+emailInput.addEventListener('input', function () {
+  if (emailInput.value === '' || isValidEmail(emailInput.value)) {
+    emailError.style.display = 'none';
+    emailInput.setCustomValidity('');
+  } else {
+    emailError.style.display = 'block';
+    emailInput.setCustomValidity('E-mail inválido');
+  }
+});

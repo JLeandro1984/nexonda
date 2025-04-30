@@ -128,6 +128,7 @@ header {
   display: flex;
   gap: 1rem;
   margin-bottom: 2rem;
+  align-items: center;
 }
 
 .search-filter input,
@@ -144,6 +145,19 @@ header {
 
 .search-filter select {
   flex: 1;
+}
+
+#search-input {
+  flex: 1; /* Ocupa todo o espaço restante */
+  padding: 8px;
+  font-size: 1rem;
+  width: 420px;
+}
+
+#filter-category {
+  padding: 8px;
+  font-size: 1rem;
+  white-space: nowrap; /* Impede quebra de texto no select */
 }
 
 .logos-grid {
@@ -318,6 +332,20 @@ header {
 
 .logos-table tbody tr:hover {
   background-color: #f1f1f1;
+}
+
+.lbl-valor-contrato {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000;
+  text-align: right;
+  display: table-cell;
+  width: 100%;
+}
+
+#table-valor-contrato {
+  font-size: 18px;
+  color: #2e7d32;
 }
 
 /*Fim css tabela*/
