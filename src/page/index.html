@@ -121,12 +121,18 @@
       </section>
     </main>
 
-      <!-- Modal -->
-    <div id="youtube-modal" class="d-none" style="position:fixed; top:10%; left:10%; width:80%; height:80%; background:#000; z-index:9999;">
-      <div id="youtube-player"></div>
-      <button class="close-btn" onclick="closeYouTubePlayer()" style="position:absolute; top:10px; right:10px; z-index:10000;">Fechar</button>
-    </div>
-
+      <!-- Modal Vídeo -->      
+      <div id="youtube-overlay" class="d-none"></div>
+      <div id="youtube-modal" class="d-none">
+          <div id="youtube-player"></div>
+          <button class="close-btn" onclick="closeYouTubePlayer()">X</button>
+      </div>
+      
+      <div id="audio-warning">
+        <p>O áudio está desligado. Deseja ativar?</p>
+        <button onclick="enableAudio()">Sim</button>
+        <button onclick="dismissAudioWarning()">Agora não</button>
+      </div>
 
     <footer>
       <p data-lang="footer-text">

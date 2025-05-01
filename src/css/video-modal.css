@@ -2,29 +2,39 @@
   display: none !important;
 }
 
-/* Modal overlay escuro */
-.modal-overlay {
-  display: none; /* Será ativado via JS */
+#youtube-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7); /* fundo escuro semi-transparente */
+  z-index: 9998; /* abaixo do modal */
 }
 
-/* Conteúdo do modal com player */
-.modal-content {
-  position: relative;
-  width: 80%;
-  max-width: 800px;
+/* 
+#youtube-modal {
+  position: fixed;
+  top: 20%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
   background: #000;
-  padding-top: 56.25%; /* Proporção 16:9 */
+  z-index: 9999;
+} */
+
+#youtube-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 720px;
+  height: 45%;
+  background: #000;
+  z-index: 9999;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
   border-radius: 8px;
-  overflow: hidden;
 }
 
 /* Player ocupa toda a área interna com proporção correta */
@@ -56,7 +66,7 @@
 
 .video-btn i {
   font-size: 20px; /* Tamanho do ícone */
-  color: #ff0000; /* Cor do ícone (vermelho) */
+  /* color: #ff0000; */
 }
 
 .video-btn:hover::after {
@@ -81,39 +91,37 @@
   color: white;
 }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    max-width: 95%;
-  }
-
-  #youtube-player {
-    height: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-content {
-    width: 95%;
-  }
-
-  #youtube-player {
-    height: 100%;
-  }
-}
-
 /* Botão de Fechar */
 .close-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #008080;
+  background: transparent;
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
-  z-index: 10;
-  display: block; /* Exibe o botão mesmo se o modal estiver invisível */
+  z-index: 10000;
+  display: block;
 }
+
+/* Responsivo */
+@media (max-width: 768px) {
+  #youtube-modal {
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 30%;
+  }
+
+  #youtube-player {
+    height: 100%;
+  }
+}
+
+/* @media (max-width: 480px) {
+  #youtube-player {
+    height: 100%;
+  }
+} */

@@ -16,8 +16,10 @@ function openYouTubePlayer(videoUrl) {
   const modal = document.getElementById('youtube-modal');
   const modalPlayer = document.getElementById('youtube-player');
 
-  // Exibe o modal ao remover a classe d-none
-  modal.classList.remove('d-none');
+    // Exibe o modal ao remover a classe d-none   
+    document.getElementById('youtube-overlay').classList.remove('d-none');
+    document.getElementById('audio-warning').classList.remove('d-none');
+    modal.classList.remove('d-none');
 
   // Vamos forçar a exibição do botão de fechar enquanto o player carrega
   document.querySelector('.close-btn').style.display = 'block';
@@ -54,7 +56,18 @@ function openYouTubePlayer(videoUrl) {
   }
 }
 
-
+function enableAudio() {
+    if (player) {
+      player.unMute();
+      audioEnabled = true;
+    }
+    document.getElementById('audio-warning').classList.add('d-none');
+  }
+  
+  function dismissAudioWarning() {
+    document.getElementById('audio-warning').classList.add('d-none');
+ }
+  
 // Função para fechar o player
 function closeYouTubePlayer() {
       if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
@@ -63,6 +76,7 @@ function closeYouTubePlayer() {
     }
 
     // Esconde o modal novamente adicionando a classe d-none
+    document.getElementById('youtube-overlay').classList.add('d-none');
     document.getElementById('youtube-modal').classList.add('d-none');
     document.querySelector('.close-btn').style.display = 'none'; // Esconde o botão de fechar
 

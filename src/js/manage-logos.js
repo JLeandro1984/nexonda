@@ -181,6 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("telephone").value = logo.telephone || '';
         document.getElementById("cellphone").value = logo.cellphone || '';
         document.getElementById("client-website").value = logo.websiteUrl || '';
+        document.getElementById("client-videoUrl").value = logo.videoUrl || '';
+        document.getElementById("client-instagramUrl").value = logo.instagramUrl || '';
+        document.getElementById("client-facebookUrl").value = logo.facebookUrl || '';
         document.getElementById("logo-description").value = logo.description || '';
         document.getElementById("logo-category").value = logo.category || '';
         document.getElementById("start-date").value = logo.startDate || '';
@@ -288,9 +291,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const clientCity = document.getElementById("client-city").value;
         const clientUf = document.getElementById("client-uf").value;
         const websiteUrl = document.getElementById("client-website").value;
-        const videoUrl = document.getElementById("client-urlvideo").value;
-        const instagramUrl = document.getElementById("client-instagram").value;
-        const facebookUrl = document.getElementById("client-facebook").value;
+        const videoUrl = document.getElementById("client-videoUrl").value;
+        const instagramUrl = document.getElementById("client-instagramUrl").value;
+        const facebookUrl = document.getElementById("client-facebookUrl").value;
         const description = document.getElementById("logo-description").value;
         const startDate = document.getElementById("start-date").value;
         const contractMonths = document.getElementById("contract-months").value;
@@ -358,13 +361,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 telephone,
                 clientCity,
                 clientUf,
-                email,
+                email,                
+                websiteUrl,
                 videoUrl,
                 instagramUrl,
                 facebookUrl,
                 category,
                 description,
-                websiteUrl,
                 startDate,
                 contractMonths,
                 endDate,
