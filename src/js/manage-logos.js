@@ -191,6 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("end-date").value = logo.endDate || ''; 
         document.getElementById("email").value = logo.email || '';
         document.getElementById("plan_type").value = logo.planType || '';
+        document.getElementById("client_level").value = logo.clientLevel || "0";        
         document.getElementById("contract_value").value = logo.contractValue || "0,00";
     
         // Define o radio button correto
@@ -302,6 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const imageInput = document.getElementById("logo-image");
         const email = document.getElementById("email").value;
         const planType = document.getElementById('plan_type').value;
+        const clientLevel = document.getElementById('client_level').value;
         const contractValue = document.getElementById("contract_value").value;   
 
         const category = logoCategorySelect.value;
@@ -330,6 +332,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 endDate,
                 contractActive,
                 planType,
+                clientLevel,
                 contractValue
             };
             
@@ -373,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 endDate,
                 contractActive,
                 planType,
+                clientLevel,
                 contractValue,
                 imagem: reader.result,
             };

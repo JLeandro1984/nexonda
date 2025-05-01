@@ -10,6 +10,7 @@ function loadLogosFromStorage() {
 }
 
 function createLogoElement(logo) {
+    
     // Cria o elemento principal
     var logoItem = document.createElement('div');
     logoItem.className = 'logo-item';
@@ -25,7 +26,6 @@ function createLogoElement(logo) {
         <img src="${imageSrc}" alt="${logo.clientName}" loading="lazy">
         <div class="logo-content">
             <h3>${logo.clientName}</h3>
-            <p>${logo.category}</p>
         </div>
     `;
 
@@ -100,6 +100,31 @@ function loadLogos() {
     container.innerHTML = '';
     const logos = loadLogosFromStorage();
 
+    //Dar preferencia na ordenação para os premio
+    if (Array.isArray(logos)) {
+        logos.sort((a, b) => {
+          const aIsPremium = a.planType?.trim().toLowerCase() === "premium";
+          const bIsPremium = b.planType?.trim().toLowerCase() === "premium";
+      
+          if (aIsPremium !== bIsPremium) {
+            return aIsPremium ? -1 : 1; // Premium primeiro
+          }
+      
+            // priorizar o Nível em ordem crescente
+            const aLevel = parseInt(a.clientLevel) || 0;
+            const bLevel = parseInt(b.clientLevel) || 0;
+            
+            if (aLevel !== bLevel) {
+              return bLevel - aLevel; // Ordem decrescente
+            }                  
+      
+          return a.clientName.localeCompare(b.clientName); // Nome alfabético
+        });
+      } else {
+        console.error("logos não é um array:", logos);
+      }
+      
+    
     logos.forEach(logo => {
         if (!contratoAtivo(logo)) return;
         
