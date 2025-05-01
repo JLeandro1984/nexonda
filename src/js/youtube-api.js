@@ -77,13 +77,30 @@ function closeYouTubePlayer() {
 
 // Função para obter o ID do vídeo a partir da URL
 function getYouTubeVideoId(url) {
-    const regex =
-      /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+  
+      if (hostname.includes("youtu.be")) {
+        // Formato: youtu.be/VIDEO_ID
+        return urlObj.pathname.slice(1);
+      }
+  
+      if (hostname.includes("youtube.com")) {
+        // Formato: youtube.com/watch?v=VIDEO_ID
+        return urlObj.searchParams.get("v");
+      }
+  
+      return null;
+    } catch (e) {
+      return null; // URL inválida
+    }
 }
   
 // function getYouTubeVideoId(url) {
-//     const match = url.match(/[?&]v=([^&#]+)/);
+//     const regex =
+//       /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+//     const match = url.match(regex);
 //     return match ? match[1] : null;
 // }
+  
