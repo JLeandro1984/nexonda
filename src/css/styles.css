@@ -17,6 +17,7 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-color);
+  padding-top: 80px; /* Ajuste para garantir que o conteúdo não fique escondido atrás do header */
 }
 
 header {
@@ -35,6 +36,14 @@ nav {
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  flex-wrap: wrap; /* Permite que os itens se ajustem em dispositivos pequenos */
+}
+
+.nav-links {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Seletor de Idiomas */
@@ -122,6 +131,18 @@ section {
   margin: 0 auto;
 }
 
+/* #hero {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  color: white;
+  margin-top: 100px;
+} */
+
 #hero {
   text-align: center;
   padding: 6rem 2rem;
@@ -131,6 +152,7 @@ section {
     var(--secondary-color)
   );
   color: white;
+  margin-top: 100px;
 }
 
 #hero h2 {
@@ -404,21 +426,32 @@ footer {
     gap: 1rem;
   }
 
-  .nav-links {
+  /* .nav-links {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
+  } */
+
+  /* .nav-links a {
+    margin: 0;
+  } */
+
+  .nav-links {
+    flex-direction: column; /* Coloca os itens de navegação em coluna no mobile */
+    width: 100%; /* Garantir que ocupe toda a largura */
+    align-items: center;
   }
 
   .nav-links a {
-    margin: 0;
+    margin: 0.5rem 0; /* Ajusta o espaçamento */
   }
+
   section {
     padding: 2rem 1rem;
   }
 
-  #hero {
+  /* #hero {
     padding: 3rem 1rem;
     margin-top: 12rem;
   }
@@ -427,6 +460,14 @@ footer {
     font-size: 1.8rem;
     margin-top: 1rem;
     margin-bottom: 0.8rem;
+  } */
+  #hero {
+    padding: 3rem 1rem; /* Reduz o padding em dispositivos menores */
+    margin-top: 12rem; /* Ajusta a margem para não cobrir o conteúdo */
+  }
+
+  #hero h2 {
+    font-size: 2rem; /* Ajusta o tamanho do título */
   }
 
   #about p,
