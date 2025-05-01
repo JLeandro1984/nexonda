@@ -426,48 +426,30 @@ footer {
     gap: 1rem;
   }
 
-  /* .nav-links {
+  .nav-links {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
-  } */
-
-  /* .nav-links a {
-    margin: 0;
-  } */
-
-  .nav-links {
-    flex-direction: column; /* Coloca os itens de navegação em coluna no mobile */
-    width: 100%; /* Garantir que ocupe toda a largura */
-    align-items: center;
   }
 
   .nav-links a {
-    margin: 0.5rem 0; /* Ajusta o espaçamento */
+    margin: 0;
   }
 
   section {
     padding: 2rem 1rem;
   }
 
-  /* #hero {
+  #hero {
     padding: 3rem 1rem;
-    margin-top: 12rem;
+    margin-top: 6rem;
   }
 
   #hero h2 {
     font-size: 1.8rem;
     margin-top: 1rem;
     margin-bottom: 0.8rem;
-  } */
-  #hero {
-    padding: 3rem 1rem; /* Reduz o padding em dispositivos menores */
-    margin-top: 12rem; /* Ajusta a margem para não cobrir o conteúdo */
-  }
-
-  #hero h2 {
-    font-size: 2rem; /* Ajusta o tamanho do título */
   }
 
   #about p,
@@ -485,7 +467,34 @@ footer {
   }
 
   #logo-container .logo-item {
-    max-width: 100%;
+    max-width: 80%;
     aspect-ratio: 16 / 9;
+  }
+
+  #about {
+    max-width: 80%;
+    margin: 0 20px;
+    padding: 0;
+  }
+
+  #about p {
+    text-align: justify;
+  }
+
+  #contact {
+    max-width: 80%;
+    margin: 0 20px;
+  }
+
+  #contact-form input,
+  #contact-form textarea,
+  #contact-form button {
+    width: 100%; /* Ocupa 80% da largura */
+    margin: 0; /* Centraliza os elementos */
+    display: block; /* Faz os elementos se comportarem como blocos */
+  }
+  #contact p {
+    width: 100%;
+    text-align: justify;
   }
 }
