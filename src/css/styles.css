@@ -328,6 +328,7 @@ section {
 }
 
 .no-results {
+  width: 200px;
   text-align: center;
   padding: 2rem;
   background-color: #f8f9fa;
