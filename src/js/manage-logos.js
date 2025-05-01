@@ -288,6 +288,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const clientCity = document.getElementById("client-city").value;
         const clientUf = document.getElementById("client-uf").value;
         const websiteUrl = document.getElementById("client-website").value;
+        const videoUrl = document.getElementById("client-urlvideo").value;
+        const instagramUrl = document.getElementById("client-instagram").value;
+        const facebookUrl = document.getElementById("client-facebook").value;
         const description = document.getElementById("logo-description").value;
         const startDate = document.getElementById("start-date").value;
         const contractMonths = document.getElementById("contract-months").value;
@@ -296,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const imageInput = document.getElementById("logo-image");
         const email = document.getElementById("email").value;
         const planType = document.getElementById('plan_type').value;
-        const contractValue = document.getElementById("contract_value").value;
+        const contractValue = document.getElementById("contract_value").value;   
 
         const category = logoCategorySelect.value;
         const file = imageInput.files[0];
@@ -316,6 +319,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 category,
                 description,
                 websiteUrl,
+                videoUrl,
+                instagramUrl,
+                facebookUrl,
                 startDate,
                 contractMonths,
                 endDate,
@@ -353,6 +359,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 clientCity,
                 clientUf,
                 email,
+                videoUrl,
+                instagramUrl,
+                facebookUrl,
                 category,
                 description,
                 websiteUrl,

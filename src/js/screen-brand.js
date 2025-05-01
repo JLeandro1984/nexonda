@@ -15,9 +15,11 @@ function createLogoElement(logo) {
     logoItem.className = 'logo-item';
 
     // Obtém a URL da imagem e do vídeo
-    var imageSrc = logo.imageUrl || logo.imagem || '';
-    var videoUrl = logo.videoUrl || "https://www.youtube.com/watch?v=0Drk4MNAFac&ab_channel=EliasMagar"; // URL padrão se não houver
-    
+    const imageSrc = logo.imageUrl || logo.imagem || '';
+    const videoUrl = logo.videoUrl || "";
+    const instagramUrl = logo.instagramUrl || "";
+    const facebookUrl = logo.facebookUrl || "";
+
     // Preenche o conteúdo do card
     logoItem.innerHTML = `
         <img src="${imageSrc}" alt="${logo.clientName}" loading="lazy">
@@ -31,25 +33,53 @@ function createLogoElement(logo) {
     var buttonContainer = document.createElement('div');
     buttonContainer.className = 'video-btn-container';
     
-    // Cria o botão de vídeo
-    var videoButton = document.createElement('button');
-    videoButton.className = 'video-btn';
-    videoButton.innerHTML = '<i class="fab fa-youtube"></i>'; 
-    videoButton.title = 'Descubra o que torna nossa empresa única! Clique no ícone.'; 
+    var buttonContainerInstagram = document.createElement('div');
+    buttonContainerInstagram.className = 'instagram-btn-container';
 
-    // Atribui os atributos necessários para o tooltip funcionar (data-toggle e data-placement)
-    videoButton.setAttribute('data-toggle', 'tooltip');
-    videoButton.setAttribute('data-placement', 'top');  // Definindo a posição do tooltip (topo)
-    
+    var buttonContainerFacebook = document.createElement('div');
+    buttonContainerFacebook.className = 'facebook-btn-container';
 
-    // Evento de clique no botão de vídeo
-    videoButton.onclick = function(e) {
-        e.stopPropagation();
-        e.preventDefault();
-        openYouTubePlayer(videoUrl);
-    };
+    if (logo.planType.toLowerCase() === "premium") {
+        // Cria o botão de vídeo
+        var videoButton = document.createElement('button');
+        videoButton.className = 'video-btn';
+        videoButton.innerHTML = '<i class="fab fa-youtube"></i>'; 
+        //videoButton.title = 'Descubra o que torna nossa empresa única! Clique no ícone.'; )
+       // videoButton.setAttribute('data-toggle', 'tooltip');
+        //videoButton.setAttribute('data-placement', 'top');  // Definindo a posição do tooltip (topo)
     
-    buttonContainer.appendChild(videoButton);
+         // Evento de clique no botão de vídeo
+        videoButton.onclick = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            openYouTubePlayer(videoUrl);
+        };
+    
+        buttonContainer.appendChild(videoButton);
+
+        var instagramButton = document.createElement('button');
+        instagramButton.className = 'instagram-btn';
+        instagramButton.innerHTML = '<i class="fab fa-instagram"></i>';
+        instagramButton.onclick = function () {
+            window.open(instagramUrl, '_blank');
+        };
+        
+        buttonContainer.appendChild(instagramButton);
+
+        // Botão do Facebook
+        var facebookButton = document.createElement('button');
+        facebookButton.className = 'facebook-btn';
+        facebookButton.innerHTML = '<i class="fab fa-facebook"></i>';
+        facebookButton.onclick = function () {
+            window.open(facebookUrl, '_blank');
+        };
+
+        buttonContainer.appendChild(facebookButton);
+    }
+ 
+
+   
+   
     
     // Wrapper principal
     var wrapper = document.createElement('div');

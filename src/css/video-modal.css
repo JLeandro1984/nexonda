@@ -38,17 +38,20 @@
 
 /* Estilos para o botão de vídeo */
 .video-btn {
-  background: none;
-  color: white;
-  border: none;
-  padding: 2px 2px;
+  background-color: white;
+  border: 2px solid #ddd;
   border-radius: 50%;
-  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  color: #555;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  margin: 0 2px;
   transition: all 0.3s ease;
-  margin-top: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .video-btn i {
@@ -76,21 +79,6 @@
 
 .video-btn:hover i {
   color: white;
-}
-
-/* Personalizando o fundo do tooltip */
-.tooltip-inner {
-  background-color: #333; /* Cor de fundo escura */
-  color: #fff; /* Cor do texto */
-  font-size: 14px;
-  font-weight: bold;
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-/* Personalizando a seta do tooltip */
-.tooltip-arrow {
-  border-top-color: #333 !important; /* Cor da seta */
 }
 
 /* Responsivo */
