@@ -9,32 +9,6 @@ function loadLogosFromStorage() {
     return storedData ? JSON.parse(storedData) : [];
 }
 
-// Cria elemento HTML para um logo
-// function createLogoElement(logo) {
-//     const logoItem = document.createElement('div');
-//     logoItem.className = 'logo-item';
-
-//     const imageSrc = logo.imageUrl || logo.imagem || '';
-// const videoUrl = "https://www.youtube.com/watch?v=-ew_bfFvros&list=RD-ew_bfFvros&start_radio=1&ab_channel=HomeFree"
-   
-//     logoItem.innerHTML = `
-//         <img src="${imageSrc}" alt="${logo.clientName}" loading="lazy">
-//         <h3>${logo.clientName}</h3>
-//         <p>${logo.category}</p>
-//           <button class="video-btn" onclick="abrirModalComVideo('${videoUrl || ''}')">
-//             📹 Ver Vídeo
-//         </button>
-//     `;
-
-//     logoItem.addEventListener('click', () => {
-//         if (logo.websiteUrl) {
-//             window.open(logo.websiteUrl, '_blank');
-//         }
-//     });
-
-//     return logoItem;
-// }
-
 function createLogoElement(logo) {
     // Cria o elemento principal
     var logoItem = document.createElement('div');

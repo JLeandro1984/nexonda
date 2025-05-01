@@ -60,7 +60,7 @@ function closeYouTubePlayer() {
         ytPlayer.stopVideo();
     }
     // Esconde o modal novamente adicionando a classe d-none
-    document.getElementById('youtube-modal').classList.add('d-none');
+    //document.getElementById('youtube-modal').classList.add('d-none');
     document.querySelector('.close-btn').style.display = 'none'; // Esconde o botão de fechar
 }
 
