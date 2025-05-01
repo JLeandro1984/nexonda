@@ -56,12 +56,20 @@ function openYouTubePlayer(videoUrl) {
 
 // Função para fechar o player
 function closeYouTubePlayer() {
-    if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo(); // Para o vídeo
+        ytPlayer.clearVideo(); // Limpa o vídeo do player
     }
+
     // Esconde o modal novamente adicionando a classe d-none
-    //document.getElementById('youtube-modal').classList.add('d-none');
+    document.getElementById('youtube-modal').classList.add('d-none');
     document.querySelector('.close-btn').style.display = 'none'; // Esconde o botão de fechar
+
+    // Limpa o conteúdo do player (se necessário)
+    if (ytPlayer) {
+        ytPlayer.destroy();  // Destrói o player se necessário para reiniciar a próxima vez
+        ytPlayer = null; // Redefine o ytPlayer
+    }
 }
 
 // Função para obter o ID do vídeo a partir da URL
