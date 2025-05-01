@@ -27,3 +27,4 @@ window.showAlert = function(message) {
     modal.classList.add("hidden");
   };
 };
+
