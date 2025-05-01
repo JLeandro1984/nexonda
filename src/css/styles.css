@@ -119,6 +119,7 @@ header nav {
   display: block;
   height: 4.0625rem;
   margin-top: 0.5rem;
+  filter: brightness(0) invert(1);
 }
 
 .admin-btn {
