@@ -18,7 +18,6 @@ function openYouTubePlayer(videoUrl) {
 
     // Exibe o modal ao remover a classe d-none   
     document.getElementById('youtube-overlay').classList.remove('d-none');
-    document.getElementById('audio-warning').classList.remove('d-none');
     modal.classList.remove('d-none');
 
   // Vamos forçar a exibição do botão de fechar enquanto o player carrega
@@ -56,17 +55,6 @@ function openYouTubePlayer(videoUrl) {
   }
 }
 
-function enableAudio() {
-    if (player) {
-      player.unMute();
-      audioEnabled = true;
-    }
-    document.getElementById('audio-warning').classList.add('d-none');
-  }
-  
-  function dismissAudioWarning() {
-    document.getElementById('audio-warning').classList.add('d-none');
- }
   
 // Função para fechar o player
 function closeYouTubePlayer() {
@@ -89,6 +77,13 @@ function closeYouTubePlayer() {
 
 // Função para obter o ID do vídeo a partir da URL
 function getYouTubeVideoId(url) {
-    const match = url.match(/[?&]v=([^&#]+)/);
+    const regex =
+      /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regex);
     return match ? match[1] : null;
 }
+  
+// function getYouTubeVideoId(url) {
+//     const match = url.match(/[?&]v=([^&#]+)/);
+//     return match ? match[1] : null;
+// }
