@@ -8,51 +8,52 @@ function onYouTubeIframeAPIReady() {
 
 // Função para abrir o player
 function openYouTubePlayer(videoUrl) {
-    const videoId = getYouTubeVideoId(videoUrl);
-    if (!videoId) return alert('ID de vídeo inválido.');
+  const videoId = getYouTubeVideoId(videoUrl);
+  if (!videoId) return alert('ID de vídeo inválido.');
 
-    lastVideoUrl = videoUrl; // Guarda a URL do vídeo para fallback
+  lastVideoUrl = videoUrl; // Guarda a URL do vídeo para fallback
 
-    const modal = document.getElementById('youtube-modal');
-    const modalPlayer = document.getElementById('youtube-player');
+  const modal = document.getElementById('youtube-modal');
+  const modalPlayer = document.getElementById('youtube-player');
 
-    // Vamos forçar a exibição do botão de fechar enquanto o player carrega
-    document.querySelector('.close-btn').style.display = 'block';
+  // Exibe o modal ao remover a classe d-none
+  modal.classList.remove('d-none');
 
-    // Se o player não estiver criado, inicialize-o aqui
-    if (!ytPlayer) {
-        ytPlayer = new YT.Player(modalPlayer, {
-            height: '100%',
-            width: '100%',
-            videoId: videoId,
-            playerVars: {
-                autoplay: 1,
-                controls: 1,
-                modestbranding: 1,
-                rel: 0,
-                mute: 1
-            },
-            events: {
-              onReady: () => {                
-                    // Exibe o modal ao remover a classe d-none
-                    modal.classList.remove('d-none');
-                    console.log('Player do YouTube pronto!');
-                    ytPlayer.playVideo();
-                },
-                onError: (error) => {
-                    console.error('Erro ao carregar o vídeo', error);
-                    // Em caso de erro, podemos redirecionar o usuário
-                    window.open(lastVideoUrl, '_blank');
-                    closeYouTubePlayer();
-                }
-            }
-        });
-    } else {
-        // Se o player já foi criado, apenas carrega o novo vídeo
-        ytPlayer.loadVideoById(videoId);
-        ytPlayer.playVideo();
-    }
+  // Vamos forçar a exibição do botão de fechar enquanto o player carrega
+  document.querySelector('.close-btn').style.display = 'block';
+
+  // Se o ytPlayer foi destruído ou não existe, cria novamente
+  if (!ytPlayer) {
+      ytPlayer = new YT.Player(modalPlayer, {
+          height: '100%',
+          width: '100%',
+          videoId: videoId,
+          playerVars: {
+              autoplay: 1,
+              controls: 1,
+              modestbranding: 1,
+              rel: 0,
+              mute: 1
+          },
+          events: {
+              onReady: () => {
+                  console.log('Player do YouTube pronto!');
+                  ytPlayer.playVideo();
+              },
+              onError: (error) => {
+                  console.error('Erro ao carregar o vídeo', error);
+                  // Em caso de erro, podemos redirecionar o usuário
+                  window.open(lastVideoUrl, '_blank');
+                  closeYouTubePlayer();
+              }
+          }
+      });
+  } else {
+      ytPlayer.loadVideoById(videoId); // Carrega o vídeo se o player já estiver ativo
+      ytPlayer.playVideo();
+  }
 }
+
 
 // Função para fechar o player
 function closeYouTubePlayer() {
