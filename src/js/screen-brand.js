@@ -31,7 +31,7 @@ function createLogoElement(logo) {
 
     // Container do botão de vídeo
     var buttonContainer = document.createElement('div');
-    buttonContainer.className = 'video-btn-container';
+    buttonContainer.className = 'btn-container';
     
     var buttonContainerInstagram = document.createElement('div');
     buttonContainerInstagram.className = 'instagram-btn-container';
@@ -44,10 +44,7 @@ function createLogoElement(logo) {
         var videoButton = document.createElement('button');
         videoButton.className = 'video-btn';
         videoButton.innerHTML = '<i class="fab fa-youtube"></i>'; 
-        //videoButton.title = 'Descubra o que torna nossa empresa única! Clique no ícone.'; )
-       // videoButton.setAttribute('data-toggle', 'tooltip');
-        //videoButton.setAttribute('data-placement', 'top');  // Definindo a posição do tooltip (topo)
-    
+
          // Evento de clique no botão de vídeo
         videoButton.onclick = function(e) {
             e.stopPropagation();
@@ -192,11 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
     categorySelect.addEventListener('change', updateLogoDisplay);
 });
 
-
-$(document).ready(function() {
-    // Ativa o tooltip para todos os elementos com o data-toggle="tooltip"
-    $('[data-toggle="tooltip"]').tooltip();
-});
 
 //document.addEventListener("DOMContentLoaded", () => {
 //   const colorThief = new ColorThief();

@@ -46,51 +46,6 @@
   height: 100%;
 }
 
-/* Estilos para o botão de vídeo */
-.video-btn {
-  background-color: white;
-  border: 2px solid #ddd;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  font-size: 1.2rem;
-  color: #555;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 2px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.video-btn i {
-  font-size: 20px; /* Tamanho do ícone */
-  /* color: #ff0000; */
-}
-
-.video-btn:hover::after {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(-10px); /* Leve movimento para cima ao aparecer */
-}
-
-/* Efeito de foco no botão */
-.video-btn:focus {
-  outline: none; /* Remove o contorno padrão */
-  border: 2px solid #ff5733; /* Cor de foco laranja */
-  box-shadow: 0 0 5px rgba(255, 87, 51, 0.8); /* Sombra ao focar no botão */
-}
-
-.video-btn:hover {
-  background: #ff0000; /* Cor de fundo do botão ao passar o mouse */
-  color: white;
-}
-
-.video-btn:hover i {
-  color: white;
-}
-
 /* Botão de Fechar */
 .close-btn {
   position: absolute;
