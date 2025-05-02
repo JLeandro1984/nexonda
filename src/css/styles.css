@@ -413,7 +413,8 @@ section {
 /* Estilo base dos botões sociais */
 .instagram-btn,
 .facebook-btn,
-.video-btn {
+.video-btn,
+.whatsapp-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -457,6 +458,16 @@ section {
   background-color: #ff0000;
   color: white;
   border-color: #ff0000;
+}
+
+.whatsapp-btn {
+  background-color: #25d366;
+}
+
+.whatsapp-btn:hover {
+  background-color: #128c7e;
+  color: white;
+  border-color: #128c7e;
 }
 
 .btn-container {

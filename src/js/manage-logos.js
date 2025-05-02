@@ -184,6 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("client-videoUrl").value = logo.videoUrl || '';
         document.getElementById("client-instagramUrl").value = logo.instagramUrl || '';
         document.getElementById("client-facebookUrl").value = logo.facebookUrl || '';
+        document.getElementById("client-whatsapp").value = logo?.clientWhatsapp || '';
         document.getElementById("logo-description").value = logo.description || '';
         document.getElementById("logo-category").value = logo.category || '';
         document.getElementById("start-date").value = logo.startDate || '';
@@ -294,7 +295,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const websiteUrl = document.getElementById("client-website").value;
         const videoUrl = document.getElementById("client-videoUrl").value;
         const instagramUrl = document.getElementById("client-instagramUrl").value;
-        const facebookUrl = document.getElementById("client-facebookUrl").value;
+        const facebookUrl = document.getElementById("client-facebookUrl").value; 
+        const clientWhatsapp = document.getElementById("client-whatsapp").value; 
         const description = document.getElementById("logo-description").value;
         const startDate = document.getElementById("start-date").value;
         const contractMonths = document.getElementById("contract-months").value;
@@ -327,6 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 videoUrl,
                 instagramUrl,
                 facebookUrl,
+                clientWhatsapp,
                 startDate,
                 contractMonths,
                 endDate,
@@ -369,6 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 videoUrl,
                 instagramUrl,
                 facebookUrl,
+                clientWhatsapp,
                 category,
                 description,
                 startDate,

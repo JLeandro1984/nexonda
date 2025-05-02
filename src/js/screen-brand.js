@@ -20,6 +20,7 @@ function createLogoElement(logo) {
     const videoUrl = logo.videoUrl || "";
     const instagramUrl = logo.instagramUrl || "";
     const facebookUrl = logo.facebookUrl || "";
+    const clientWhatsapp = logo.clientWhatsapp || "";
 
     // Preenche o conteúdo do card
     logoItem.innerHTML = `
@@ -33,12 +34,6 @@ function createLogoElement(logo) {
     var buttonContainer = document.createElement('div');
     buttonContainer.className = 'btn-container';
     
-    var buttonContainerInstagram = document.createElement('div');
-    buttonContainerInstagram.className = 'instagram-btn-container';
-
-    var buttonContainerFacebook = document.createElement('div');
-    buttonContainerFacebook.className = 'facebook-btn-container';
-
     if (logo.planType.toLowerCase() === "premium") {
         // Cria o botão de vídeo
         var videoButton = document.createElement('button');
@@ -54,30 +49,47 @@ function createLogoElement(logo) {
     
         buttonContainer.appendChild(videoButton);
 
-        var instagramButton = document.createElement('button');
-        instagramButton.className = 'instagram-btn';
-        instagramButton.innerHTML = '<i class="fab fa-instagram"></i>';
-        instagramButton.onclick = function () {
-            window.open(instagramUrl, '_blank');
-        };
-        
-        buttonContainer.appendChild(instagramButton);
+        if (!!instagramUrl) {
+            var instagramButton = document.createElement('button');
+            instagramButton.className = 'instagram-btn';
+            instagramButton.innerHTML = '<i class="fab fa-instagram"></i>';
+            instagramButton.onclick = function () {
+                window.open(instagramUrl, '_blank');
+            };
+            
+            buttonContainer.appendChild(instagramButton);
+        }
+  
+       // Botão do Facebook
+        if (!!facebookUrl) {             
+            var facebookButton = document.createElement('button');
+            facebookButton.className = 'facebook-btn';
+            facebookButton.innerHTML = '<i class="fab fa-facebook"></i>';
+            facebookButton.onclick = function () {
+                window.open(facebookUrl, '_blank');
+            };
 
-        // Botão do Facebook
-        var facebookButton = document.createElement('button');
-        facebookButton.className = 'facebook-btn';
-        facebookButton.innerHTML = '<i class="fab fa-facebook"></i>';
-        facebookButton.onclick = function () {
-            window.open(facebookUrl, '_blank');
-        };
+            buttonContainer.appendChild(facebookButton);
+        }
+       
 
-        buttonContainer.appendChild(facebookButton);
+        // Botão do WhatsApp
+        if (!!clientWhatsapp) {
+            var whatsappButton = document.createElement('button');
+            whatsappButton.className = 'whatsapp-btn';
+            whatsappButton.innerHTML = '<i class="fab fa-whatsapp"></i>';
+            whatsappButton.onclick = function () {
+                const phone = clientWhatsapp.replace(/\D/g, ''); // Remove não numéricos
+                const message = encodeURIComponent("Olá, gostaria de entrar em contato!");
+                const url = `https://wa.me/55${phone}?text=${message}`;
+                window.open(url, '_blank');
+            };
+    
+            buttonContainer.appendChild(whatsappButton);
+        } 
+
     }
  
-
-   
-   
-    
     // Wrapper principal
     var wrapper = document.createElement('div');
     wrapper.className = 'logo-item-wrapper';
@@ -214,7 +226,22 @@ document.addEventListener('DOMContentLoaded', () => {
     categorySelect.addEventListener('change', updateLogoDisplay);
 });
 
-
+function redirectToWhatsApp(clientWhatsapp) {
+    const rawNumber = clientWhatsapp
+    
+    // Remove caracteres não numéricos
+    const phoneNumber = rawNumber.replace(/\D/g, '');
+    
+    // Mensagem opcional
+    const message = encodeURIComponent("Olá, gostaria de entrar em contato!");
+    
+    // Monta a URL do WhatsApp
+    const url = `https://wa.me/55${phoneNumber}?text=${message}`;
+    
+    // Abre o link em nova aba
+    window.open(url, '_blank');
+}
+  
 //document.addEventListener("DOMContentLoaded", () => {
 //   const colorThief = new ColorThief();
 //   const logoItems = document.querySelectorAll(".logo-item img");
