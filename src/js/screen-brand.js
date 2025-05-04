@@ -234,6 +234,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', updateLogoDisplay);
     categorySelect.addEventListener('change', updateLogoDisplay);
+    debugger
+    
+    //Visibilidade botão Admin
+    
+    const now = new Date();
+    const d = now.getDate();       
+    const m = now.getMonth() + 1;       
+    const parteUm = d + m;   
+    const parteDois = String(now.getFullYear()).slice(-2); 
+  
+    const chave  = `mostrarAdmin${parteUm}${parteDois}`; 
+  
+    const params = new URLSearchParams(window.location.search);
+    const mostrarAdmin = params.get(chave) === 'true';
+  
+    const adminBtn = document.getElementById('admin-btn');
+    adminBtn.style.display = 'none';
+
+    if (adminBtn) {
+        if (mostrarAdmin) {
+          adminBtn.style.display = 'inline-block'; 
+        }
+    }
 });
 
 function redirectToWhatsApp(clientWhatsapp) {

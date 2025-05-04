@@ -1,9 +1,7 @@
 import { categories } from './categories.js';
 import { ufs } from './ufs.js';  
 
-document.addEventListener("DOMContentLoaded", () => {
-   // usuarioLogado();
-
+document.addEventListener("DOMContentLoaded", () => {  
     const logoForm = document.getElementById("logo-form");
     const logosGrid = document.getElementById("logos-grid");
     const searchInput = document.getElementById("search-input");
@@ -551,37 +549,6 @@ document.addEventListener("DOMContentLoaded", () => {
     startDateInput.addEventListener('change', calculateEndDate);
     contractMonthsSelect.addEventListener('change', calculateEndDate);   
 
-    // function usuarioLogado(){
-    //         // Verifica se o usuário está autenticado
-    //     const isAuthenticated = localStorage.getItem('isAuthenticated');
-
-    //     if (!isAuthenticated) {
-    //         window.location.href = 'login.html'; // Redireciona para login se não autenticado
-    //         return;
-    //     }
-
-    //     // Pega o nome do usuário do localStorage
-    //     const userName = localStorage.getItem('userName') || 'Usuário';
-
-    //     // Exibe o nome no elemento com id="user-name"
-    //     const userNameElement = document.getElementById('user-name');
-    //     if (userNameElement) {
-    //         userNameElement.textContent = `Olá, ${userName}`;
-    //     }
-
-    //     // Adiciona evento ao botão de logout
-    //     const logoutBtn = document.querySelector('.logout-btn');
-    //     if (logoutBtn) {
-    //         logoutBtn.addEventListener('click', () => {
-    //         // Limpa os dados do login
-    //         localStorage.removeItem('isAuthenticated');
-    //         localStorage.removeItem('userName');
-    //         localStorage.removeItem('token'); // se houver token
-    //         // Redireciona para a tela de login
-    //         window.location.href = 'login.html';
-    //         });
-    //     }
-    // }
 });
 
 const cnpjInput = document.getElementById('client-cnpj');
@@ -613,38 +580,6 @@ function aplicarMascaraTelefone(input, isCelular = false) {
         input.value = valor;
     });
 }
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     const userIcon = document.getElementById('user-icon');
-//     const userDropdown = document.getElementById('user-dropdown');
-//     const userNameEl = document.getElementById('user-name');
-  
-//     // Pegando nome do localStorage
-//     const userName = localStorage.getItem('userName') || 'Usuário';
-//     userNameEl.textContent = userName;
-  
-//     // Toggle do menu
-//     userIcon.addEventListener('click', () => {
-//       userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-//     });
-  
-//     // Oculta dropdown ao clicar fora
-//     document.addEventListener('click', (e) => {
-//       if (!e.target.closest('.user-menu')) {
-//         userDropdown.style.display = 'none';
-//       }
-//     });
-  
-//     // Logout
-//     const logoutBtn = document.querySelector('.logout-btn');
-//     logoutBtn.addEventListener('click', () => {
-//       localStorage.removeItem('isAuthenticated');
-//       localStorage.removeItem('userName');
-//       localStorage.removeItem('token');
-//       window.location.href = 'login.html';
-//     });
-//   });
-
   
 // Aplica a máscara nos inputs
 document.addEventListener('DOMContentLoaded', function () {

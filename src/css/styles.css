@@ -30,6 +30,10 @@ header {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.admin-btn {
+  display: none;
+}
+
 nav {
   display: flex;
   align-items: center; /* alinha verticalmente */
@@ -40,8 +44,6 @@ nav {
 }
 
 .nav-links {
-  /* display: flex; */
-  /* justify-content: flex-end; */
   align-items: flex-end;
   gap: 1rem;
   flex-wrap: wrap;
