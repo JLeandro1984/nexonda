@@ -524,31 +524,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Função para calcular data final baseada na data inicial e meses
-function calculateEndDate() {
-    if (!startDateInput.value || !contractMonthsSelect.value) return;
-    
-    const startDate = new Date(startDateInput.value);
-    const monthsToAdd = parseInt(contractMonthsSelect.value);
-    
-    let endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + monthsToAdd);
-    
-    // Ajuste para o último dia do mês se o dia original não existir no novo mês
-    if (startDate.getDate() !== endDate.getDate()) {
-        endDate.setDate(0);
+    function calculateEndDate() {
+        if (!startDateInput.value || !contractMonthsSelect.value) return;
+        
+        const startDate = new Date(startDateInput.value);
+        const monthsToAdd = parseInt(contractMonthsSelect.value);
+        
+        let endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + monthsToAdd);
+        
+        // Ajuste para o último dia do mês se o dia original não existir no novo mês
+        if (startDate.getDate() !== endDate.getDate()) {
+            endDate.setDate(0);
+        }
+        
+        const year = endDate.getFullYear();
+        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+        const day = String(endDate.getDate()).padStart(2, '0');
+        
+        endDateInput.value = `${year}-${month}-${day}`;
     }
-    
-    const year = endDate.getFullYear();
-    const month = String(endDate.getMonth() + 1).padStart(2, '0');
-    const day = String(endDate.getDate()).padStart(2, '0');
-    
-    endDateInput.value = `${year}-${month}-${day}`;
-}
 
     // Event listeners para calcular data final
     startDateInput.addEventListener('change', calculateEndDate);
-    contractMonthsSelect.addEventListener('change', calculateEndDate);
-    
+    contractMonthsSelect.addEventListener('change', calculateEndDate);   
 
 });
 

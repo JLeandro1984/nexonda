@@ -34,7 +34,7 @@ function createLogoElement(logo) {
     var buttonContainer = document.createElement('div');
     buttonContainer.className = 'btn-container';
     
-    if (logo.planType.toLowerCase() === "premium") {
+    if (logo.planType.toLowerCase() !== "basico") {
         // Cria o botão de vídeo
         var videoButton = document.createElement('button');
         videoButton.className = 'video-btn';
@@ -112,31 +112,41 @@ function loadLogos() {
     container.innerHTML = '';
     const logos = loadLogosFromStorage();
 
-    //Dar preferencia na ordenação para os premio
+    //Dar preferencia na ordenação para premio-plus, premium e basico
     if (Array.isArray(logos)) {
         logos.sort((a, b) => {
-          const aIsPremium = a.planType?.trim().toLowerCase() === "premium";
-          const bIsPremium = b.planType?.trim().toLowerCase() === "premium";
+          const normalize = str => str?.trim().toLowerCase() || "";
       
-          if (aIsPremium !== bIsPremium) {
-            return aIsPremium ? -1 : 1; // Premium primeiro
+          const planPriority = {
+            "premium-plus": 0,
+            "premium": 1,
+            "basico": 2
+          };
+      
+          const aPlan = normalize(a.planType);
+          const bPlan = normalize(b.planType);
+      
+          const aPriority = planPriority[aPlan] ?? 3; // qualquer outro tipo vem depois
+          const bPriority = planPriority[bPlan] ?? 3;
+      
+          if (aPriority !== bPriority) {
+            return aPriority - bPriority; // menor valor = maior prioridade
           }
       
-            // priorizar o Nível em ordem crescente
-            const aLevel = parseInt(a.clientLevel) || 0;
-            const bLevel = parseInt(b.clientLevel) || 0;
-            
-            if (aLevel !== bLevel) {
-              return bLevel - aLevel; // Ordem decrescente
-            }                  
+          // priorizar o Nível em ordem decrescente
+          const aLevel = parseInt(a.clientLevel) || 0;
+          const bLevel = parseInt(b.clientLevel) || 0;
+      
+          if (aLevel !== bLevel) {
+            return bLevel - aLevel; // Ordem decrescente
+          }
       
           return a.clientName.localeCompare(b.clientName); // Nome alfabético
         });
       } else {
         console.error("logos não é um array:", logos);
       }
-      
-    
+     
     logos.forEach(logo => {
         if (!contratoAtivo(logo)) return;
         

@@ -4,11 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gerenciar Logotipos - Logo Gallery Admin</title>
-    <!-- Link para o CSS do Bootstrap 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />-->
+
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/manage-logos.css" />
   </head>
@@ -191,6 +187,7 @@
                   <option value="">Selecione</option>
                   <option value="basico">Basico</option>
                   <option value="premium">Premium</option>
+                  <option value="premium-plus">Premium Plus</option>
                 </select>
               </div>
 
@@ -281,6 +278,119 @@
             <div class="logos-grid" id="logos-grid"></div>
           </div>
         </div>
+
+        <!-- Seção de Propagandas Premium -->
+        <div class="admin-section">
+          <h2><i class="fas fa-ad"></i> Cadastrar Nova Propaganda Premium</h2>
+          <form id="ad-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-title">Título da Propaganda*</label>
+                <input
+                  type="text"
+                  id="ad-title"
+                  required
+                  placeholder="Ex: Oferta Especial de Verão"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="ad-client">Cliente Premium*</label>
+                <select id="ad-client" required>
+                  <option value="">Selecione um cliente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="ad-description">Descrição*</label>
+              <textarea
+                id="ad-description"
+                required
+                placeholder="Descreva a promoção ou campanha"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-type">Tipo de Mídia*</label>
+                <select id="ad-type" required>
+                  <option value="image">Imagem (Banner)</option>
+                  <option value="video">Vídeo</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="ad-media">URL da Mídia*</label>
+                <input
+                  type="url"
+                  id="ad-media"
+                  required
+                  placeholder="https://exemplo.com/banner.jpg"
+                />
+                <small class="hint">Para vídeos: YouTube ou link MP4</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="ad-link">Link de Destino*</label>
+              <input
+                type="url"
+                id="ad-link"
+                required
+                placeholder="https://exemplo.com/promocao"
+              />
+              <small class="hint"
+                >Página para onde o usuário será direcionado ao clicar</small
+              >
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-start">Data de Início*</label>
+                <input type="date" id="ad-start" required />
+              </div>
+
+              <div class="form-group">
+                <label for="ad-end">Data de Término*</label>
+                <input type="date" id="ad-end" required />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="save-btn">
+                <i class="fas fa-save"></i> Salvar Propaganda
+              </button>
+              <button type="reset" class="cancel-btn">
+                <i class="fas fa-times"></i> Limpar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de Propagandas Cadastradas -->
+        <div class="admin-section">
+          <h2><i class="fas fa-list"></i> Propagandas Cadastradas</h2>
+          <div class="ads-controls">
+            <div class="search-filter">
+              <input
+                type="text"
+                id="ad-search-input"
+                placeholder="Buscar propagandas..."
+              />
+              <select id="ad-filter-status">
+                <option value="all">Todas</option>
+                <option value="active">Ativas</option>
+                <option value="inactive">Inativas</option>
+                <option value="upcoming">Futuras</option>
+                <option value="expired">Expiradas</option>
+              </select>
+            </div>
+          </div>
+          <div class="premium-ads-list" id="premium-ads-list">
+            <!-- As propagandas serão carregadas aqui -->
+          </div>
+        </div>
       </main>
     </div>
 
@@ -307,5 +417,6 @@
 
     <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/manage-logos.js"></script>
+    <script type="module" src="../js/manage-advertising.js"></script>
   </body>
 </html>

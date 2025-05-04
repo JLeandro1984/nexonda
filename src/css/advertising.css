@@ -1,0 +1,166 @@
+/* Seção de Propagandas Premium */
+#premium-ads {
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+#premium-ads h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+}
+
+.premium-ads-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.premium-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.premium-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.premium-ad-item {
+  flex: 0 0 auto;
+  width: 300px;
+  scroll-snap-align: start;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.premium-ad-item:hover {
+  transform: translateY(-5px);
+}
+
+/* Estilos para conteúdo de mídia */
+.premium-ad-item img,
+.premium-ad-item video,
+.premium-ad-item .youtube-video-container {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* Container para vídeos do YouTube */
+.youtube-video-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.youtube-video-container iframe {
+  border: none;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.play-overlay i {
+  color: white;
+  font-size: 48px;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.youtube-video-container:hover .play-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.youtube-video-container:hover .play-overlay i {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Conteúdo da propaganda */
+.premium-ad-content {
+  padding: 1rem;
+}
+
+.premium-ad-content h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+.premium-ad-content p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.premium-ad-link {
+  display: inline-block;
+  background-color: var(--secondary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.premium-ad-link:hover {
+  background-color: var(--primary-color);
+}
+
+/* Controles do carrossel */
+.carousel-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.carousel-control {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.carousel-control:hover {
+  background-color: var(--primary-color);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .premium-ad-item {
+    width: 250px;
+  }
+
+  #premium-ads h2 {
+    font-size: 1.5rem;
+  }
+
+  .play-overlay i {
+    font-size: 36px;
+  }
+}

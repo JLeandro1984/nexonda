@@ -22,7 +22,7 @@ function openYouTubePlayer(videoUrl) {
 
   // Vamos forçar a exibição do botão de fechar enquanto o player carrega
   document.querySelector('.close-btn').style.display = 'block';
-
+debugger
   // Se o ytPlayer foi destruído ou não existe, cria novamente
   if (!ytPlayer) {
       ytPlayer = new YT.Player(modalPlayer, {
