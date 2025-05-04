@@ -509,6 +509,18 @@ footer {
     gap: 1rem;
   }
 
+  .logo {
+    margin-bottom: 1rem; /* Espaço entre logo e links */
+    text-align: center; /* Centraliza a imagem dentro da div */
+    width: 100%; /* Ocupa toda a largura */
+    padding: 0; /* Remove paddings anteriores */
+  }
+
+  .logo img {
+    display: inline-block; /* Permite centralização com text-align */
+    max-width: 180px; /* Ajuste conforme necessário */
+  }
+
   .nav-links {
     display: flex;
     flex-wrap: wrap;
