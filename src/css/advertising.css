@@ -84,6 +84,7 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3; /* Limita a 3 linhas */
+  line-clamp: 3; /* Propriedade padrão */
   -webkit-box-orient: vertical;
   line-height: 1.4;
   font-size: 0.9rem;
