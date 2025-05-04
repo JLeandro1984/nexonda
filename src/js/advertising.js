@@ -1,4 +1,4 @@
-// advertising.js - Versão que mantém a estrutura HTML existente
+// advertising.js - Versão melhorada
 
 // Função para carregar propagandas premium
 function loadPremiumAds() {
@@ -26,7 +26,7 @@ function loadPremiumAds() {
   carousel.className = 'premium-carousel';
   
   // Cria os itens do carrossel
-  activeAds.forEach(ad => {
+  activeAds.forEach((ad, index) => {
     const adItem = document.createElement('div');
     adItem.className = 'premium-ad-item';
     
@@ -38,13 +38,7 @@ function loadPremiumAds() {
         const videoId = getYouTubeVideoId(ad.mediaUrl);
         mediaContent = `
           <div class="youtube-video-container" onclick="openYouTubePlayer('${ad.mediaUrl}')">
-            <iframe 
-              src="https://www.youtube.com/embed/${videoId}?rel=0&enablejsapi=1" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen
-              data-video-id="${videoId}"
-            ></iframe>
+            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">
             <div class="play-overlay">
               <i class="fas fa-play"></i>
             </div>
@@ -60,11 +54,15 @@ function loadPremiumAds() {
       }
     }
     
+    // Limita a descrição para evitar overflow
+    const shortDescription = ad.description.length > 150 ? 
+      ad.description.substring(0, 150) + '...' : ad.description;
+    
     adItem.innerHTML = `
       ${mediaContent}
       <div class="premium-ad-content">
         <h3>${ad.title}</h3>
-        <p>${ad.description}</p>
+        <p title="${ad.description}">${shortDescription}</p>
         <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank">Saiba mais</a>
       </div>
     `;
@@ -76,41 +74,92 @@ function loadPremiumAds() {
   const controls = document.createElement('div');
   controls.className = 'carousel-controls';
   controls.innerHTML = `
-    <button class="carousel-control prev" onclick="scrollCarousel(-1)">❮</button>
-    <button class="carousel-control next" onclick="scrollCarousel(1)">❯</button>
+    <button class="carousel-control prev" aria-label="Anterior" onclick="scrollCarousel(-300)">
+      <span aria-hidden="true">❮</span>
+    </button>
+    <button class="carousel-control next" aria-label="Próximo" onclick="scrollCarousel(300)">
+      <span aria-hidden="true">❯</span>
+    </button>
   `;
 
   adsContainer.appendChild(carousel);
   adsContainer.appendChild(controls);
 
-  // Configura os iframes do YouTube
-  setupYouTubeIframes();
+  // Adiciona indicadores de scroll
+  addCarouselIndicators(carousel, adsContainer);
+  
+  // Configura observador de scroll para atualizar indicadores
+  setupScrollObserver(carousel);
 }
 
-// Configura os iframes do YouTube para usar a API
-function setupYouTubeIframes() {
-  // Esta função será chamada quando a API do YouTube estiver pronta
-  window.onYouTubeIframeAPIReady = function() {
-    document.querySelectorAll('.youtube-video-container iframe').forEach(iframe => {
-      new YT.Player(iframe, {
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
+// Adiciona indicadores de scroll
+function addCarouselIndicators(carousel, container) {
+  const itemCount = carousel.children.length;
+  if (itemCount <= 1) return;
+  
+  const indicators = document.createElement('div');
+  indicators.className = 'carousel-indicators';
+  
+  for (let i = 0; i < itemCount; i++) {
+    const indicator = document.createElement('button');
+    indicator.className = 'carousel-indicator' + (i === 0 ? ' active' : '');
+    indicator.setAttribute('aria-label', `Ir para item ${i + 1}`);
+    indicator.onclick = () => {
+      carousel.scrollTo({
+        left: carousel.children[i].offsetLeft - 32,
+        behavior: 'smooth'
       });
-    });
-  };
-
-  function onPlayerReady(event) {
-    // Pode adicionar lógica adicional quando o player estiver pronto
+    };
+    indicators.appendChild(indicator);
   }
-
-  function onPlayerStateChange(event) {
-    // Pode adicionar lógica para tratar mudanças de estado do vídeo
-  }
+  
+  container.appendChild(indicators);
 }
 
-// Função para obter ID do vídeo do YouTube (reutilizada da youtube-api.js)
+// Configura observador de scroll
+function setupScrollObserver(carousel) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const index = Array.from(carousel.children).indexOf(entry.target);
+        updateActiveIndicator(index);
+      }
+    });
+  }, {
+    root: carousel,
+    threshold: 0.7
+  });
+
+  Array.from(carousel.children).forEach(item => {
+    observer.observe(item);
+  });
+}
+
+// Atualiza indicador ativo
+function updateActiveIndicator(index) {
+  const indicators = document.querySelectorAll('.carousel-indicator');
+  indicators.forEach((indicator, i) => {
+    indicator.classList.toggle('active', i === index);
+  });
+}
+
+// Função para rolar o carrossel
+window.scrollCarousel = function(scrollAmount) {
+  const carousel = document.querySelector('.premium-carousel');
+  if (!carousel) return;
+  
+  carousel.scrollBy({
+    left: scrollAmount,
+    behavior: 'smooth'
+  });
+};
+
+// Carrega as propagandas quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+  loadPremiumAds();
+});
+
+// Funções auxiliares permanecem as mesmas
 function getYouTubeVideoId(url) {
   try {
     const urlObj = new URL(url);
@@ -129,20 +178,3 @@ function getYouTubeVideoId(url) {
     return null;
   }
 }
-
-// Função para rolar o carrossel
-window.scrollCarousel = function(direction) {
-  const carousel = document.querySelector('.premium-carousel');
-  if (!carousel) return;
-  
-  const scrollAmount = 300;
-  carousel.scrollBy({
-    left: direction * scrollAmount,
-    behavior: 'smooth'
-  });
-};
-
-// Carrega as propagandas quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-  loadPremiumAds();
-});
