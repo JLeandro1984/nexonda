@@ -2,6 +2,7 @@
 
 // Função para carregar propagandas premium
 function loadPremiumAds() {
+  const sectionAds = document.querySelector('#premium-ads');
   const adsContainer = document.querySelector('.premium-ads-container');
   if (!adsContainer) return;
 
@@ -17,6 +18,7 @@ function loadPremiumAds() {
   });
 
   if (activeAds.length === 0) {
+    sectionAds.style.display = 'none';
     adsContainer.parentElement.style.display = 'none';
     return;
   }

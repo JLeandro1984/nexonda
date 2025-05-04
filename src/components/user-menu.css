@@ -1,0 +1,96 @@
+/* Estilo do menu do usuário */
+.user-menu {
+  position: relative;
+  display: inline-block;
+}
+
+/* Estilo do ícone do avatar do usuário */
+.user-avatar {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Ícone dentro do avatar */
+.avatar-icon {
+  width: 20px;
+  height: 20px;
+  fill: white;
+}
+
+/* Estilo do dropdown do menu */
+.user-dropdown {
+  display: none;
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 1000;
+  width: 180px; /* Largura do menu */
+}
+
+/* Mostra o dropdown quando a classe active é aplicada */
+.user-dropdown.active {
+  display: block;
+}
+
+/* Estilo do texto de saudação */
+.user-greeting {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Estilo do item do dropdown */
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--text-color);
+  font-size: 0.9rem;
+  transition: background-color var(--transition-speed) ease;
+  gap: 10px;
+}
+
+/* Efeito de hover nos itens */
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Estilo do botão de logout */
+.logout-btn {
+  background-color: transparent;
+  color: #e74c3c; /* Cor vermelha para o botão Sair */
+  border: none;
+}
+
+/* Efeito de hover no botão de logout */
+.logout-btn:hover {
+  background-color: #f9e6e6;
+}
+
+/* Estilo da linha divisória entre os itens */
+.dropdown-divider {
+  border-top: 1px solid #eee;
+  margin: 8px 0;
+}
+
+/* Estilo do perfil do usuário dentro do menu dropdown */
+.user-profile {
+  padding: 10px;
+}
+
+/* Ajustes no nome do usuário */
+.user-name-text {
+  font-weight: bold;
+}

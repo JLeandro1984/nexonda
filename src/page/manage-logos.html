@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/manage-logos.css" />
+    <script type="module" src="../components/user-menu.js"></script>
   </head>
   <body>
     <div class="container">
@@ -19,11 +20,18 @@
         </div>
 
         <div class="user-info">
-          <span>Usuário</span>
-          <a href="index.html" class="logout-btn">Sair</a>
+          <user-menu></user-menu>
+        </div>
 
-          <!-- Seletor de Idiomas -->
-          <div id="language-selector-container" class="language-selector">
+        <!-- <div class="user-info"> -->
+        <!-- <user-menu></user-menu> -->
+
+        <!-- Seletor de Idiomas -->
+        <!-- <div
+            id="language-selector-container"
+            class="language-selector"
+            style="display: none"
+          >
             <button id="language-button" class="language-button">
               <img
                 id="current-flag"
@@ -45,8 +53,8 @@
                 <span data-lang="language-spanish">Español</span>
               </div>
             </div>
-          </div>
-        </div>
+          </div> -->
+        <!-- </div> -->
       </header>
 
       <main class="content">

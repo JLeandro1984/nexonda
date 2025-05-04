@@ -50,7 +50,7 @@ nav {
 
 .nav-links a,
 .language-selector {
-  text-decoration: none;
+  text-decoration: none !important;
   color: #333;
   font-weight: 500;
 }
