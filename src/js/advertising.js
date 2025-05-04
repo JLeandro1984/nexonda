@@ -90,6 +90,9 @@ function loadPremiumAds() {
   
   // Configura observador de scroll para atualizar indicadores
   setupScrollObserver(carousel);
+
+  startAutoCarousel();
+  setupCarouselHover();
 }
 
 // Adiciona indicadores de scroll
@@ -176,5 +179,51 @@ function getYouTubeVideoId(url) {
     return null;
   } catch (e) {
     return null;
+  }
+}
+
+// Variável para controlar o intervalo
+let carouselInterval;
+
+function startAutoCarousel() {
+  const carousel = document.querySelector('.premium-carousel');
+  if (!carousel || carousel.children.length <= 1) return;
+
+  // Para qualquer intervalo existente antes de iniciar um novo
+  stopAutoCarousel();
+
+  // Configura o intervalo para passar os cards
+  carouselInterval = setInterval(() => {
+    const scrollAmount = carousel.offsetWidth;
+    const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+    
+    if (carousel.scrollLeft >= maxScroll - 10) {
+      // Volta para o início se chegou ao final
+      carousel.scrollTo({
+        left: 0,
+        behavior: 'smooth'
+      });
+    } else {
+      // Avança para o próximo card
+      carousel.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  }, 5000); // Muda a cada 5 segundos (ajuste conforme necessário)
+}
+
+function stopAutoCarousel() {
+  if (carouselInterval) {
+    clearInterval(carouselInterval);
+  }
+}
+
+// Pausa o carrossel quando o mouse está sobre ele
+function setupCarouselHover() {
+  const carousel = document.querySelector('.premium-carousel');
+  if (carousel) {
+    carousel.addEventListener('mouseenter', stopAutoCarousel);
+    carousel.addEventListener('mouseleave', startAutoCarousel);
   }
 }
