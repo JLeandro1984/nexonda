@@ -4,32 +4,43 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Galeria de Logos Corporativos</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/video-modal.css" />
     <link rel="stylesheet" href="../css/advertising.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-        <!-- CSS do Bootstrap 5 -->
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-      <!-- JS do Bootstrap 5 (com Popper incluído) -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- JS Bootstrap (com Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </head>
+
   <body>
     <header>
       <nav>
         <div class="logo">
-          <img  src="../images/brandConnect/logo_brandConnect.png" alt="BrandConnect">
+          <img
+            src="../images/brandConnect/logo_brandConnect.png"
+            alt="BrandConnect"
+          />
         </div>
 
         <div class="nav-links">
           <a href="#gallery" data-lang="gallery">Galeria</a>
           <a href="#about" data-lang="about">Sobre</a>
           <a href="#contact" data-lang="contact">Contato</a>
-          <a href="admin.html" id="admin-btn" class="admin-btn" data-lang="admin-area"
+          <a
+            href="admin.html"
+            id="admin-btn"
+            class="admin-btn"
+            data-lang="admin-area"
             >Área Administrativa</a
           >
 
@@ -62,8 +73,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Toggle Dark Mode -->
+        <div class="dark-mode-toggle">
+          <button id="dark-mode-btn" aria-label="Alternar modo escuro">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
       </nav>
     </header>
+
     <main>
       <section id="hero">
         <h2 data-lang="hero-title">Descubra as Marcas que Lideram o Mercado</h2>
@@ -134,23 +153,46 @@
       </section>
     </main>
 
-      <!-- Modal Vídeo -->      
-      <div id="youtube-overlay" class="d-none"></div>
-      <div id="youtube-modal" class="d-none">
-          <div id="youtube-player"></div>
-          <button class="close-btn" onclick="closeYouTubePlayer()">X</button>
-      </div>
-      
+    <!-- Modal Vídeo -->
+    <div id="youtube-overlay" class="d-none"></div>
+    <div id="youtube-modal" class="d-none">
+      <div id="youtube-player"></div>
+      <button
+        class="close-btn"
+        onclick="closeYouTubePlayer()"
+        aria-label="Fechar vídeo"
+      >
+        X
+      </button>
+    </div>
+
     <footer>
       <p data-lang="footer-text">
         &copy; 2025 BrandConnect. Todos os direitos reservados. BrandConnect -
         Conectando marcas ao mundo.
       </p>
     </footer>
-   
+
+    <!-- Botão do WhatsApp -->
+    <div
+      id="whatsapp-float"
+      class="whatsapp-float"
+      aria-label="Contato WhatsApp"
+    >
+      <a
+        href="https://wa.me/55SEUNUMERO"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="fab fa-whatsapp"></i>
+      </a>
+    </div>
+
+    <!-- Scripts -->
     <script type="module" src="../js/screen-brand.js"></script>
     <script type="module" src="../js/main.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="../js/youtube-api.js"></script>  
-    <script src="../js/advertising.js"></script>  
+    <script src="../js/youtube-api.js"></script>
+    <script src="../js/advertising.js"></script>
+  </body>
 </html>

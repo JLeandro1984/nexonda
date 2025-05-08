@@ -428,7 +428,7 @@ section {
   background-color: #656668;
   color: white;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .facebook-btn {
@@ -497,6 +497,37 @@ footer {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* WhatsApp Flutuante */
+.whatsapp-float {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  bottom: 40px;
+  right: 40px;
+  background-color: #25d366;
+  color: #fff;
+  border-radius: 50px;
+  text-align: center;
+  font-size: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+  background-color: #128c7e;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-float i {
+  margin-top: 5px;
+  color: #fff;
 }
 
 @media (max-width: 768px) {
@@ -593,4 +624,74 @@ footer {
     margin-top: 4px;
     justify-content: start;
   }
+
+  .whatsapp-float {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+    font-size: 25px;
+  }
+}
+
+/*Modo Dark*/
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+  margin-left: 20px;
+}
+
+#dark-mode-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#dark-mode-btn:hover {
+  transform: rotate(20deg);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  --primary-color: #1a1a2e;
+  --secondary-color: #4cc9f0;
+  --accent-color: #f72585;
+  --background-color: #121212;
+  --text-color: #e1e1e1;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+body.dark-mode #search,
+body.dark-mode .logo-item,
+body.dark-mode .modal-box,
+body.dark-mode .premium-ads-container,
+body.dark-mode #contact-form input,
+body.dark-mode #contact-form textarea {
+  background-color: #2d2d2d;
+  color: #e1e1e1;
+  border-color: #444;
+}
+
+body.dark-mode #contact-form input::placeholder,
+body.dark-mode #contact-form textarea::placeholder {
+  color: #aaa;
+}
+
+body.dark-mode .search-box input,
+body.dark-mode .category-filter select {
+  background-color: #2d2d2d;
+  color: #e1e1e1;
+  border-color: #444;
+}
+
+body.dark-mode .language-options {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+body.dark-mode .language-option:hover {
+  background-color: #3d3d3d;
 }

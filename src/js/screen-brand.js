@@ -275,6 +275,11 @@ function redirectToWhatsApp(clientWhatsapp) {
     window.open(url, '_blank');
 }
   
+// WhatsApp flutuante da BrandConnect
+const whatsappNumber = '5515996257159'; // Exemplo: 55 11 99999-9999
+const whatsappLink = document.querySelector('#whatsapp-float a');
+whatsappLink.href = `https://wa.me/${whatsappNumber}`;
+
 //document.addEventListener("DOMContentLoaded", () => {
 //   const colorThief = new ColorThief();
 //   const logoItems = document.querySelectorAll(".logo-item img");
