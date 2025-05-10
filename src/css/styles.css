@@ -788,6 +788,12 @@ body.dark-mode #premium-ads {
     background-size: 1em;
   }
 
+  #category-select {
+    width: 100%; /* Garante que ocupe 100% da largura disponível */
+    font-size: 1rem; /* Ajuste do tamanho da fonte */
+    padding: 0.8rem;
+  }
+
   #logo-container .logo-item {
     max-width: 80%;
     aspect-ratio: 16 / 9;
