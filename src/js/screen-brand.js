@@ -292,6 +292,16 @@ const locationInput = document.getElementById('location-input');
 
 checkbox.addEventListener('change', () => {
   if (checkbox.checked) {
+    const cachedLocation = localStorage.getItem('userLocation');
+
+    if (cachedLocation) {
+      const cidadeUF = JSON.parse(cachedLocation);
+      locationInput.value = cidadeUF;
+      citySpan.textContent = `Cidade: ${cidadeUF}`;
+      updateLogoDisplay();
+      return;
+    }
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         position => {
@@ -307,16 +317,17 @@ checkbox.addEventListener('change', () => {
           .then(data => {
             const addr = data.address;
             const cidade = addr.city || addr.town || addr.village || addr.county || '';
-            //const uf = addr.state_code || addr.state || '';
-            
             const estadoCompleto = addr.state || '';
             const uf = ufs.find(uf => uf.nome.toLowerCase() === estadoCompleto.toLowerCase())?.sigla || '';
-              
+
             const cidadeUF = `${cidade}${uf ? ' - ' + uf : ''}`;
-            locationInput.value = cidadeUF; // preenche o input
+            locationInput.value = cidadeUF;
             citySpan.textContent = `Cidade: ${cidadeUF}`;
 
-            updateLogoDisplay(); // chama o filtro existente
+            // Salva no localStorage
+            localStorage.setItem('userLocation', JSON.stringify(cidadeUF));
+
+            updateLogoDisplay();
           })
           .catch(() => {
             citySpan.textContent = "Cidade: Erro ao localizar";
@@ -335,9 +346,11 @@ checkbox.addEventListener('change', () => {
   } else {
     citySpan.textContent = "Localização não informada";
     locationInput.value = '';
-    updateLogoDisplay(); // limpa o filtro
+    localStorage.removeItem('userLocation'); // Limpa o cache
+    updateLogoDisplay();
   }
 });
+
 
 //Autocomplete - pesquisa por nome de cidade e/ou UF
 document.getElementById('location-input').addEventListener('input', updateLogoDisplay);
