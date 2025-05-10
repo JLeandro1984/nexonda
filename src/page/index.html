@@ -72,13 +72,12 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Toggle Dark Mode -->
-        <div class="dark-mode-toggle">
-          <button id="dark-mode-btn" aria-label="Alternar modo escuro">
-            <i class="fas fa-moon"></i>
-          </button>
+          <!-- Toggle Dark Mode -->
+          <div class="dark-mode-toggle">
+            <button id="dark-mode-btn" aria-label="Alternar modo escuro">
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
         </div>
       </nav>
     </header>
@@ -119,6 +118,32 @@
                 Todas as Categorias
               </option>
             </select>
+          </div>
+
+          <!-- Filtro por cidade/UF -->
+          <div class="search-box">
+            <input
+              type="text"
+              id="location-input"
+              placeholder="Buscar por cidade ou UF..."
+              autocomplete="off"
+            />
+            <i class="fas fa-map-marker-alt"></i>
+            <span id="clear-location" class="clear-icon" title="Limpar"
+              >&times;</span
+            >
+            <div id="suggestions-list" class="suggestions-list"></div>
+          </div>
+
+          <!-- Checkbox localização automática -->
+          <div class="location-toggle">
+            <label>
+              <input type="checkbox" id="use-location" />
+              Empresas da minha cidade
+            </label>
+            <span id="detected-city" class="city-info"
+              >Localização não informada</span
+            >
           </div>
         </div>
       </section>

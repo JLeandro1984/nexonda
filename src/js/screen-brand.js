@@ -1,5 +1,6 @@
  import { categories } from './categories.js';
-
+import { ufs } from './ufs.js';  
+ 
 const STORAGE_KEY = 'logoGalleryData';
 const categorySelect = document.getElementById("category-select");
 
@@ -196,16 +197,33 @@ function populateFilterCategories() {
 
 // Atualiza os logos com base no filtro
 function updateLogoDisplay() {
-    const searchTerm = document.getElementById('search-input').value;
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const locationTerm = document.getElementById('location-input')?.value.toLowerCase() || '';
     const selectedCategory = categorySelect.value;
     const logos = loadLogosFromStorage();
 
     const filteredLogos = logos.filter(logo => {
-        if (!contratoAtivo(logo)) return;
+        if (!contratoAtivo(logo)) return false;
 
-        const matchesSearch = logo.clientName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = logo.clientName.toLowerCase().includes(searchTerm);
+
+            // Separar cidade e UF (suporta "cidade - uf", "cidade-uf", "cidade uf" ou apenas "cidade")
+            let [parteUm, parteDois] = locationTerm
+            .split(/[-\s]{1,}/) // separa por hífen ou espaço(s)
+            .map(s => s.trim().toLowerCase());
+       
+            // Se ambos cidade e UF forem fornecidos, deve fazer a verificação exata
+            const matchesLocation = !locationTerm || (
+                (parteUm && parteDois) 
+                ? (logo.clientCity?.toLowerCase().includes(parteUm) && logo.clientUf?.toLowerCase() === parteDois) 
+                : (parteUm && logo.clientCity?.toLowerCase().includes(parteUm)) || 
+                    (parteUm && logo.clientUf?.toLowerCase() === parteUm)
+            );
+
+
         const matchesCategory = !selectedCategory || logo.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+
+        return matchesSearch && matchesLocation && matchesCategory;
     });
 
     const container = document.getElementById('logo-container');
@@ -225,6 +243,7 @@ function updateLogoDisplay() {
         });
     }
 }
+
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
@@ -259,26 +278,131 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function redirectToWhatsApp(clientWhatsapp) {
-    const rawNumber = clientWhatsapp
-    
-    // Remove caracteres não numéricos
-    const phoneNumber = rawNumber.replace(/\D/g, '');
-    
-    // Mensagem opcional
-    const message = encodeURIComponent("Olá, gostaria de entrar em contato!");
-    
-    // Monta a URL do WhatsApp
-    const url = `https://wa.me/55${phoneNumber}?text=${message}`;
-    
-    // Abre o link em nova aba
-    window.open(url, '_blank');
-}
-  
+ 
 // WhatsApp flutuante da BrandConnect
 const whatsappNumber = '5515996257159'; // Exemplo: 55 11 99999-9999
 const whatsappLink = document.querySelector('#whatsapp-float a');
 whatsappLink.href = `https://wa.me/${whatsappNumber}`;
+
+
+//Pesquisa ao selecionar minha localização
+const checkbox = document.getElementById('use-location');
+const citySpan = document.getElementById('detected-city');
+const locationInput = document.getElementById('location-input');
+
+checkbox.addEventListener('change', () => {
+  if (checkbox.checked) {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+            headers: {
+              'User-Agent': 'BrandConnect/1.0 (contato@seudominio.com.br)',
+              'Referer': location.origin
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            const addr = data.address;
+            const cidade = addr.city || addr.town || addr.village || addr.county || '';
+            //const uf = addr.state_code || addr.state || '';
+            
+            const estadoCompleto = addr.state || '';
+            const uf = ufs.find(uf => uf.nome.toLowerCase() === estadoCompleto.toLowerCase())?.sigla || '';
+              
+            const cidadeUF = `${cidade}${uf ? ' - ' + uf : ''}`;
+            locationInput.value = cidadeUF; // preenche o input
+            citySpan.textContent = `Cidade: ${cidadeUF}`;
+
+            updateLogoDisplay(); // chama o filtro existente
+          })
+          .catch(() => {
+            citySpan.textContent = "Cidade: Erro ao localizar";
+            checkbox.checked = false;
+          });
+        },
+        () => {
+          citySpan.textContent = "Cidade: Permissão negada";
+          checkbox.checked = false;
+        }
+      );
+    } else {
+      alert("Geolocalização não suportada.");
+      checkbox.checked = false;
+    }
+  } else {
+    citySpan.textContent = "Localização não informada";
+    locationInput.value = '';
+    updateLogoDisplay(); // limpa o filtro
+  }
+});
+
+//Autocomplete - pesquisa por nome de cidade e/ou UF
+document.getElementById('location-input').addEventListener('input', updateLogoDisplay);
+
+function getUniqueCitiesFromLogos() {
+    const logos = loadLogosFromStorage();
+    const citySet = new Set();
+  
+    logos.forEach(logo => {
+      if (logo.clientCity) {
+        citySet.add(logo.clientCity.trim());
+      }
+    });
+  
+    return Array.from(citySet).sort();
+}
+  
+const inputElement = document.getElementById("location-input");
+const suggestionsList = document.getElementById("suggestions-list");
+
+inputElement.addEventListener("input", function () {
+  const searchTerm = this.value.toLowerCase();
+  suggestionsList.innerHTML = "";
+
+  const cidades = getUniqueCitiesFromLogos();
+  if (searchTerm.length > 0) {
+    const filteredCities = cidades.filter(city =>
+      city.toLowerCase().includes(searchTerm)
+    );
+
+    filteredCities.forEach(city => {
+      const suggestionItem = document.createElement("div");
+      suggestionItem.classList.add("suggestion-item");
+      suggestionItem.textContent = city;
+
+      suggestionItem.addEventListener("click", function () {
+        inputElement.value = city;
+        suggestionsList.innerHTML = "";
+        updateLogoDisplay(); // Filtrar com base na cidade escolhida
+      });
+
+      suggestionsList.appendChild(suggestionItem);
+    });
+  }
+});
+
+document.addEventListener("click", function (event) {
+    if (!inputElement.contains(event.target) && !suggestionsList.contains(event.target)) {
+      suggestionsList.innerHTML = "";
+    }
+});
+  
+//Limpar input Cidade e/ou UF
+const clearIcon = document.getElementById('clear-location');
+locationInput.addEventListener('input', () => {
+  clearIcon.style.display = locationInput.value ? 'block' : 'none';
+});
+
+clearIcon.addEventListener('click', () => {
+  locationInput.value = '';
+  clearIcon.style.display = 'none';
+  document.getElementById('suggestions-list').innerHTML = '';
+  updateLogoDisplay();
+});
+
 
 //document.addEventListener("DOMContentLoaded", () => {
 //   const colorThief = new ColorThief();
