@@ -253,10 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', updateLogoDisplay);
     categorySelect.addEventListener('change', updateLogoDisplay);
-    debugger
-    
-    //Visibilidade botão Admin
-    
+        
+    //Visibilidade botão Admin    
     const now = new Date();
     const d = now.getDate();       
     const m = now.getMonth() + 1;       
@@ -417,6 +415,108 @@ clearIcon.addEventListener('click', () => {
 });
 
 
+//Formulário preenchido pelo cliente
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('contact-form');
+    const inputs = form.querySelectorAll('input, textarea');
+    const STORAGE_KEY = 'contactFormData';           // Rascunho temporário
+    const STORAGE_HISTORY_KEY = 'contactFormHistory'; // Histórico de contatos enviados
+    const alertBox = createAlertBox();               // Alerta visual
+
+    // Carrega o rascunho salvo
+    function loadFormData() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            const formData = JSON.parse(savedData);
+            inputs.forEach(input => {
+                const fieldName = input.getAttribute('placeholder') || input.name;
+                if (formData[fieldName]) {
+                    input.value = formData[fieldName];
+                }
+            });
+        }
+    }
+
+    // Salva o rascunho enquanto digita
+    function saveFormData() {
+        const formData = {};
+        inputs.forEach(input => {
+            const fieldName = input.getAttribute('placeholder') || input.name;
+            formData[fieldName] = input.value;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    }
+
+    // Salva o envio no histórico com Data de Cadastro
+    function saveToHistory(formData) {
+        const history = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY)) || [];
+        formData['Data de Cadastro'] = new Date().toLocaleString();
+        history.unshift(formData);
+        localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
+    }
+
+    // Limpa o formulário e rascunho
+    function clearFormData() {
+        localStorage.removeItem(STORAGE_KEY);
+        inputs.forEach(input => {
+            input.value = '';
+        });
+    }
+
+    // Mostra uma mensagem de alerta
+    function showAlert(message, title = "Mensagem", type = "info") {
+        alertBox.textContent = message;
+        alertBox.className = `alert-box ${type}`;
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.classList.add('fade-out');
+            setTimeout(() => document.body.removeChild(alertBox), 500);
+        }, 3000);
+    }
+
+    // Cria o elemento de alerta
+    function createAlertBox() {
+        const div = document.createElement('div');
+        div.id = 'form-alert';
+        div.classList.add('alert-box');
+        return div;
+    }
+
+    // Envio do formulário
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = {};
+        inputs.forEach(input => {
+            const fieldName = input.getAttribute('placeholder') || input.name;
+            formData[fieldName] = input.value.trim();
+        });
+
+        // Verificação simples dos campos obrigatórios
+        if (!formData.Nome || !formData.Email || !formData.Mensagem) {
+            showAlert("Por favor, preencha todos os campos.", "Erro", "error");
+            return;
+        }
+
+        // Salva no histórico com data
+        saveToHistory(formData);
+
+        // Alerta de sucesso
+        showAlert("Mensagem enviada com sucesso!", "Sucesso", "success");
+
+        // Limpa o formulário
+        clearFormData();
+    });
+
+    // Salva rascunho em tempo real
+    inputs.forEach(input => {
+        input.addEventListener('input', saveFormData);
+        input.addEventListener('change', saveFormData);
+    });
+
+    // Carrega o rascunho ao iniciar
+    loadFormData();
+});
 //document.addEventListener("DOMContentLoaded", () => {
 //   const colorThief = new ColorThief();
 //   const logoItems = document.querySelectorAll(".logo-item img");

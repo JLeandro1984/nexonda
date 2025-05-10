@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const client = logos.find(logo => logo.clientCNPJ === clientCNPJ);
       
       if (!client) {
-          showAlert('Cliente não encontrado', 'Erro');
+          showAlert('Cliente não encontrado', 'Erro','error');
           return null;
       }
       
@@ -443,7 +443,7 @@ function getAdStatusInfo(ad, today) {
       const adIndex = ads.findIndex(ad => ad.id === adId);
       
       if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro');
+          showAlert('Propaganda não encontrada', 'Erro','error');
           return;
       }
       
@@ -475,7 +475,7 @@ function getAdStatusInfo(ad, today) {
       const adIndex = ads.findIndex(ad => ad.id === adId);
       
       if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro');
+          showAlert('Propaganda não encontrada', 'Erro','error');
           return;
       }
       
@@ -484,7 +484,7 @@ function getAdStatusInfo(ad, today) {
       
       showAlert(
           `Propaganda ${ads[adIndex].isActive ? 'ativada' : 'pausada'} com sucesso`,
-          'Status alterado'
+          'Status alterado','success'
       );
       
       renderAdsList();
@@ -496,7 +496,7 @@ function getAdStatusInfo(ad, today) {
       const adIndex = ads.findIndex(ad => ad.id === adId);
       
       if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro');
+          showAlert('Propaganda não encontrada', 'Erro','error');
           return;
       }
       
@@ -516,7 +516,7 @@ function getAdStatusInfo(ad, today) {
       document.getElementById('confirm-delete').onclick = function() {
           ads.splice(adIndex, 1);
           localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(ads));
-          showAlert('Propaganda excluída com sucesso', 'Sucesso');
+          showAlert('Propaganda excluída com sucesso', 'Sucesso', 'success');
           modal.classList.add('hidden');
           renderAdsList();
       };
@@ -526,22 +526,6 @@ function getAdStatusInfo(ad, today) {
       };
   }
 
-  // Função para mostrar alertas
-  function showAlert(message, title = 'Atenção') {
-      const alertBox = document.getElementById('custom-alert');
-      const alertTitle = document.getElementById('alert-title');
-      const alertMessage = document.getElementById('alert-message');
-      
-      if (!alertBox || !alertTitle || !alertMessage) return;
-      
-      alertTitle.textContent = title;
-      alertMessage.innerHTML = message;
-      alertBox.classList.remove('hidden');
-      
-      document.getElementById('close-alert-btn').onclick = function() {
-          alertBox.classList.add('hidden');
-      };
-  }
 
   // Função para validar URL
   function isValidUrl(url) {

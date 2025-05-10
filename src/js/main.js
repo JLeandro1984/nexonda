@@ -1,4 +1,5 @@
 import i18n from './lang.js';
+import { showAlert } from '../components/alert.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -47,15 +48,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-// Torna showAlert acessível em todo o escopo do script
-window.showAlert = function(message) {
-  const modal = document.getElementById("custom-alert");
-  const messageBox = document.getElementById("alert-message");
-  messageBox.textContent = message;
-  modal.classList.remove("hidden");
+// // Torna showAlert acessível em todo o escopo do script
+// window.showAlert = function(message) {
+//   const modal = document.getElementById("custom-alert");
+//   const messageBox = document.getElementById("alert-message");
+//   messageBox.textContent = message;
+//   modal.classList.remove("hidden");
 
-  document.getElementById("close-alert-btn").onclick = () => {
-    modal.classList.add("hidden");
-  };
-};
+//   document.getElementById("close-alert-btn").onclick = () => {
+//     modal.classList.add("hidden");
+//   };
+// };
 

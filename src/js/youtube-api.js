@@ -3,7 +3,7 @@ let lastVideoUrl = ''; // Para armazenar o último vídeo
 
 // Função chamada pela API do YouTube quando a biblioteca é carregada
 function onYouTubeIframeAPIReady() {
-    console.log('YouTube API carregada!');
+    //console.log('YouTube API carregada!');
 }
 
 // Função para abrir o player
@@ -22,7 +22,7 @@ function openYouTubePlayer(videoUrl) {
 
   // Vamos forçar a exibição do botão de fechar enquanto o player carrega
   document.querySelector('.close-btn').style.display = 'block';
-debugger
+
   // Se o ytPlayer foi destruído ou não existe, cria novamente
   if (!ytPlayer) {
       ytPlayer = new YT.Player(modalPlayer, {
@@ -38,7 +38,7 @@ debugger
           },
           events: {
               onReady: () => {
-                  console.log('Player do YouTube pronto!');
+                  //console.log('Player do YouTube pronto!');
                   ytPlayer.playVideo();
               },
               onError: (error) => {
