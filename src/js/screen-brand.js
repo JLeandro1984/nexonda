@@ -1,13 +1,36 @@
- import { categories } from './categories.js';
+import { firestore, serverTimestamp} from '../js/firebase-config.js';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+import { categories } from './categories.js';
 import { ufs } from './ufs.js';  
  
-const STORAGE_KEY = 'logoGalleryData';
+// Removed STORAGE_KEY since we're not using localStorage anymore
 const categorySelect = document.getElementById("category-select");
 
-// Carrega logos do localStorage
-function loadLogosFromStorage() {
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    return storedData ? JSON.parse(storedData) : [];
+// Carrega logos do Firebase Firestore
+async function loadLogosFromStorage() {
+    try {
+        const logosCollection = collection(firestore, 'logos');
+        const querySnapshot = await getDocs(logosCollection);
+        
+        const logos = [];
+        querySnapshot.forEach((doc) => {
+            logos.push({ id: doc.id, ...doc.data() });
+        });
+        
+        return logos;
+    } catch (error) {
+        console.error("Error loading logos from Firestore:", error);
+        return [];
+    }
 }
 
 function createLogoElement(logo) {
@@ -108,10 +131,10 @@ function createLogoElement(logo) {
 }
 
 // Renderiza todos os logos
-function loadLogos() {
+async function loadLogos() {
     const container = document.getElementById('logo-container');
     container.innerHTML = '';
-    const logos = loadLogosFromStorage();
+    const logos = await loadLogosFromStorage();
 
     //Dar preferencia na ordenação para premio-plus, premium e basico
     if (Array.isArray(logos)) {
@@ -171,6 +194,7 @@ function contratoAtivo(logo) {
 
     return true
 }
+
 // Popula categorias no select de filtro
 function populateFilterCategories() {
     categories.forEach(group => {
@@ -196,11 +220,11 @@ function populateFilterCategories() {
 }
 
 // Atualiza os logos com base no filtro
-function updateLogoDisplay() {
+async function updateLogoDisplay() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const locationTerm = document.getElementById('location-input')?.value.toLowerCase() || '';
     const selectedCategory = categorySelect.value;
-    const logos = loadLogosFromStorage();
+    const logos = await loadLogosFromStorage();
 
     const filteredLogos = logos.filter(logo => {
         if (!contratoAtivo(logo)) return false;
@@ -246,8 +270,8 @@ function updateLogoDisplay() {
 
 
 // Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-    loadLogos();
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadLogos();
     populateFilterCategories();
 
     const searchInput = document.getElementById('search-input');
@@ -353,8 +377,8 @@ checkbox.addEventListener('change', () => {
 //Autocomplete - pesquisa por nome de cidade e/ou UF
 document.getElementById('location-input').addEventListener('input', updateLogoDisplay);
 
-function getUniqueCitiesFromLogos() {
-    const logos = loadLogosFromStorage();
+async function getUniqueCitiesFromLogos() {
+    const logos = await loadLogosFromStorage();
     const citySet = new Set();
   
     logos.forEach(logo => {
@@ -369,11 +393,11 @@ function getUniqueCitiesFromLogos() {
 const inputElement = document.getElementById("location-input");
 const suggestionsList = document.getElementById("suggestions-list");
 
-inputElement.addEventListener("input", function () {
+inputElement.addEventListener("input", async function () {
   const searchTerm = this.value.toLowerCase();
   suggestionsList.innerHTML = "";
 
-  const cidades = getUniqueCitiesFromLogos();
+  const cidades = await getUniqueCitiesFromLogos();
   if (searchTerm.length > 0) {
     const filteredCities = cidades.filter(city =>
       city.toLowerCase().includes(searchTerm)
@@ -414,129 +438,124 @@ clearIcon.addEventListener('click', () => {
   updateLogoDisplay();
 });
 
-
-//Formulário preenchido pelo cliente
+// Formulário preenchido pelo cliente
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('contact-form');
-    const inputs = form.querySelectorAll('input, textarea');
-    const STORAGE_KEY = 'contactFormData';           // Rascunho temporário
-    const STORAGE_HISTORY_KEY = 'contactFormHistory'; // Histórico de contatos enviados
-    const alertBox = createAlertBox();               // Alerta visual
+  const form = document.getElementById('contact-form');
+  const inputs = form.querySelectorAll('input, textarea');
+  const STORAGE_KEY = 'contactFormData';           // Rascunho temporário
+  const alertBox = createAlertBox();               // Alerta visual
 
-    // Carrega o rascunho salvo
-    function loadFormData() {
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        if (savedData) {
-            const formData = JSON.parse(savedData);
-            inputs.forEach(input => {
-                const fieldName = input.getAttribute('placeholder') || input.name;
-                if (formData[fieldName]) {
-                    input.value = formData[fieldName];
-                }
-            });
-        }
-    }
+  // Carrega o rascunho salvo localmente
+  function loadFormData() {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+          const formData = JSON.parse(savedData);
+          inputs.forEach(input => {
+              const fieldName = input.getAttribute('placeholder') || input.name;
+              if (formData[fieldName]) {
+                  input.value = formData[fieldName];
+              }
+          });
+      }
+  }
 
-    // Salva o rascunho enquanto digita
-    function saveFormData() {
-        const formData = {};
-        inputs.forEach(input => {
-            const fieldName = input.getAttribute('placeholder') || input.name;
-            formData[fieldName] = input.value;
-        });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    }
+  // Salva o rascunho localmente enquanto digita
+  function saveFormData() {
+      const formData = {};
+      inputs.forEach(input => {
+          const fieldName = input.getAttribute('placeholder') || input.name;
+          formData[fieldName] = input.value;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  }
 
-    // Salva o envio no histórico com Data de Cadastro
-    function saveToHistory(formData) {
-        const history = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY)) || [];
-        formData['Data de Cadastro'] = new Date().toLocaleString();
-        history.unshift(formData);
-        localStorage.setItem(STORAGE_HISTORY_KEY, JSON.stringify(history));
-    }
+  // Mostra uma mensagem de alerta
+  function showAlert(message, title = "Mensagem", type = "info") {
+      alertBox.textContent = message;
+      alertBox.className = `alert-box ${type}`;
+      document.body.appendChild(alertBox);
+      setTimeout(() => {
+          alertBox.classList.add('fade-out');
+          setTimeout(() => document.body.removeChild(alertBox), 500);
+      }, 3000);
+  }
 
-    // Limpa o formulário e rascunho
-    function clearFormData() {
-        localStorage.removeItem(STORAGE_KEY);
-        inputs.forEach(input => {
-            input.value = '';
-        });
-    }
+  // Cria o elemento de alerta
+  function createAlertBox() {
+      const div = document.createElement('div');
+      div.id = 'form-alert';
+      div.classList.add('alert-box');
+      return div;
+  }
 
-    // Mostra uma mensagem de alerta
-    function showAlert(message, title = "Mensagem", type = "info") {
-        alertBox.textContent = message;
-        alertBox.className = `alert-box ${type}`;
-        document.body.appendChild(alertBox);
-        setTimeout(() => {
-            alertBox.classList.add('fade-out');
-            setTimeout(() => document.body.removeChild(alertBox), 500);
-        }, 3000);
-    }
+  // Limpa o formulário e rascunho local
+  function clearFormData() {
+      localStorage.removeItem(STORAGE_KEY);
+      inputs.forEach(input => {
+          input.value = '';
+      });
+  }
 
-    // Cria o elemento de alerta
-    function createAlertBox() {
-        const div = document.createElement('div');
-        div.id = 'form-alert';
-        div.classList.add('alert-box');
-        return div;
-    }
+  // Salva os dados no Firebase Firestore
+  async function saveToFirebase(formData) {
+      try {
+          // Adiciona timestamp do servidor
+          formData.createdAt = serverTimestamp();
+          
+          // Referência para a coleção de contatos
+          const contactsRef = collection(firestore, 'contacts');
+          
+          // Adiciona o documento
+          await addDoc(contactsRef, formData);
+          
+          return true;
+      } catch (error) {
+          console.error("Erro ao salvar no Firebase:", error);
+          return false;
+      }
+  }
 
-    // Envio do formulário
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+  // Envio do formulário
+  form.addEventListener('submit', async function (e) {
+      e.preventDefault();
 
-        const formData = {};
-        inputs.forEach(input => {
-            const fieldName = input.getAttribute('placeholder') || input.name;
-            formData[fieldName] = input.value.trim();
-        });
+      const formData = {};
+      inputs.forEach(input => {
+          const fieldName = input.getAttribute('placeholder') || input.name;
+          formData[fieldName] = input.value.trim();
+      });
 
-        // Verificação simples dos campos obrigatórios
-        if (!formData.Nome || !formData.Email || !formData.Mensagem) {
-            showAlert("Por favor, preencha todos os campos.", "Erro", "error");
-            return;
-        }
+      // Verificação simples dos campos obrigatórios
+      if (!formData.Nome || !formData.Email || !formData.Mensagem) {
+          showAlert("Por favor, preencha todos os campos.", "Erro", "error");
+          return;
+      }
 
-        // Salva no histórico com data
-        saveToHistory(formData);
+      try {
+          // Salva no Firebase
+          const saved = await saveToFirebase(formData);
+          
+          if (saved) {
+              // Alerta de sucesso
+              showAlert("Mensagem enviada com sucesso!", "Sucesso", "success");
+              
+              // Limpa o formulário
+              clearFormData();
+          } else {
+              showAlert("Ocorreu um erro ao enviar. Tente novamente.", "Erro", "error");
+          }
+      } catch (error) {
+          console.error("Erro no envio:", error);
+          showAlert("Ocorreu um erro inesperado. Tente novamente.", "Erro", "error");
+      }
+  });
 
-        // Alerta de sucesso
-        showAlert("Mensagem enviada com sucesso!", "Sucesso", "success");
+  // Salva rascunho em tempo real
+  inputs.forEach(input => {
+      input.addEventListener('input', saveFormData);
+      input.addEventListener('change', saveFormData);
+  });
 
-        // Limpa o formulário
-        clearFormData();
-    });
-
-    // Salva rascunho em tempo real
-    inputs.forEach(input => {
-        input.addEventListener('input', saveFormData);
-        input.addEventListener('change', saveFormData);
-    });
-
-    // Carrega o rascunho ao iniciar
-    loadFormData();
+  // Carrega o rascunho ao iniciar
+  loadFormData();
 });
-//document.addEventListener("DOMContentLoaded", () => {
-//   const colorThief = new ColorThief();
-//   const logoItems = document.querySelectorAll(".logo-item img");
-
-//   logoItems.forEach((img) => {
-//     // Aguarda a imagem carregar para extrair a cor
-//     if (img.complete) {
-//       applyColor(img);
-//     } else {
-//       img.addEventListener("load", () => applyColor(img));
-//     }
- // });
-
-  //function applyColor(img) {
-    // try {
-    //   const dominantColor = colorThief.getColor(img);
-    //   const rgb = `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`;
-    //   img.parentElement.style.backgroundColor = rgb;
-    // } catch (e) {
-    //   console.warn("Não foi possível obter a cor do logo:", e);
-    // }
- // }
-//});

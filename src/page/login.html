@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Logo Gallery Admin</title>
+    <title>Login - BrandConnect Admin</title>
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/login.css" />
   </head>
@@ -11,31 +11,28 @@
     <div class="login-container">
       <div class="login-box">
         <div class="login-header">
-          <h1>Logo Gallery</h1>
+          <h1>BrandConnect</h1>
           <p>Área Administrativa</p>
         </div>
 
-        <form id="login-form">
-          <div class="form-group">
-            <label for="username">Usuário:</label>
-            <input type="text" id="username" required />
-          </div>
+        <div class="form-actions">
+          <button id="google-login-btn" class="login-btn google-btn">
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              alt="Google logo"
+              style="width: 20px; vertical-align: middle; margin-right: 8px"
+            />
+            Entrar com Google
+          </button>
+        </div>
 
-          <div class="form-group">
-            <label for="password">Senha:</label>
-            <input type="password" id="password" required />
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="login-btn">Entrar</button>
-          </div>
-
-          <div class="form-footer">
-            <a href="index.html">Voltar para o site</a>
-          </div>
-        </form>
+        <div class="form-footer">
+          <a href="index.html">Voltar para o site</a>
+        </div>
       </div>
     </div>
-    <script src="../js/login.js"></script>
+
+    <!-- Firebase SDKs -->
+    <script type="module" src="../js/login.js"></script>
   </body>
 </html>

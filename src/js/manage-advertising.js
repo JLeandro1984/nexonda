@@ -1,20 +1,33 @@
-// admin-ads.js - Sistema completo de gerenciamento de propagandas premium
+import { firestore } from './firebase-config.js';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js ';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Constantes
-  const STORAGE_KEY = 'logoGalleryData';
-  const ADS_STORAGE_KEY = 'premiumAdsData';
-  
-  // Elementos do DOM
+  const ADS_STORAGE_KEY = 'premiumAdsData'; // ainda usamos localStorage para fallback temporariamente
+  const CLOUD_NAME = "dmq4e5bm5";
+  const UPLOAD_PRESET = "brandConnectPresetName";
+  let editingIndex = null;
+  let adsList = [];
+
+  // Elementos DOM
   const adForm = document.getElementById('ad-form');
   const adSearchInput = document.getElementById('ad-search-input');
   const adFilterStatus = document.getElementById('ad-filter-status');
   const clientSelect = document.getElementById('ad-client');
 
-  // Inicialização
-  initStorage();
-  loadPremiumClients();
+  // Carrega dados inicialmente
+  await loadPremiumClients();
   setupDateInputs();
+  adsList = await loadPremiumAdsFromFirestore();
   renderAdsList();
 
   // Event Listeners
@@ -22,546 +35,333 @@ document.addEventListener('DOMContentLoaded', () => {
   if (adSearchInput) adSearchInput.addEventListener('input', renderAdsList);
   if (adFilterStatus) adFilterStatus.addEventListener('change', renderAdsList);
 
-  // Função para inicializar o storage se necessário
-  function initStorage() {
-      if (!localStorage.getItem(ADS_STORAGE_KEY)) {
-          localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify([]));
-      }
+  // --- Funções Principais ---
+
+  async function loadPremiumClients() {
+    const logos = await loadClientsFromFirestore();
+    populateClientSelect(logos);
   }
 
-  // Função para carregar clientes 'premium-plus'
-  function loadPremiumClients() {
-      if (!clientSelect) {
-          console.error('Elemento ad-client não encontrado');
-          return;
-      }
-      debugger
-      clientSelect.innerHTML = '<option value="">Selecione um cliente premium plus</option>';
-      
-      const logos = loadLogosFromStorage();
-      if (!logos || !Array.isArray(logos)) {
-          console.error('Dados de logos inválidos');
-          return;
-      }
-      
-      const premiumClients = logos.filter(logo => {
-          const isPremium = logo.planType && String(logo.planType).toLowerCase() === 'premium-plus';
-          const isActive = isContractActive(logo);
-          return isPremium && isActive;
+  async function loadClientsFromFirestore() {
+    try {
+      const logosRef = collection(firestore, 'logos');
+      const q = query(logosRef, where('planType', '==', 'premium-plus'));
+      const snapshot = await getDocs(q);
+      const clients = [];
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        if (isContractActive(data)) {
+          clients.push({
+            id: doc.id,
+            ...data
+          });
+        }
       });
-      
-      if (premiumClients.length === 0) {
-          const option = document.createElement('option');
-          option.value = '';
-          option.textContent = 'Nenhum cliente premium disponível';
-          clientSelect.appendChild(option);
-          return;
-      }
-      
-      premiumClients.sort((a, b) => a.clientName.localeCompare(b.clientName));
-      
-      premiumClients.forEach(client => {
-          const option = document.createElement('option');
-          option.value = client.clientCNPJ;
-          
-          let displayText = client.clientName;
-          if (client.clientFantasyName) {
-              displayText = `${client.clientFantasyName} (${client.clientName})`;
-          }
-          
-          if (client.clientCity && client.clientUf) {
-              displayText += ` - ${client.clientCity}/${client.clientUf}`;
-          }
-          
-          option.textContent = displayText;
-          option.title = `CNPJ: ${formatCNPJ(client.clientCNPJ)} | Plano: ${client.planType}`;
-          clientSelect.appendChild(option);
-      });
+
+      return clients;
+    } catch (error) {
+      console.error("Erro ao carregar clientes do Firestore:", error);
+      return [];
+    }
   }
 
-  // Função para carregar logos do localStorage
-  function loadLogosFromStorage() {
-      const storedData = localStorage.getItem(STORAGE_KEY);
-      return storedData ? JSON.parse(storedData) : [];
+  function populateClientSelect(clients) {
+    if (!clientSelect) return;
+
+    clientSelect.innerHTML = '<option value="">Selecione um cliente premium plus</option>';
+
+    const activeClients = clients.filter(client => isContractActive(client));
+    activeClients.sort((a, b) => a.clientName.localeCompare(b.clientName));
+
+    activeClients.forEach(client => {
+      const option = document.createElement('option');
+      option.value = client.clientCNPJ;
+      option.textContent = `${client.clientName} (${client.clientFantasyName || ''})`;
+      option.title = `CNPJ: ${formatCNPJ(client.clientCNPJ)} | Plano: ${client.planType}`;
+      clientSelect.appendChild(option);
+    });
   }
 
-  // Função para verificar contrato ativo
-  function isContractActive(logo) {
-      if (logo.contractActive === false) return false;
-      if (!logo.endDate) return true;
-      
+  async function handleAdSubmit(e) {
+    e.preventDefault();
+    const formData = getFormData();
+    if (!validateFormData(formData)) return;
+
+    const fileInput = document.getElementById('ad-media-file')?.files[0];
+    let mediaUrl = formData.mediaUrl;
+
+    // Se houver arquivo, faz upload via Cloudinary
+    if (fileInput) {
       try {
-          const endDate = new Date(logo.endDate);
-          const today = new Date();
-          endDate.setHours(0, 0, 0, 0);
-          today.setHours(0, 0, 0, 0);
-          return endDate >= today;
-      } catch (e) {
-          console.error('Erro ao verificar data do contrato:', e);
-          return true;
+        mediaUrl = await uploadImageToCloudinary(fileInput);
+      } catch (err) {
+        alert("Erro ao fazer upload da imagem.");
+        return;
       }
+    }
+
+    const newAd = createAdObject(formData, mediaUrl);
+    await savePremiumAd(newAd);
+    showAlert("Propaganda salva com sucesso!");
+    adForm.reset();
+    adsList = await loadPremiumAdsFromFirestore();
+    renderAdsList();
   }
 
-  // Função para formatar CNPJ
-  function formatCNPJ(cnpj) {
-      if (!cnpj) return 'Não informado';
-      const cleaned = cnpj.toString().replace(/\D/g, '');
-      if (cleaned.length !== 14) return cnpj;
-      return cleaned.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-  }
-
-  // Função para configurar inputs de data
-  function setupDateInputs() {
-      const today = new Date().toISOString().split('T')[0];
-      const startDateInput = document.getElementById('ad-start');
-      const endDateInput = document.getElementById('ad-end');
-      
-      if (!startDateInput || !endDateInput) return;
-      
-      startDateInput.min = today;
-      endDateInput.min = today;
-      
-      startDateInput.addEventListener('change', function() {
-          endDateInput.min = this.value;
-          if (endDateInput.value && endDateInput.value < this.value) {
-              endDateInput.value = this.value;
-          }
-      });
-  }
-
-  // Função principal para enviar formulário
-  function handleAdSubmit(e) {
-      e.preventDefault();
-      
-      const formData = getFormData();
-      if (!validateFormData(formData)) return;
-      
-      const client = getClientData(formData.clientCNPJ);
-      if (!client) return;
-      
-      const newAd = createAdObject(formData, client);
-      savePremiumAd(newAd);
-      
-      showAlert('Propaganda cadastrada com sucesso!');
-      if (adForm) adForm.reset();
-      renderAdsList();
-  }
-
-  // Função para obter dados do formulário
   function getFormData() {
-      return {
-          title: document.getElementById('ad-title')?.value.trim() || '',
-          description: document.getElementById('ad-description')?.value.trim() || '',
-          mediaType: document.getElementById('ad-type')?.value || '',
-          mediaUrl: document.getElementById('ad-media')?.value.trim() || '',
-          targetUrl: document.getElementById('ad-link')?.value.trim() || '',
-          clientCNPJ: document.getElementById('ad-client')?.value || '',
-          startDate: document.getElementById('ad-start')?.value || '',
-          endDate: document.getElementById('ad-end')?.value || ''
-      };
+    return {
+      title: document.getElementById('ad-title').value.trim(),
+      description: document.getElementById('ad-description').value.trim(),
+      mediaType: document.getElementById('ad-type').value,
+      mediaUrl: document.getElementById('ad-media').value.trim(),
+      targetUrl: document.getElementById('ad-link').value.trim(),
+      clientCNPJ: document.getElementById('ad-client').value,
+      startDate: document.getElementById('ad-start').value,
+      endDate: document.getElementById('ad-end').value
+    };
   }
 
-  // Função para validar dados do formulário
-  function validateFormData(formData) {
-      // Verifica campos obrigatórios
-      const requiredFields = ['title', 'description', 'mediaType', 'mediaUrl', 'targetUrl', 'clientCNPJ', 'startDate', 'endDate'];
-      const missingFields = requiredFields.filter(field => !formData[field]);
-      
-      if (missingFields.length > 0) {
-          showAlert('Preencha todos os campos obrigatórios', 'Atenção');
-          return false;
+  function validateFormData(data) {
+    const requiredFields = ['title', 'description', 'mediaType', 'targetUrl', 'clientCNPJ', 'startDate', 'endDate'];
+    for (let field of requiredFields) {
+      if (!data[field]) {
+        alert("Por favor, preencha todos os campos obrigatórios.");
+        return false;
       }
-      
-      // Valida mídia
-      const mediaError = validateMedia(formData.mediaType, formData.mediaUrl);
-      if (mediaError) {
-          showAlert(mediaError, 'Mídia inválida');
-          return false;
-      }
-      
-      // Valida datas
-      if (!validateAdDates(formData.startDate, formData.endDate)) {
-          return false;
-      }
-      
-      // Valida URL de destino
-      if (!isValidUrl(formData.targetUrl)) {
-          showAlert('O link de destino deve ser uma URL válida (começando com http:// ou https://)', 'URL inválida');
-          return false;
-      }
-      
+    }
+
+    if (!isValidUrl(data.targetUrl)) {
+      alert("O link de destino é inválido.");
+      return false;
+    }
+
+    if (!validateAdDates(data.startDate, data.endDate)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  function isValidUrl(url) {
+    try {
+      new URL(url);
       return true;
+    } catch (e) {
+      return false;
+    }
   }
 
-  // Função para validar mídia
-  function validateMedia(mediaType, mediaUrl) {
-      if (!isValidUrl(mediaUrl)) {
-          return "URL inválida. Deve começar com http:// ou https://";
-      }
-      
-      if (mediaType === 'image') {
-          const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-          const extension = mediaUrl.substring(mediaUrl.lastIndexOf('.')).toLowerCase();
-          if (!imageExtensions.includes(extension)) {
-              return "A URL deve ser de uma imagem (JPG, PNG, GIF, WebP ou SVG)";
-          }
-      } else if (mediaType === 'video') {
-          if (!mediaUrl.includes('youtube.com') && !mediaUrl.includes('youtu.be') && !mediaUrl.endsWith('.mp4')) {
-              return "Para vídeos, use um link do YouTube ou um arquivo MP4";
-          }
-      }
-      
-      return null;
-  }
-
-  // Função para validar datas
   function validateAdDates(startDate, endDate) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      
-      if (start > end) {
-          showAlert("A data de início não pode ser posterior à data de término", "Datas inválidas");
-          return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (start > end) {
+      alert("A data de início não pode ser posterior à data de término");
+      return false;
+    }
+    if (end < today) {
+      alert("A data de término não pode ser anterior à data atual");
+      return false;
+    }
+    return true;
+  }
+
+  function createAdObject(formData, mediaUrl) {
+    return {
+      ...formData,
+      mediaUrl,
+      createdAt: new Date().toISOString(),
+      isActive: true,
+      clicks: 0,
+      impressions: 0
+    };
+  }
+
+  async function savePremiumAd(adData) {
+    try {
+      await addDoc(collection(firestore, 'premiumAds'), adData);
+    } catch (error) {
+      console.error("Erro ao salvar propaganda:", error);
+    }
+  }
+
+  async function loadPremiumAdsFromFirestore() {
+    try {
+      const snapshot = await getDocs(collection(firestore, 'premiumAds'));
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Erro ao carregar propagandas:", error);
+      return [];
+    }
+  }
+
+  function renderAdsList() {
+    const adsGrid = document.getElementById('premium-ads-list');
+    if (!adsGrid) return;
+
+    const searchTerm = (adSearchInput.value || '').toLowerCase();
+    const statusFilter = adFilterStatus.value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Filtro
+    const filtered = adsList.filter(ad => {
+      const matchesSearch =
+        ad.title.toLowerCase().includes(searchTerm) ||
+        ad.description.toLowerCase().includes(searchTerm) ||
+        ad.clientName?.toLowerCase().includes(searchTerm);
+
+      const startDate = new Date(ad.startDate);
+      const endDate = new Date(ad.endDate);
+
+      switch (statusFilter) {
+        case 'active':
+          return startDate <= today && endDate >= today && ad.isActive;
+        case 'inactive':
+          return !ad.isActive;
+        case 'upcoming':
+          return startDate > today;
+        case 'expired':
+          return endDate < today;
+        default:
+          return matchesSearch;
       }
-      
-      if (end < today) {
-          showAlert("A data de término não pode ser anterior à data atual", "Data expirada");
-          return false;
-      }
-      
-      return true;
+    });
+
+    // Renderização
+    adsGrid.innerHTML = '';
+    if (filtered.length === 0) {
+      adsGrid.innerHTML = '<div class="no-ads">Nenhuma propaganda encontrada.</div>';
+      return;
+    }
+
+    filtered.forEach(ad => {
+      const card = createAdCard(ad);
+      adsGrid.appendChild(card);
+    });
+
+    setupAdButtons();
   }
 
-  // Função para obter dados do cliente
-  function getClientData(clientCNPJ) {
-      const logos = loadLogosFromStorage();
-      const client = logos.find(logo => logo.clientCNPJ === clientCNPJ);
-      
-      if (!client) {
-          showAlert('Cliente não encontrado', 'Erro','error');
-          return null;
-      }
-      
-      return client;
-  }
+  function createAdCard(ad) {
+    const card = document.createElement('div');
+    card.className = 'premium-ad-card';
+    card.dataset.id = ad.id;
 
-  // Função para criar objeto de propaganda
-  function createAdObject(formData, client) {
-      return {
-          id: Date.now().toString(),
-          title: formData.title,
-          description: formData.description,
-          mediaType: formData.mediaType,
-          mediaUrl: formData.mediaUrl,
-          targetUrl: formData.targetUrl,
-          clientId: formData.clientCNPJ,
-          clientName: client.clientName,
-          clientLogo: client.imagem,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          adType: 'premium',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          clicks: 0,
-          impressions: 0
-      };
-  }
-
-  // Função para salvar propaganda
-  function savePremiumAd(adData) {
-     const existingAds = JSON.parse(localStorage.getItem(ADS_STORAGE_KEY) || '[]');
-      existingAds.push(adData);
-      localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(existingAds));
-  }
-
-  // Função para renderizar lista de propagandas
-  // Função para carregar e exibir propagandas cadastradas
-function renderAdsList() {
-  const adsList = document.getElementById('premium-ads-list');
-  if (!adsList) return;
-  
-  const searchTerm = document.getElementById('ad-search-input')?.value.toLowerCase() || '';
-  const statusFilter = document.getElementById('ad-filter-status')?.value || 'all';
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const ads = JSON.parse(localStorage.getItem('premiumAdsData') || '[]');
-  
-  const filteredAds = ads.filter(ad => {
-    // Filtro por termo de busca
-    const matchesSearch = 
-      ad.title.toLowerCase().includes(searchTerm) ||
-      ad.description.toLowerCase().includes(searchTerm) ||
-      ad.clientName.toLowerCase().includes(searchTerm);
-    
-    // Filtro por status
     const startDate = new Date(ad.startDate);
     const endDate = new Date(ad.endDate);
-    
-    let matchesStatus = true;
-    switch(statusFilter) {
-      case 'active':
-        matchesStatus = startDate <= today && endDate >= today && ad.isActive;
-        break;
-      case 'inactive':
-        matchesStatus = !ad.isActive;
-        break;
-      case 'upcoming':
-        matchesStatus = startDate > today;
-        break;
-      case 'expired':
-        matchesStatus = endDate < today;
-        break;
-      case 'all':
-      default:
-        matchesStatus = true;
-    }
-    
-    return matchesSearch && matchesStatus;
-  });
-  
-  // Ordena por data de início (mais recentes primeiro)
-  filteredAds.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-  
-  adsList.innerHTML = '';
-  
-  if (filteredAds.length === 0) {
-    adsList.innerHTML = '<div class="no-ads">Nenhuma propaganda encontrada</div>';
-    return;
-  }
-  
-  filteredAds.forEach(ad => {
-    const adCard = createAdCard(ad, today);
-    adsList.appendChild(adCard);
-  });
-  
-  setupAdButtons();
-}
+    const today = new Date();
+    let statusText = 'Ativa';
+    let statusClass = 'active';
 
-  // Função para criar card de propaganda
-  function createAdCard(ad, today) {
-    const adCard = document.createElement('div');
-    adCard.className = 'premium-ad-card';
-    adCard.dataset.id = ad.id;
-    
-    const statusInfo = getAdStatusInfo(ad, today);
-    const formattedStartDate = formatDate(ad.startDate);
-    const formattedEndDate = formatDate(ad.endDate);
-    
-    adCard.innerHTML = `
+    if (endDate < today) {
+      statusText = 'Expirada';
+      statusClass = 'expired';
+    } else if (startDate > today) {
+      statusText = 'Futura';
+      statusClass = 'upcoming';
+    }
+
+    card.innerHTML = `
       <div class="ad-media">
-        ${createMediaContent(ad)}
-        <div class="ad-status ${statusInfo.class}">${statusInfo.text}</div>
+        ${ad.mediaType === 'image' ? `<img src="${ad.mediaUrl}" alt="${ad.title}">` : `<video src="${ad.mediaUrl}" controls></video>`}
+        <div class="ad-status ${statusClass}">${statusText}</div>
       </div>
-      <div class="ad-info">
-        <h3>${ad.title}</h3>
-        <p class="ad-description">${ad.description}</p>
-        
-        <div class="ad-meta">
-          <div class="client-info">
-            <img src="${ad.clientLogo || '../images/default-logo.png'}" alt="${ad.clientName}" class="client-logo">
-            <span>${ad.clientName}</span>
-          </div>
-          
-          <div class="ad-dates">
-            <span><i class="fas fa-calendar-alt"></i> ${formattedStartDate} - ${formattedEndDate}</span>
-          </div>
-        </div>
-        
-        <div class="ad-actions">
-          <button class="edit-btn" data-id="${ad.id}">
-            <i class="fas fa-edit"></i> Editar
-          </button>
-          <button class="toggle-btn" data-id="${ad.id}" data-active="${ad.isActive}">
-            ${ad.isActive ? '<i class="fas fa-pause"></i> Pausar' : '<i class="fas fa-play"></i> Ativar'}
-          </button>
-          <button class="delete-btn" data-id="${ad.id}">
-            <i class="fas fa-trash"></i> Excluir
-          </button>
-        </div>
+      <h3>${ad.title}</h3>
+      <p>${ad.description}</p>
+      <small>Cliente: ${ad.clientName}</small><br>
+      <small>Datas: ${ad.startDate} - ${ad.endDate}</small>
+      <div class="actions">
+        <button class="edit-btn" data-id="${ad.id}">Editar</button>
+        <button class="delete-btn" data-id="${ad.id}">Excluir</button>
       </div>
     `;
-    
-    return adCard;
+    return card;
   }
 
- // Funções auxiliares
-function getAdStatusInfo(ad, today) {
-  const startDate = new Date(ad.startDate);
-  const endDate = new Date(ad.endDate);
-  
-  if (!ad.isActive) return { text: 'Inativa', class: 'inactive' };
-  if (startDate > today) return { text: 'Futura', class: 'upcoming' };
-  if (endDate < today) return { text: 'Expirada', class: 'expired' };
-  return { text: 'Ativa', class: 'active' };
-}
-
-  // Função para formatar data
-  function formatDate(dateString) {
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('pt-BR', options);
-  }
-
-  // Função para criar conteúdo de mídia
-  function createMediaContent(ad) {
-    if (ad.mediaType === 'image') {
-      return `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
-    } else if (ad.mediaType === 'video') {
-      if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
-        const videoId = getYouTubeVideoId(ad.mediaUrl);
-        return `<img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">`;
-      } else if (ad.mediaUrl.endsWith('.mp4')) {
-        return `<video src="${ad.mediaUrl}" alt="${ad.title}" muted autoplay loop playsinline preload="metadata" style="max-width: 100%; border-radius: 8px;"></video>`;
-      }
-      return '<div class="video-icon"><i class="fas fa-video"></i></div>';
-    }
-    return '';
-  }
-     
-  // Função para configurar botões das propagandas
   function setupAdButtons() {
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-          btn.addEventListener('click', () => editAd(btn.dataset.id));
-      });
-      
-      document.querySelectorAll('.toggle-btn').forEach(btn => {
-          btn.addEventListener('click', () => toggleAdStatus(btn.dataset.id));
-      });
-      
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', () => confirmDeleteAd(btn.dataset.id));
-      });
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => editAd(btn.dataset.id));
+    });
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => confirmDeleteAd(btn.dataset.id));
+    });
   }
 
-  // Função para editar propaganda
-  function editAd(adId) {
-      const ads = JSON.parse(localStorage.getItem(ADS_STORAGE_KEY) || '[]');
-      const adIndex = ads.findIndex(ad => ad.id === adId);
-      
-      if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro','error');
-          return;
-      }
-      
-      const ad = ads[adIndex];
-      fillAdForm(ad);
-      
-      ads.splice(adIndex, 1);
-      localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(ads));
-      renderAdsList();
+  async function editAd(id) {
+    const ad = adsList.find(a => a.id === id);
+    fillAdForm(ad);
+    editingIndex = id;
   }
 
-  // Função para preencher formulário
   function fillAdForm(ad) {
-      document.getElementById('ad-title').value = ad.title;
-      document.getElementById('ad-description').value = ad.description;
-      document.getElementById('ad-type').value = ad.mediaType;
-      document.getElementById('ad-media').value = ad.mediaUrl;
-      document.getElementById('ad-link').value = ad.targetUrl;
-      document.getElementById('ad-client').value = ad.clientId;
-      document.getElementById('ad-start').value = ad.startDate;
-      document.getElementById('ad-end').value = ad.endDate;
-      
-      document.querySelector('#ad-form').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('ad-title').value = ad.title;
+    document.getElementById('ad-description').value = ad.description;
+    document.getElementById('ad-type').value = ad.mediaType;
+    document.getElementById('ad-media-url').value = ad.mediaUrl;
+    document.getElementById('ad-link').value = ad.targetUrl;
+    document.getElementById('ad-client').value = ad.clientCNPJ;
+    document.getElementById('ad-start').value = ad.startDate;
+    document.getElementById('ad-end').value = ad.endDate;
+    document.getElementById('save-ad').textContent = 'Atualizar';
   }
 
-  // Função para alternar status
-  function toggleAdStatus(adId) {
-      const ads = JSON.parse(localStorage.getItem(ADS_STORAGE_KEY) || []);
-      const adIndex = ads.findIndex(ad => ad.id === adId);
-      
-      if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro','error');
-          return;
-      }
-      
-      ads[adIndex].isActive = !ads[adIndex].isActive;
-      localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(ads));
-      
-      showAlert(
-          `Propaganda ${ads[adIndex].isActive ? 'ativada' : 'pausada'} com sucesso`,
-          'Status alterado','success'
-      );
-      
+  async function confirmDeleteAd(id) {
+    if (!confirm("Tem certeza que deseja excluir esta propaganda?")) return;
+    try {
+      await deleteDoc(doc(firestore, 'premiumAds', id));
+      adsList = adsList.filter(a => a.id !== id);
       renderAdsList();
+      alert("Propaganda excluída com sucesso.");
+    } catch (error) {
+      console.error("Erro ao excluir propaganda:", error);
+      alert("Erro ao excluir propaganda.");
+    }
   }
 
-  // Função para confirmar exclusão
-  function confirmDeleteAd(adId) {
-      const ads = JSON.parse(localStorage.getItem(ADS_STORAGE_KEY) || []);
-      const adIndex = ads.findIndex(ad => ad.id === adId);
-      
-      if (adIndex === -1) {
-          showAlert('Propaganda não encontrada', 'Erro','error');
-          return;
+  function setupDateInputs() {
+    const today = new Date().toISOString().split('T')[0];
+    const startInput = document.getElementById('ad-start');
+    const endInput = document.getElementById('ad-end');
+    if (!startInput || !endInput) return;
+
+    startInput.min = today;
+    endInput.min = today;
+
+    startInput.addEventListener('change', () => {
+      endInput.min = startInput.value;
+      if (endInput.value < startInput.value) {
+        endInput.value = startInput.value;
       }
-      
-      const ad = ads[adIndex];
-      const modal = document.getElementById('delete-modal');
-      const message = modal.querySelector('p');
-      
-      message.innerHTML = `
-          Tem certeza que deseja excluir a propaganda <strong>"${ad.title}"</strong>?
-          <br><br>
-          Cliente: ${ad.clientName}<br>
-          Período: ${formatDate(ad.startDate)} a ${formatDate(ad.endDate)}
-      `;
-      
-      modal.classList.remove('hidden');
-      
-      document.getElementById('confirm-delete').onclick = function() {
-          ads.splice(adIndex, 1);
-          localStorage.setItem(ADS_STORAGE_KEY, JSON.stringify(ads));
-          showAlert('Propaganda excluída com sucesso', 'Sucesso', 'success');
-          modal.classList.add('hidden');
-          renderAdsList();
-      };
-      
-      document.getElementById('cancel-delete').onclick = function() {
-          modal.classList.add('hidden');
-      };
+    });
   }
 
+  async function uploadImageToCloudinary(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
 
-  // Função para validar URL
-  function isValidUrl(url) {
-      try {
-          new URL(url);
-          return true;
-      } catch (e) {
-          return false;
-      }
+    const res = await fetch(`https://api.cloudinary.com/v1_1/ ${CLOUD_NAME}/image/upload`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Falha no upload");
+
+    const data = await res.json();
+    return data.secure_url;
   }
 
-  function getYouTubeVideoId(url) {
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-    return match ? match[1] : '';
+  function formatCNPJ(cnpj) {
+    if (!cnpj) return '';
+    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
   }
 
-  
-  // Função para obter o ID do vídeo a partir da URL
-// function getYouTubeVideoId(url) {
-//   try {
-//     const urlObj = new URL(url);
-//     const hostname = urlObj.hostname;
-
-//     if (hostname.includes("youtu.be")) {
-//       // Formato: youtu.be/VIDEO_ID
-//       return urlObj.pathname.slice(1);
-//     }
-
-//     if (hostname.includes("youtube.com")) {
-//       // Formato: youtube.com/watch?v=VIDEO_ID
-//       return urlObj.searchParams.get("v");
-//     }
-
-//     return null;
-//   } catch (e) {
-//     return null; // URL inválida
-//   }
-// }
+  function isContractActive(client) {
+    const endDate = new Date(client.endDate);
+    const now = new Date();
+    return endDate >= now && client.contractActive;
+  }
 });

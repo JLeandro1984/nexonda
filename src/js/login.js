@@ -1,8 +1,18 @@
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+import { app } from './firebase-config.js';  // Sua configuração Firebase já exportada
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
-    const errorMessage = document.querySelector('.error-message');
+    const errorMessage = document.querySelector('.error-message') || document.createElement('div');
+    const googleLoginBtn = document.getElementById('google-login-btn');
 
-    // Verificar se há mensagem de sucesso do registro
+    // Adiciona a div de erro se ela não existir
+    if (!document.querySelector('.error-message')) {
+        errorMessage.classList.add('error-message');
+        document.querySelector('.login-box').appendChild(errorMessage);
+    }
+
+    // Verificar se há mensagem de sucesso do registro (não necessária no Google)
     if (localStorage.getItem('registerSuccess')) {
         const successMessage = document.createElement('div');
         successMessage.className = 'success-message';
@@ -11,36 +21,32 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('registerSuccess');
     }
 
-    loginForm.addEventListener('submit', (event) => {
-        event.preventDefault();
+    // Função para fazer login com Google
+    googleLoginBtn.addEventListener('click', async () => {
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
 
-        // Obter usuários cadastrados
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        // Procurar usuário
-        const user = users.find(u => 
-            (u.username === username || u.email === username) && u.password === password
-        );
-
-        if (user) {
             // Salvar informações do usuário logado
             localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('userName', user.fullname);
-            localStorage.setItem('userId', user.id);
-            
+            localStorage.setItem('userName', user.displayName);
+            localStorage.setItem('userEmail', user.email);
+            localStorage.setItem('userId', user.uid);
+
             // Redirecionar para a página de administração
             window.location.href = 'admin.html';
-        } else {
-            errorMessage.textContent = 'Usuário ou senha incorretos';
+        } catch (error) {
+            errorMessage.textContent = 'Erro ao fazer login com Google';
             errorMessage.style.display = 'block';
+            console.error(error.message);
         }
     });
 
     // Verifica se o usuário já está logado
-    if (localStorage.getItem('isLoggedIn') === 'true') {
+    if (localStorage.getItem('isAuthenticated') === 'true') {
         window.location.href = 'admin.html';
     }
-}); 
+});

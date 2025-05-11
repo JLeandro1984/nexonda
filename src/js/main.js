@@ -1,5 +1,6 @@
 import i18n from './lang.js';
 import { showAlert } from '../components/alert.js';
+import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -17,33 +18,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 //Inicio código - Modo Dark
   const darkModeBtn = document.getElementById('dark-mode-btn');
-  const darkModeIcon = darkModeBtn.querySelector('i');
+
+  if (darkModeBtn) {
+    const darkModeIcon = darkModeBtn.querySelector('i');
   
-  // Verifica preferência salva
-  const isDarkMode = localStorage.getItem('darkMode') === 'true';
-  
-  // Aplica o modo dark se necessário
-  if (isDarkMode) {
-    document.body.classList.add('dark-mode');
-    darkModeIcon.classList.replace('fa-moon', 'fa-sun');
-  }
-  
-  // Evento de clique no botão
-  darkModeBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark-mode');
-    const isNowDark = document.body.classList.contains('dark-mode');
+    // Verifica preferência salva
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
     
-    // Atualiza ícone
-    if (isNowDark) {
+    // Aplica o modo dark se necessário
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
       darkModeIcon.classList.replace('fa-moon', 'fa-sun');
-    } else {
-      darkModeIcon.classList.replace('fa-sun', 'fa-moon');
     }
     
-    // Salva preferência
-    localStorage.setItem('darkMode', isNowDark);
-  });
-  //Fim código - Modo Dark
+    // Evento de clique no botão
+    darkModeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isNowDark = document.body.classList.contains('dark-mode');
+      
+      // Atualiza ícone
+      if (isNowDark) {
+        darkModeIcon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        darkModeIcon.classList.replace('fa-sun', 'fa-moon');
+      }
+      
+      // Salva preferência
+      localStorage.setItem('darkMode', isNowDark);
+    });
+    //Fim código - Modo Dark
+  }
+ 
 
 });
 

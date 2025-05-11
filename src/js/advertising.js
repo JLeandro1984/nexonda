@@ -1,101 +1,140 @@
-// advertising.js - Versão melhorada
+import { firestore } from '../js/firebase-config.js';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 
 // Função para carregar propagandas premium
-function loadPremiumAds() {
+async function loadPremiumAds() {
   const sectionAds = document.querySelector('#premium-ads');
   const adsContainer = document.querySelector('.premium-ads-container');
   if (!adsContainer) return;
 
-  // Carrega os dados do localStorage
-  const storedAds = localStorage.getItem('premiumAdsData');
-  const premiumAds = storedAds ? JSON.parse(storedAds) : [];
-  
-  // Filtra apenas propagandas ativas e premium
-  const activeAds = premiumAds.filter(ad => {
-    const endDate = new Date(ad.endDate);
-    const today = new Date();
-    return ad.isActive && endDate >= today && ad.adType === 'premium';
-  });
+  try {
+    // Carrega os dados do Firebase
+    const premiumAds = await getPremiumAdsFromFirebase();
+    
+    // Filtra apenas propagandas ativas e premium
+    const activeAds = premiumAds.filter(ad => {
+      debugger
+      const endDate = new Date(ad.endDate);
+      const today = new Date();
+      return ad.isActive && endDate >= today;
+    });
 
-  if (activeAds.length === 0) {
+    if (activeAds.length === 0) {
+      sectionAds.style.display = 'none';
+      adsContainer.parentElement.style.display = 'none';
+      return;
+    }
+
+    // Cria o carrossel
+    const carousel = document.createElement('div');
+    carousel.className = 'premium-carousel';
+    
+    // Cria os itens do carrossel
+    activeAds.forEach((ad, index) => {
+      const adItem = document.createElement('div');
+      adItem.className = 'premium-ad-item';
+      
+      let mediaContent = '';
+      if (ad.mediaType === 'image') {
+        mediaContent = `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
+      } else if (ad.mediaType === 'video') {
+        if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
+          const videoId = getYouTubeVideoId(ad.mediaUrl);
+          mediaContent = `
+            <div class="youtube-video-container" onclick="openYouTubePlayer('${ad.mediaUrl}')">
+              <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">
+              <div class="play-overlay">
+                <i class="fas fa-play"></i>
+              </div>
+            </div>
+          `;
+        } else {
+          mediaContent = `
+            <video width="100%" height="180" controls>
+              <source src="${ad.mediaUrl}" type="video/mp4">
+              Seu navegador não suporta vídeos HTML5.
+            </video>
+          `;
+        }
+      }
+      
+      // Limita a descrição para evitar overflow
+      const shortDescription = ad.description.length > 150 ? 
+        ad.description.substring(0, 150) + '...' : ad.description;
+      
+      adItem.innerHTML = `
+        ${mediaContent}
+        <div class="premium-ad-content">
+          <h3>${ad.title}</h3>
+          <p title="${ad.description}">${shortDescription}</p>
+          <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank">Saiba mais</a>
+        </div>
+      `;
+      
+      carousel.appendChild(adItem);
+    });
+
+    // Adiciona controles de navegação
+    const controls = document.createElement('div');
+    controls.className = 'carousel-controls';
+    controls.innerHTML = `
+      <button class="carousel-control prev" aria-label="Anterior" onclick="scrollCarousel(-300)">
+        <span aria-hidden="true">❮</span>
+      </button>
+      <button class="carousel-control next" aria-label="Próximo" onclick="scrollCarousel(300)">
+        <span aria-hidden="true">❯</span>
+      </button>
+    `;
+
+    adsContainer.appendChild(carousel);
+    adsContainer.appendChild(controls);
+
+    // Adiciona indicadores de scroll
+    addCarouselIndicators(carousel, adsContainer);
+    
+    // Configura observador de scroll para atualizar indicadores
+    setupScrollObserver(carousel);
+
+    startAutoCarousel();
+    setupCarouselHover();
+  } catch (error) {
+    console.error('Erro ao carregar anúncios premium:', error);
     sectionAds.style.display = 'none';
     adsContainer.parentElement.style.display = 'none';
-    return;
   }
-
-  // Cria o carrossel
-  const carousel = document.createElement('div');
-  carousel.className = 'premium-carousel';
-  
-  // Cria os itens do carrossel
-  activeAds.forEach((ad, index) => {
-    const adItem = document.createElement('div');
-    adItem.className = 'premium-ad-item';
-    
-    let mediaContent = '';
-    if (ad.mediaType === 'image') {
-      mediaContent = `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
-    } else if (ad.mediaType === 'video') {
-      if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
-        const videoId = getYouTubeVideoId(ad.mediaUrl);
-        mediaContent = `
-          <div class="youtube-video-container" onclick="openYouTubePlayer('${ad.mediaUrl}')">
-            <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">
-            <div class="play-overlay">
-              <i class="fas fa-play"></i>
-            </div>
-          </div>
-        `;
-      } else {
-        mediaContent = `
-          <video width="100%" height="180" controls>
-            <source src="${ad.mediaUrl}" type="video/mp4">
-            Seu navegador não suporta vídeos HTML5.
-          </video>
-        `;
-      }
-    }
-    
-    // Limita a descrição para evitar overflow
-    const shortDescription = ad.description.length > 150 ? 
-      ad.description.substring(0, 150) + '...' : ad.description;
-    
-    adItem.innerHTML = `
-      ${mediaContent}
-      <div class="premium-ad-content">
-        <h3>${ad.title}</h3>
-        <p title="${ad.description}">${shortDescription}</p>
-        <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank">Saiba mais</a>
-      </div>
-    `;
-    
-    carousel.appendChild(adItem);
-  });
-
-  // Adiciona controles de navegação
-  const controls = document.createElement('div');
-  controls.className = 'carousel-controls';
-  controls.innerHTML = `
-    <button class="carousel-control prev" aria-label="Anterior" onclick="scrollCarousel(-300)">
-      <span aria-hidden="true">❮</span>
-    </button>
-    <button class="carousel-control next" aria-label="Próximo" onclick="scrollCarousel(300)">
-      <span aria-hidden="true">❯</span>
-    </button>
-  `;
-
-  adsContainer.appendChild(carousel);
-  adsContainer.appendChild(controls);
-
-  // Adiciona indicadores de scroll
-  addCarouselIndicators(carousel, adsContainer);
-  
-  // Configura observador de scroll para atualizar indicadores
-  setupScrollObserver(carousel);
-
-  startAutoCarousel();
-  setupCarouselHover();
 }
+
+// Função para obter anúncios premium do Firebase
+async function getPremiumAdsFromFirebase() {
+  try {
+    const querySnapshot = await getDocs(collection(firestore, 'premiumAds'));
+    const premiumAds = [];
+    
+    querySnapshot.forEach((doc) => {
+      const adData = doc.data();
+      premiumAds.push({
+        id: doc.id,
+        ...adData
+      });
+    });
+    
+    return premiumAds;
+  } catch (error) {
+    console.error('Erro ao buscar anúncios do Firebase:', error);
+    return [];
+  }
+}
+
+// Restante do código permanece igual...
 
 // Adiciona indicadores de scroll
 function addCarouselIndicators(carousel, container) {

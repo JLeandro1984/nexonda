@@ -1,14 +1,64 @@
+import { firestore, serverTimestamp } from '../js/firebase-config.js';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+  deleteDoc
+} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+
 document.addEventListener('DOMContentLoaded', function () {
-  const STORAGE_HISTORY_KEY = 'contactFormHistory';
+  const CONTACTS_COLLECTION = 'contacts'; // Nome da coleção no Firestore
   const tabela = document.getElementById('cadastro-tabela').querySelector('tbody');
   const semRegistros = document.getElementById('sem-registros');
   const searchInput = document.getElementById("search-input");
   const sortSelect = document.getElementById("sort-select");
 
-  let historico = JSON.parse(localStorage.getItem(STORAGE_HISTORY_KEY)) || [];
+  let historico = [];
 
-  // Função para carregar os dados da tabela
-  function carregarCadastros() {
+  // Função para carregar os dados do Firestore
+  async function carregarCadastros() {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, CONTACTS_COLLECTION));
+      historico = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Tratamento da data
+        let dataCadastro = '';
+        if (data.createdAt) {
+          // Se for um timestamp do Firebase
+          if (data.createdAt.toDate) {
+            dataCadastro = data.createdAt.toDate().toLocaleString('pt-BR');
+          } 
+          // Se já for uma string (caso já tenha sido formatada antes)
+          else if (typeof data.createdAt === 'string') {
+            dataCadastro = data.createdAt;
+          }
+        }
+        
+        historico.push({
+          'Nome': data.Nome || '',
+          'Email': data.Email || '',
+          'Mensagem': data.Mensagem || '',
+          'Data de Cadastro': dataCadastro
+        });
+      });
+  
+      atualizarTabela();
+    } catch (error) {
+      console.error("Erro ao carregar cadastros:", error);
+      semRegistros.style.display = 'block';
+      semRegistros.textContent = 'Erro ao carregar dados.';
+    }
+  }
+
+  // Função para atualizar a tabela com os dados atuais
+  function atualizarTabela() {
     tabela.innerHTML = ''; // Limpa a tabela antes de carregar os novos dados
 
     if (historico.length === 0) {
@@ -41,9 +91,9 @@ document.addEventListener('DOMContentLoaded', function () {
   function filtrarTabela() {
     const termo = searchInput.value.toLowerCase();
     const filtrado = historico.filter(item =>
-      item['Nome'].toLowerCase().includes(termo) ||
-      item['Email'].toLowerCase().includes(termo) ||
-      item['Mensagem'].toLowerCase().includes(termo)
+      (item['Nome'] && item['Nome'].toLowerCase().includes(termo)) ||
+      (item['Email'] && item['Email'].toLowerCase().includes(termo)) ||
+      (item['Mensagem'] && item['Mensagem'].toLowerCase().includes(termo))
     );
 
     carregarTabelaFiltrada(filtrado);
@@ -88,6 +138,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return new Date(b['Data de Cadastro']) - new Date(a['Data de Cadastro']);
       }
 
+      // Adiciona verificação para propriedades undefined
+      if (!a[criterio] || !b[criterio]) return 0;
       return a[criterio].localeCompare(b[criterio]);
     });
 
