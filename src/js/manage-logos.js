@@ -1,639 +1,394 @@
-import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, where } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-storage.js";
-import { app } from './firebase-config.js';
+import { logosApi } from './api.js';
 import { categories } from './categories.js';
-import { ufs } from './ufs.js';  
+import { ufs } from './ufs.js';
 
-// Inicializa serviços do Firebase
-const db = getFirestore(app);
-const storage = getStorage(app);
-const userId = localStorage.getItem('userId'); // para associar os dados ao usuário logado
+// Elementos DOM
+const logoForm = document.getElementById("logo-form");
+const logosGrid = document.getElementById("logos-grid");
+const searchInput = document.getElementById("search-input");
+const filterCategory = document.getElementById("filter-category");
+const logoCategorySelect = document.getElementById("logo-category");
+const ufSelect = document.getElementById('client-uf');
+const cnpjInput = document.getElementById("client-cnpj");
+const saveBtn = document.querySelector('.save-btn');
+const cancelBtn = document.querySelector('.cancel-btn');
+const startDateInput = document.getElementById('start-date');
+const contractMonthsSelect = document.getElementById('contract-months');
+const endDateInput = document.getElementById('end-date');
+const logoImageInput = document.getElementById("logo-image");
+const logoImageUrl = document.getElementById("logo-image-url");
 
-document.addEventListener("DOMContentLoaded", async () => {  
-    // Elementos DOM 
-    const logoForm = document.getElementById("logo-form");
-    const logosGrid = document.getElementById("logos-grid");
-    const searchInput = document.getElementById("search-input");
-    const filterCategory = document.getElementById("filter-category");
-    const logoCategorySelect = document.getElementById("logo-category");
-    const ufSelect = document.getElementById('client-uf');
-    const cnpjInput = document.getElementById("client-cnpj");
-    const saveBtn = document.querySelector('.save-btn');
-    const cancelBtn = document.querySelector('.cancel-btn');
-    const startDateInput = document.getElementById('start-date');
-    const contractMonthsSelect = document.getElementById('contract-months');
-    const endDateInput = document.getElementById('end-date');
+let editingIndex = null;
+let logos = [];
+let isNavigating = false;
 
-    
-        // Função para inicializar o widget de upload do Cloudinary
-        const YOUR_UPLOAD_PRESET = "brandConnectPresetName";
-        const YOUR_CLOUD_NAME = "dmq4e5bm5";
+// Estado global de autenticação
+let authState = {
+    isChecking: false,
+    isAuthenticated: false,
+    user: null
+};
 
-        async function uploadImageToCloudinary(file) {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", YOUR_UPLOAD_PRESET);
+ // Preenche o select de UFs
+ ufs.forEach(uf => {
+    const option = document.createElement('option');
+    option.value = uf.sigla;
+    option.textContent = uf.nome;
+    ufSelect.appendChild(option);
+ });
 
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/image/upload`, {
-                method: "POST",
-                body: formData
-            });
+// Função para decodificar o token JWT
+function decodeJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (error) {
+        console.error('Erro ao decodificar token:', error);
+        return null;
+    }
+}
 
-            const data = await response.json();
+// Função para verificar se o usuário está autenticado
+async function checkAuth() {
+    if (authState.isChecking) return authState.isAuthenticated;
+    authState.isChecking = true;
 
-            if (data.secure_url) {
-                return {
-                    imageUrl: data.secure_url,
-                    deleteToken: data.delete_token // útil se você ativou "Retornar token de exclusão"
-                };
-            } else {
-                throw new Error("Erro ao fazer upload da imagem para o Cloudinary.");
+    try {
+        // Verifica se há um token na URL (caso venha do redirecionamento do Google)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tokenFromUrl = urlParams.get('token');
+        
+        if (tokenFromUrl) {
+            console.log('Token encontrado na URL, salvando no localStorage');
+            localStorage.setItem('authToken', tokenFromUrl);
+            // Remove o token da URL para não ficar exposto
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        const token = localStorage.getItem('authToken');
+        console.log('Verificando autenticação. Token:', token ? 'Presente' : 'Ausente');
+        
+        if (!token) {
+            console.log('Token não encontrado no localStorage');
+            authState.isAuthenticated = false;
+            return false;
+        }
+
+        console.log('Enviando requisição para verificar token...');
+        const response = await fetch('https://authenticate-lnpdkkqg5q-uc.a.run.app', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
+        });
 
-            
-            if (data.delete_token) {
-                console.log("Token de exclusão recebido:", data.delete_token);
+        console.log('Resposta recebida:', response.status);
+        if (!response.ok) {
+            console.log('Token inválido, removendo do localStorage');
+            localStorage.removeItem('authToken');
+            authState.isAuthenticated = false;
+            return false;
+        }
+
+        const data = await response.json();
+        console.log('Resposta da verificação:', data);
+
+        if (data.authorized) {
+            // Decodifica o token e salva o nome do usuário
+            const decodedToken = decodeJwt(token);
+            if (decodedToken && decodedToken.name) {
+                localStorage.setItem('userName', decodedToken.name);
             }
+            authState.isAuthenticated = true;
+            return true;
         }
-    // Tornando a função visível globalmente (para onclick do HTML)
-    window.uploadImageToCloudinary = uploadImageToCloudinary;
-    
-    async function deleteLogoFromCloudinary(deleteToken) {
-         const cloudName = "dmq4e5bm5"; 
-    
-        try {
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/delete_by_token`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({ token: deleteToken })
-            });
-    
-            const data = await response.json();
-    
-            if (data.result === "ok") {
-                console.log("Imagem excluída com sucesso.");
-            } else {
-                console.error("Erro ao excluir imagem:", data);
-                throw new Error("Erro ao excluir imagem do Cloudinary.");
-            }
-        } catch (error) {
-            console.error("Erro na requisição ao Cloudinary:", error);
-            throw error;
-        }
+        
+        authState.isAuthenticated = false;
+        return false;
+    } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        localStorage.removeItem('authToken');
+        authState.isAuthenticated = false;
+        return false;
+    } finally {
+        authState.isChecking = false;
     }
-    
+}
 
-    cnpjInput.addEventListener("blur", validarCNPJNoCampo);
-    let editingIndex = null;
-    let logos = [];
+// Função para gerenciar a navegação
+async function handleNavigation() {
+    if (isNavigating) return;
+    isNavigating = true;
 
-    // Preenche o select de UFs
-    ufs.forEach(uf => {
-        const option = document.createElement('option');
-        option.value = uf.sigla;
-        option.textContent = uf.nome;
-        ufSelect.appendChild(option);
-    });
+    try {
+        const isAuthenticated = await checkAuth();
+        console.log('Está autenticado:', isAuthenticated);
 
-    // Funções do Firestore
-    async function addLogoToFirestore(logoData) {
-        try {
-            const docRef = await addDoc(collection(db, 'logos'), {
-                ...logoData,
-                userId: userId,
-                createdAt: new Date()
-            });
-            return docRef.id;
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            throw error;
+        if (!isAuthenticated) {
+            console.log('Usuário não autenticado');
+            showAlert('Erro de autenticação. Por favor, faça login novamente.', 'error');
+            return;
         }
+
+        // Se estiver autenticado, inicializa a página
+        console.log('Usuário autenticado, inicializando página');
+        await init();
+    } catch (error) {
+        console.error('Erro no handleNavigation:', error);
+        showAlert('Erro ao carregar a página. Por favor, tente novamente.', 'error');
+    } finally {
+        isNavigating = false;
     }
+}
 
-    async function updateLogoInFirestore(logoId, updatedData) {
-        try {
-            await updateDoc(doc(db, 'logos', logoId), updatedData);
-        } catch (error) {
-            console.error("Error updating document: ", error);
-            throw error;
-        }
-    }
-
-    async function deleteLogoFromFirestore(logoId) {
-        try {
-            await deleteDoc(doc(db, 'logos', logoId));
-        } catch (error) {
-            console.error("Error deleting document: ", error);
-            throw error;
-        }
-    }
-
-    async function loadLogosFromFirestore() {
-        try {
-            const logosRef = collection(db, 'logos');
-            const q = query(logosRef, where('userId', '==', userId));
-            const snapshot = await getDocs(q);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-            console.error("Error loading logos: ", error);
-            return [];
-        }
-    }
-
-    // async function uploadImageFirebase(file, logoId) {
-    //     try {
-    //         // Se for uma data URL (quando edita mantendo a mesma imagem)
-    //         if (typeof file === 'string' && file.startsWith('data:')) {
-    //             return file;
-    //         }
-            
-    //         // Upload para Firebase Storage
-    //         const storageRef = ref(storage, `logos/${userId}/${logoId}/${file.name}`);
-    //         await uploadBytes(storageRef, file);
-    //         return await getDownloadURL(storageRef);
-    //     } catch (error) {
-    //         console.error("Error uploading image: ", error);
-    //         throw error;
-    //     }
-    // }
-
-    // Inicializa a aplicação
-    async function init() {
-        logos = await loadLogosFromFirestore();
+// Inicializa a aplicação
+async function init() {
+    try {
+        showAlert('Carregando logotipos...', 'info');
+        logos = await logosApi.getAll();
         renderLogos(logos);
         populateCategories();
         populateFilterCategories();
         applyFilters();
+        showAlert('Logotipos carregados com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro na inicialização:', error);
+        showAlert('Erro ao carregar os logotipos. Por favor, tente novamente.', 'error');
+    }
+}
+
+// Renderiza os logos em uma tabela
+function renderLogos(list) {
+    if (!logosGrid) {
+        console.error('Elemento logos-grid não encontrado');
+        return;
     }
 
-     // Renderiza os logos em uma tabela 
-     function renderLogos(list) {
-        logosGrid.innerHTML = "";
+    logosGrid.innerHTML = "";
 
-        if (list.length === 0) {
-            logosGrid.innerHTML = "<p>Nenhum logotipo encontrado.</p>";
-            return;
-        }
+    if (!Array.isArray(list) || list.length === 0) {
+        logosGrid.innerHTML = "<p>Nenhum logotipo encontrado.</p>";
+        return;
+    }
 
-        // Cria a tabela
-        const table = document.createElement('table');
-        table.className = 'logos-table';
-        
-        // Cabeçalho da tabela
-        const thead = document.createElement('thead');
-        thead.innerHTML = `
-          <tr>
-                <th class="col-logo">Logo</th>
-                <th class="col-razao">Razão Social</th>
-                <th class="col-fantasia">Nome Fantasia</th>
-                <th class="col-cnpj">CNPJ</th>
-                <th class="col-celular">Celular</th>
-                <th class="col-cidade">Cidade/UF</th>
-                <th class="col-categoria">Categoria</th>
-                <th class="col-contrato">Contrato</th>
-                <th class="col-contrato">Valor Contrato</th>
-                <th class="col-acoes">Ações</th>
-          </tr>
+    // Cria a tabela
+    const table = document.createElement('table');
+    table.className = 'logos-table';
+    
+    // Cabeçalho da tabela
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th class="col-logo">Logo</th>
+            <th class="col-razao">Razão Social</th>
+            <th class="col-fantasia">Nome Fantasia</th>
+            <th class="col-cnpj">CNPJ</th>
+            <th class="col-celular">Celular</th>
+            <th class="col-cidade">Cidade/UF</th>
+            <th class="col-categoria">Categoria</th>
+            <th class="col-contrato">Contrato</th>
+            <th class="col-valor">Valor Contrato</th>
+            <th class="col-acoes">Ações</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+    
+    // Corpo da tabela
+    const tbody = document.createElement('tbody');
+    
+    list.forEach((logo) => {
+        if (!logo) return; // Pula logos inválidos
+
+        const startDate = logo.startDate ? new Date(logo.startDate) : null;
+        const endDate = logo.endDate ? new Date(logo.endDate) : null;
+        const formattedStartDate = startDate ? startDate.toLocaleDateString('pt-BR') : 'N/A';
+        const formattedEndDate = endDate ? endDate.toLocaleDateString('pt-BR') : 'N/A';
+        const status = logo.contractActive ? 'Ativo' : 'Inativo';
+        const statusClass = logo.contractActive ? 'active' : 'inactive';
+        const dataContrato = logo.contractActive ? `${formattedStartDate} a ${formattedEndDate}` : "Sem contrato";
+        const categoria = getCategoryLabelByValue(logo.category) || 'Não definida';
+        const valorContrato = logo.contractValue ? formatToMoney(logo.contractValue) : 'N/A';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><img src="${logo.imagem || 'placeholder.png'}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
+            <td>${logo.clientName || 'N/A'}</td>
+            <td>${logo.clientFantasyName || 'N/A'}</td>
+            <td>${logo.clientCNPJ || 'N/A'}</td>
+            <td>${logo.clientPhone || 'N/A'}</td>
+            <td>${logo.clientCity ? `${logo.clientCity}/${logo.clientUF}` : 'N/A'}</td>
+            <td>${categoria}</td>
+            <td class="${statusClass}">${dataContrato}</td>
+            <td>${valorContrato}</td>
+            <td class="actions">
+                <button onclick="editLogo('${logo.id}')" class="edit-btn" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteLogo('${logo.id}')" class="delete-btn" title="Excluir">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
         `;
-        table.appendChild(thead);
-        
-        // Corpo da tabela
-        const tbody = document.createElement('tbody');
-        
-        list.forEach((logo) => {
-            const startDate = new Date(logo.startDate);
-            const endDate = new Date(logo.endDate);
-            const formattedStartDate = startDate.toLocaleDateString('pt-BR');
-            const formattedEndDate = endDate.toLocaleDateString('pt-BR');
-            const status = logo.contractActive ? 'Ativo' : 'Inativo';
-            const statusClass = logo.contractActive ? 'active' : 'inactive';
-            const dataContrato = logo.contractActive ? `${formattedStartDate} a ${formattedEndDate}` : "";
-            const categoria = getCategoryLabelByValue(logo.category);
+        tbody.appendChild(row);
+    });
+    
+    table.appendChild(tbody);
+    logosGrid.appendChild(table);
 
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><img src="${logo.imagem}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
-                <td>${logo.clientName}</td>
-                <td>${logo.clientFantasyName || '-'}</td>
-                <td>${logo.clientCNPJ || '-'}</td>
-                <td>${logo.cellphone || '-'}</td>
-                <td>${logo.clientCity}/${logo.clientUf}</td>
-                <td data-lang="${logo.category}">${categoria}</td>
-                <td>
-                    <span class="contract-status ${statusClass}">${status}</span><br>
-                    <small>${dataContrato}</small>
-                </td>
-                <td>${logo.contractValue || '0,00'}</td>
-                <td class="actions">
-                    <button data-id="${logo.clientCNPJ}" class="edit-btn">Editar</button>
-                    <button data-id="${logo.clientCNPJ}" class="delete-btn">Excluir</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-        
-        // Inicializa totalContractValue como 0
-        let totalContractValue = 0;
-
-        // Itera pela lista para somar os valores dos contratos
-        list.forEach(logo => {
-            const contractValue = !logo.contractValue || !contratoAtivo(logo) ? 0 : parseFloat(logo.contractValue.replace(/[^\d,-]/g, '').replace(',', '.'));            
-            if (!isNaN(contractValue)) {
-                totalContractValue += contractValue;
-            }
-        });
-        
-        // Adiciona uma linha com o total geral da coluna "Valor Contrato"
-        const totalRow = document.createElement('tr');
-        totalRow.innerHTML = `
-            <td colspan="8" class="lbl-valor-contrato">Total Geral:</td>
-            <td id="table-valor-contrato">${totalContractValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            <td></td>
-        `;
-
-        tbody.appendChild(totalRow);
-        
-        table.appendChild(tbody);
-        logosGrid.appendChild(table);
+    // Adiciona mensagem se não houver logos
+    if (tbody.children.length === 0) {
+        logosGrid.innerHTML = "<p>Nenhum logotipo encontrado.</p>";
     }
+}
 
-    // Funções auxiliares (mantidas iguais)
-    function getCategoryLabelByValue(value) {
-        for (const category of categories) {
-            // Verifica se é o valor do grupo principal
-            if (category.value === value) {
-                return category.label;
-            }
+// Event Listeners
+logoForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
     
-            // Procura nas subcategorias (options)
-            const subcategory = category.options.find(option => option.value === value);
-            if (subcategory) {
-                return subcategory.label;
-            }
-        }
-    
-        return null; // Não encontrado
-    }
-   
-    function contratoAtivo(logo) {
-        const endDate = new Date(logo.endDate);
-        const today = new Date();
-    
-            // Zera o horário de hoje para comparação apenas por data (opcional)
-            today.setHours(0, 0, 0, 0);
-            endDate.setHours(0, 0, 0, 0);
-    
-        if (endDate < today) return false;
-    
-        if (!logo.contractActive) return false; 
-        
-    
-        return true
-    }
-
-    // Carrega os dados de um logo no formulário para edição    
-      function loadLogoForEdit(cnpj) {
-        const logo = logos.find(l => l.clientCNPJ === cnpj);
-        if (!logo) return;
-    
-        editingIndex = logos.findIndex(l => l.clientCNPJ === cnpj);
-    
-        document.getElementById("client-name").value = logo.clientName;
-        document.getElementById("client-fantasy-name").value = logo.clientFantasyName || '';
-        document.getElementById("client-cnpj").value = logo.clientCNPJ || '';
-        document.getElementById("client-city").value = logo.clientCity || '';
-        document.getElementById("client-uf").value = logo.clientUf || '';
-        document.getElementById("telephone").value = logo.telephone || '';
-        document.getElementById("cellphone").value = logo.cellphone || '';
-        document.getElementById("client-website").value = logo.websiteUrl || '';
-        document.getElementById("client-videoUrl").value = logo.videoUrl || '';
-        document.getElementById("client-instagramUrl").value = logo.instagramUrl || '';
-        document.getElementById("client-facebookUrl").value = logo.facebookUrl || '';
-        document.getElementById("client-whatsapp").value = logo?.clientWhatsapp || '';
-        document.getElementById("logo-description").value = logo.description || '';
-        document.getElementById("logo-category").value = logo.category || '';
-        document.getElementById("start-date").value = logo.startDate || '';
-        document.getElementById("contract-months").value = logo.contractMonths || '';
-        document.getElementById("end-date").value = logo.endDate || ''; 
-        document.getElementById("email").value = logo.email || '';
-        document.getElementById("plan_type").value = logo.planType || '';
-        document.getElementById("client_level").value = logo.clientLevel || "0";        
-        document.getElementById("contract_value").value = logo.contractValue || "0,00";
-    
-        // Define o radio button correto
-        document.getElementById("ativo-true").checked = !!logo.contractActive;
-        document.getElementById("ativo-false").checked = !logo.contractActive;
-    
-        // Mostra a imagem atual
-        const imagePreview = document.createElement('div');
-        imagePreview.innerHTML = `
-            <p>Imagem Atual:</p>
-            <img src="${logo.imagem}" alt="Logo atual" style="max-width: 100px; margin: 10px 0;" />
-            <p>Se desejar alterar, selecione uma nova imagem abaixo:</p>
-        `;
-    
-        const imageInputContainer = document.getElementById("logo-image").parentNode;
-        const oldPreview = document.getElementById("current-image-preview");
-        if (oldPreview) oldPreview.remove();
-    
-        imagePreview.id = "current-image-preview";
-        imageInputContainer.insertBefore(imagePreview, document.getElementById("logo-image"));
-    
-        document.getElementById("logo-image").required = false;
-        
-        saveBtn.textContent = 'Atualizar';
-        document.querySelector('.logo-form-container').classList.add('editing-mode');
-    }
-
-        // Filtra e atualiza a lista exibida
-     function applyFilters() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectElement = filterCategory
-    
-            let category = "";
-            if (!!selectElement.value) {
-                category = selectElement.value;
-            }
-            
-            const filtered = logos.filter(logo => {
-                const matchesName = logo.clientName.toLowerCase().includes(searchTerm);
-                const matchesFantasyName = logo.clientFantasyName.toLowerCase().includes(searchTerm);
-                const matchesCNPJ = logo.clientCNPJ.toLowerCase().includes(searchTerm);
-                const matchesCity = logo.clientCity.toLowerCase().includes(searchTerm);
-                const matchesUF = logo.clientUf.toLowerCase().includes(searchTerm);
-                const matchesPlanType =  (logo.planType || "").toLowerCase().includes(searchTerm);
-                const matchesCategory = category === "" || logo.category === category;
-                return (matchesPlanType || matchesName || matchesFantasyName || matchesCNPJ || matchesCity || matchesUF) && matchesCategory;
-            });
-    
-            renderLogos(filtered);
-    }
-    
-    function populateCategories() {
-        categories.forEach(group => {
-            const optgroup = document.createElement("optgroup");
-            optgroup.label = group.label;
-            group.options.forEach(option => {
-                const optionElement = document.createElement("option");
-                optionElement.value = option.value;
-                optionElement.textContent = option.label;
-                optgroup.appendChild(optionElement);
-            });
-            logoCategorySelect.appendChild(optgroup);
-        });
-    }
-
-        // Preenche as categorias no filtro também
-        function populateFilterCategories() {
-            categories.forEach(group => {
-                const optgroup = document.createElement("optgroup");
-                optgroup.label = group.label;
-                group.options.forEach(option => {
-                    const optionElement = document.createElement("option");
-                    optionElement.value = option.value;
-                    optionElement.textContent = option.label;
-                    optgroup.appendChild(optionElement);
-                });
-                filterCategory.appendChild(optgroup);
-            });
-        }
-    
-        function validarCNPJ(cnpj) {
-            cnpj = cnpj.replace(/[^\d]+/g, '');
-          
-            if (cnpj.length !== 14) return false;
-            if (/^(\d)\1+$/.test(cnpj)) return false;
-          
-            let tamanho = cnpj.length - 2;
-            let numeros = cnpj.substring(0, tamanho);
-            let digitos = cnpj.substring(tamanho);
-            let soma = 0;
-            let pos = tamanho - 7;
-          
-            for (let i = tamanho; i >= 1; i--) {
-              soma += numeros.charAt(tamanho - i) * pos--;
-              if (pos < 2) pos = 9;
-            }
-          
-            let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-            if (resultado != digitos.charAt(0)) return false;
-          
-            tamanho += 1;
-            numeros = cnpj.substring(0, tamanho);
-            soma = 0;
-            pos = tamanho - 7;
-          
-            for (let i = tamanho; i >= 1; i--) {
-              soma += numeros.charAt(tamanho - i) * pos--;
-              if (pos < 2) pos = 9;
-            }
-          
-            resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-            if (resultado != digitos.charAt(1)) return false;
-          
-            return true;
-        }
-          
-        function validarCNPJNoCampo() {
-            const input = document.getElementById('client-cnpj');
-            const feedback = document.getElementById('cnpj-feedback');
-            const cnpj = input.value;
-          
-            if (cnpj === '') {
-              feedback.textContent = '';
-              input.style.borderColor = '';
-              return;
-            }
-          
-            if (validarCNPJ(cnpj)) {
-              feedback.textContent = '';
-              input.style.borderColor = 'green';
-            } else {
-              feedback.textContent = 'CNPJ inválido';
-              input.style.borderColor = 'red';
-            }
-        }
-    
-        // Função para calcular data final baseada na data inicial e meses
-        function calculateEndDate() {
-            if (!startDateInput.value || !contractMonthsSelect.value) return;
-            
-            const startDate = new Date(startDateInput.value);
-            const monthsToAdd = parseInt(contractMonthsSelect.value);
-            
-            let endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + monthsToAdd);
-            
-            // Ajuste para o último dia do mês se o dia original não existir no novo mês
-            if (startDate.getDate() !== endDate.getDate()) {
-                endDate.setDate(0);
-            }
-            
-            const year = endDate.getFullYear();
-            const month = String(endDate.getMonth() + 1).padStart(2, '0');
-            const day = String(endDate.getDate()).padStart(2, '0');
-            
-            endDateInput.value = `${year}-${month}-${day}`;
-        }
-            
-    // Evento de submit do formulário adaptado para Firebase
-    logoForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-    
-        const formData = {
-            clientCNPJ: document.getElementById("client-cnpj").value,
-            clientName: document.getElementById("client-name").value,
-            clientFantasyName: document.getElementById("client-fantasy-name").value,
-            cellphone: document.getElementById("cellphone").value,
-            telephone: document.getElementById("telephone").value,
-            clientCity: document.getElementById("client-city").value,
-            clientUf: document.getElementById("client-uf").value,
-            email: document.getElementById("email").value,
-            websiteUrl: document.getElementById("client-website").value,
-            videoUrl: document.getElementById("client-videoUrl").value,
-            instagramUrl: document.getElementById("client-instagramUrl").value,
-            facebookUrl: document.getElementById("client-facebookUrl").value,
-            clientWhatsapp: document.getElementById("client-whatsapp").value,
-            description: document.getElementById("logo-description").value,
-            category: logoCategorySelect.value,
-            startDate: startDateInput.value,
-            contractMonths: contractMonthsSelect.value,
-            endDate: endDateInput.value,
-            contractActive: document.querySelector('input[name="contract-active"]:checked').value === 'true',
-            planType: document.getElementById('plan_type').value,
-            clientLevel: document.getElementById('client_level').value,
-            contractValue: document.getElementById("contract_value").value,
-            userId: userId
+    try {
+        const formData = new FormData(logoForm);
+        const logoData = {
+            clientName: formData.get('client-name'),
+            clientFantasyName: formData.get('client-fantasy-name'),
+            clientCNPJ: formData.get('client-cnpj'),
+            clientPhone: formData.get('client-phone'),
+            clientEmail: formData.get('client-email'),
+            clientCity: formData.get('client-city'),
+            clientUF: formData.get('client-uf'),
+            category: formData.get('logo-category'),
+            startDate: formData.get('start-date'),
+            endDate: formData.get('end-date'),
+            contractMonths: formData.get('contract-months'),
+            contractValue: formData.get('contract-value'),
+            contractActive: formData.get('contract-active') === 'true',
+            imagem: formData.get('logo-image-url')
         };
-    
-        const file = document.getElementById("logo-image").files[0];
-    
-        try {
-            if (editingIndex !== null) {
-                // Modo edição
-                const logoId = logos[editingIndex].id;
-                let imageUrl = logos[editingIndex].imagem;
-                let deleteToken = logos[editingIndex].deleteToken;
-    
-                if (file) {
-                    const { imageUrl: newUrl, deleteToken: newToken } = await uploadImageToCloudinary(file);
-                    imageUrl = newUrl;
-                    deleteToken = newToken;
-                    formData.imagem = imageUrl;
-                    formData.deleteToken = deleteToken;
-                }
-    
-                await updateLogoInFirestore(logoId, formData);
-                logos[editingIndex] = { ...logos[editingIndex], ...formData };
-    
-            } else {
-                // Novo cadastro
-                if (!file) {
-                    showAlert("Selecione uma imagem!");
-                    return;
-                }
-    
-                const cnpjExists = logos.some(l => l.clientCNPJ === formData.clientCNPJ);
-                if (cnpjExists) {
-                    showAlert("CNPJ já cadastrado!");
-                    return;
-                }
-    
-                const logoId = await addLogoToFirestore(formData);
-                const { imageUrl, deleteToken } = await uploadImageToCloudinary(file);
-                await updateLogoInFirestore(logoId, { imagem: imageUrl, deleteToken });
-    
-                logos.push({
-                    id: logoId,
-                    ...formData,
-                    imagem: imageUrl,
-                    deleteToken,
-                    createdAt: new Date()
-                });
-            }
-    
-            renderLogos(logos);
-            logoForm.reset();
-    
-            editingIndex = null;
-            saveBtn.textContent = 'Salvar';
-            document.querySelector('.logo-form-container').classList.remove('editing-mode');
-    
-            const oldPreview = document.getElementById("current-image-preview");
-            if (oldPreview) oldPreview.remove();
-    
-            showAlert("Cadastro realizado com sucesso!","Sucesso","success")
-        } catch (error) {
-            console.error("Erro ao salvar logo:", error);
-            showAlert("Ocorreu um erro ao salvar. Por favor, tente novamente.");
-        }
-    });
-    
-    let cnpjDelete = null;
-    document.getElementById("confirm-delete").addEventListener("click", async () => {
-        if (cnpjDelete !== null) {
-            try {
-                const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
-                if (logoToDelete) {
-                    // Exclui a imagem do Cloudinary
-                    await deleteLogoFromCloudinary(logoToDelete.deleteToken);
-    
-                    // Exclui o logo do Firestore
-                    await deleteLogoFromFirestore(logoToDelete.id);
-    
-                    // Remove o logo da lista local
-                    logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
-                    
-                    // Renderiza novamente a lista de logos
-                    renderLogos(logos);
 
-                    showAlert("Excluído com sucesso", "Atenção!", "success");
-                }
-            } catch (error) {
-                console.error("Erro ao excluir logo:", error);
-               showAlert("Ocorreu um erro ao excluir. Por favor, tente novamente.","Erro","error");
-            }
-            cnpjDelete = null;
-            document.getElementById("delete-modal").classList.add("hidden");
-        }
-    });
-
-    // Outros event listeners
-    logosGrid.addEventListener("click", (e) => {
-        if (e.target.classList.contains("delete-btn")) {
-            cnpjDelete = e.target.dataset.id;
-            document.getElementById("delete-modal").classList.remove("hidden");
+        if (editingIndex) {
+            await logosApi.update(editingIndex, logoData);
+            showAlert('Logotipo atualizado com sucesso!', 'success');
+        } else {
+            await logosApi.add(logoData);
+            showAlert('Logotipo adicionado com sucesso!', 'success');
         }
 
-        if (e.target.classList.contains("edit-btn")) {
-            const cnpjEditar = e.target.dataset.id;
-            loadLogoForEdit(cnpjEditar);
-            document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-
-    document.getElementById("cancel-delete").addEventListener("click", () => {
-        cnpjDelete = null;
-        document.getElementById("delete-modal").classList.add("hidden");
-    });
-    
-    cancelBtn.addEventListener('click', () => {
+        // Recarrega a lista de logos
+        logos = await logosApi.getAll();
+        renderLogos(logos);
+        
+        // Limpa o formulário
+        logoForm.reset();
+        logoForm.querySelector("#logo-preview").style.display = 'none';
         editingIndex = null;
-        saveBtn.textContent = 'Salvar';
+        logoForm.querySelector('.save-btn').textContent = 'Salvar';
+        logoForm.querySelector('.save-btn').classList.remove('update');
+        
+    } catch (error) {
+        console.error("Erro ao salvar logo:", error);
+        showAlert('Erro ao salvar logotipo. Por favor, tente novamente.', 'error');
+    }
+});
 
-        const oldPreview = document.getElementById("current-image-preview");
-        if (oldPreview) oldPreview.remove();
-    });
+// Upload de imagem
+logoImageInput.addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+        const result = await logosApi.uploadImage(file);
+        logoImageUrl.value = result.imageUrl;
+    } catch (error) {
+        showAlert('Erro ao fazer upload da imagem: ' + error.message, 'error');
+    }
+});
 
-    searchInput.addEventListener("input", applyFilters);
-    filterCategory.addEventListener("change", applyFilters);
-    startDateInput.addEventListener('change', calculateEndDate);
-    contractMonthsSelect.addEventListener('change', calculateEndDate);
+// Funções auxiliares
+function getCategoryLabelByValue(value) {
+    for (const category of categories) {
+        if (category.value === value) {
+            return category.label;
+        }
+        const subcategory = category.options.find(option => option.value === value);
+        if (subcategory) {
+            return subcategory.label;
+        }
+    }
+    return null;
+}
 
-    // Inicializa a aplicação
-    init();
+function formatToMoney(value) {
+    return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    }).format(value);
+}
+
+function showAlert(message, type = 'info') {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Funções globais para edição e exclusão
+window.editLogo = function(logoId) {
+    const logo = logos.find(l => l.id === logoId);
+    if (logo) {
+        editingIndex = logoId;
+        loadLogoForEdit(logo);
+    }
+};
+
+window.deleteLogo = async function(logoId) {
+    if (confirm('Tem certeza que deseja excluir este logotipo?')) {
+        try {
+            await logosApi.delete(logoId);
+            logos = logos.filter(l => l.id !== logoId);
+            renderLogos(logos);
+            showAlert('Logotipo excluído com sucesso!', 'success');
+        } catch (error) {
+            console.error('Erro ao excluir logo:', error);
+            showAlert('Erro ao excluir logotipo. Por favor, tente novamente.', 'error');
+        }
+    }
+};
+
+// Função para salvar o token
+function saveAuthToken(token) {
+    console.log('Salvando token no localStorage');
+    localStorage.setItem('authToken', token);
+    // Dispara um evento personalizado para notificar sobre a mudança
+    window.dispatchEvent(new CustomEvent('authTokenChanged', { detail: { token } }));
+}
+
+// Adiciona listener para mudanças de autenticação
+window.addEventListener('storage', (event) => {
+    if (event.key === 'authToken') {
+        console.log('Token alterado no localStorage');
+        handleNavigation();
+    }
+});
+
+// Adiciona listener para o evento personalizado
+window.addEventListener('authTokenChanged', (event) => {
+    console.log('Token alterado via evento personalizado');
+    handleNavigation();
+});
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Página carregada, inicializando...');
+    handleNavigation();
 });
 
 document.getElementById("btn-upload-image").addEventListener("click", () => {
@@ -648,20 +403,7 @@ document.getElementById("logo-image").addEventListener("change", (event) => {
 });
 
 // Funções de máscara e validação (mantidas iguais)
-const cnpjInput = document.getElementById('client-cnpj');
-cnpjInput.addEventListener('input', function () {
-    let value = cnpjInput.value.replace(/\D/g, ''); // Remove tudo que não é dígito
-
-    if (value.length > 14) value = value.slice(0, 14); // Limita a 14 dígitos
-
-    // Aplica a máscara: 00.000.000/0000-00
-    value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-    value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-    value = value.replace(/(\d{4})(\d)/, '$1-$2');
-
-    cnpjInput.value = value;
-});
+cnpjInput.addEventListener('input', () => formatCNPJ(cnpjInput));
 
 function aplicarMascaraTelefone(input, isCelular = false) {
     input.addEventListener('input', function (e) {
@@ -682,7 +424,7 @@ document.getElementById("logo-image").addEventListener("change", async (event) =
     const file = event.target.files[0];
     if (!file) return;
     try {
-      const result = await uploadImageToCloudinary(file);
+      const result = await logosApi.uploadImage(file);
       document.getElementById("logo-image-url").value = result.imageUrl;
     } catch (error) {
       alert("Erro ao enviar imagem: " + error.message);
@@ -698,30 +440,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Validação de valor do contrato (mantida igual)
 const inputValorContrato = document.getElementById('contract_value');
-function formatToMoney(value) {
-    value = value.replace(/\D/g, '');
-    if (value === '') return '0,00';
-    value = (parseInt(value, 10) / 100).toFixed(2);
-    return value
-      .replace('.', ',')
-      .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
-
-  inputValorContrato.addEventListener('input', function (e) {
+inputValorContrato.addEventListener('input', function (e) {
     e.target.value = formatToMoney(e.target.value);
-  });
+});
 
-  inputValorContrato.addEventListener('focus', function () {
+inputValorContrato.addEventListener('focus', function () {
     if (inputValorContrato.value === '0,00') {
         inputValorContrato.value = '';
     }
-  });
+});
 
-  inputValorContrato.addEventListener('blur', function () {
+inputValorContrato.addEventListener('blur', function () {
     if (inputValorContrato.value === '') {
         inputValorContrato.value = '0,00';
     }
-  });
+});
 
 // Validação de email 
 const emailInput = document.getElementById('email');
@@ -742,3 +475,267 @@ emailInput.addEventListener('input', function () {
     emailInput.setCustomValidity('E-mail inválido');
   }
 });
+
+// Carrega os dados de um logo no formulário para edição    
+function loadLogoForEdit(logo) {
+    console.log('Carregando logo para edição:', logo); // Debug
+    
+    // Preenche os campos do formulário
+    const form = document.getElementById("logo-form");
+    form.querySelector("#client-name").value = logo.clientName || '';
+    form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
+    form.querySelector("#client-cnpj").value = logo.clientCNPJ || '';
+    form.querySelector("#client-phone").value = logo.clientPhone || '';
+    form.querySelector("#client-email").value = logo.clientEmail || '';
+    form.querySelector("#client-city").value = logo.clientCity || '';
+    form.querySelector("#client-uf").value = logo.clientUF || '';
+    form.querySelector("#logo-category").value = logo.category || '';
+    
+    // Formata as datas
+    if (logo.startDate) {
+        const startDate = new Date(logo.startDate);
+        form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
+    }
+    
+    if (logo.endDate) {
+        const endDate = new Date(logo.endDate);
+        form.querySelector("#end-date").value = endDate.toISOString().split('T')[0];
+    }
+    
+    form.querySelector("#contract-months").value = logo.contractMonths || '';
+    form.querySelector("#contract-value").value = logo.contractValue || '';
+    
+    // Atualiza a imagem do logo
+    const logoPreview = form.querySelector("#logo-preview");
+    if (logo.imagem) {
+        logoPreview.src = logo.imagem;
+        logoPreview.style.display = 'block';
+    } else {
+        logoPreview.src = 'placeholder.png';
+        logoPreview.style.display = 'none';
+    }
+
+    // Atualiza o botão de salvar
+    const saveBtn = form.querySelector('.save-btn');
+    saveBtn.textContent = 'Atualizar';
+    saveBtn.classList.add('update');
+
+    // Mostra o formulário
+    form.style.display = 'block';
+    
+    // Scroll para o formulário
+    form.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Filtra e atualiza a lista exibida
+function applyFilters() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectElement = filterCategory;
+
+    let category = "";
+    if (!!selectElement.value) {
+        category = selectElement.value;
+    }
+    
+    const filtered = logos.filter(logo => {
+        if (!logo) return false;
+
+        const matchesName = (logo.clientName || "").toLowerCase().includes(searchTerm);
+        const matchesFantasyName = (logo.clientFantasyName || "").toLowerCase().includes(searchTerm);
+        const matchesCNPJ = (logo.clientCNPJ || "").toLowerCase().includes(searchTerm);
+        const matchesCity = (logo.clientCity || "").toLowerCase().includes(searchTerm);
+        const matchesUF = (logo.clientUF || "").toLowerCase().includes(searchTerm);
+        const matchesPlanType = (logo.planType || "").toLowerCase().includes(searchTerm);
+        const matchesCategory = category === "" || logo.category === category;
+        
+        return (matchesPlanType || matchesName || matchesFantasyName || matchesCNPJ || matchesCity || matchesUF) && matchesCategory;
+    });
+
+    renderLogos(filtered);
+}
+
+function populateCategories() {
+    categories.forEach(group => {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = group.label;
+        group.options.forEach(option => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option.value;
+            optionElement.textContent = option.label;
+            optgroup.appendChild(optionElement);
+        });
+        logoCategorySelect.appendChild(optgroup);
+    });
+}
+
+// Preenche as categorias no filtro também
+function populateFilterCategories() {
+    categories.forEach(group => {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = group.label;
+        group.options.forEach(option => {
+            const optionElement = document.createElement("option");
+            optionElement.value = option.value;
+            optionElement.textContent = option.label;
+            optgroup.appendChild(optionElement);
+        });
+        filterCategory.appendChild(optgroup);
+    });
+}
+
+function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/[^\d]+/g, '');
+  
+    if (cnpj.length !== 14) return false;
+    if (/^(\d)\1+$/.test(cnpj)) return false;
+  
+    let tamanho = cnpj.length - 2;
+    let numeros = cnpj.substring(0, tamanho);
+    let digitos = cnpj.substring(tamanho);
+    let soma = 0;
+    let pos = tamanho - 7;
+  
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+  
+    let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    if (resultado != digitos.charAt(0)) return false;
+  
+    tamanho += 1;
+    numeros = cnpj.substring(0, tamanho);
+    soma = 0;
+    pos = tamanho - 7;
+  
+    for (let i = tamanho; i >= 1; i--) {
+      soma += numeros.charAt(tamanho - i) * pos--;
+      if (pos < 2) pos = 9;
+    }
+  
+    resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    if (resultado != digitos.charAt(1)) return false;
+  
+    return true;
+}
+  
+function validarCNPJNoCampo() {
+    const input = document.getElementById('client-cnpj');
+    const feedback = document.getElementById('cnpj-feedback');
+    const cnpj = input.value;
+  
+    if (cnpj === '') {
+      feedback.textContent = '';
+      input.style.borderColor = '';
+      return;
+    }
+  
+    if (validarCNPJ(cnpj)) {
+      feedback.textContent = '';
+      input.style.borderColor = 'green';
+    } else {
+      feedback.textContent = 'CNPJ inválido';
+      input.style.borderColor = 'red';
+    }
+}
+
+// Função para calcular data final baseada na data inicial e meses
+function calculateEndDate() {
+    if (!startDateInput.value || !contractMonthsSelect.value) return;
+    
+    const startDate = new Date(startDateInput.value);
+    const monthsToAdd = parseInt(contractMonthsSelect.value);
+    
+    let endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + monthsToAdd);
+    
+    // Ajuste para o último dia do mês se o dia original não existir no novo mês
+    if (startDate.getDate() !== endDate.getDate()) {
+        endDate.setDate(0);
+    }
+    
+    const year = endDate.getFullYear();
+    const month = String(endDate.getMonth() + 1).padStart(2, '0');
+    const day = String(endDate.getDate()).padStart(2, '0');
+    
+    endDateInput.value = `${year}-${month}-${day}`;
+}
+
+let cnpjDelete = null;
+document.getElementById("confirm-delete").addEventListener("click", async () => {
+    if (cnpjDelete !== null) {
+        try {
+            const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
+            if (logoToDelete) {
+                // Exclui a imagem do Cloudinary
+                await deleteImage(logoToDelete.imagem);
+
+                // Exclui o logo do Firestore
+                await deleteLogoFromFirestore(logoToDelete.id);
+
+                // Remove o logo da lista local
+                logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
+                
+                // Renderiza novamente a lista de logos
+                renderLogos(logos);
+
+                showAlert("Excluído com sucesso", "Atenção!", "success");
+            }
+        } catch (error) {
+            console.error("Erro ao excluir logo:", error);
+           showAlert("Ocorreu um erro ao excluir. Por favor, tente novamente.","Erro","error");
+        }
+        cnpjDelete = null;
+        document.getElementById("delete-modal").classList.add("hidden");
+    }
+});
+
+// Outros event listeners
+logosGrid.addEventListener("click", (e) => {
+    if (e.target.classList.contains("delete-btn")) {
+        cnpjDelete = e.target.dataset.id;
+        document.getElementById("delete-modal").classList.remove("hidden");
+    }
+
+    if (e.target.classList.contains("edit-btn")) {
+        const cnpjEditar = e.target.dataset.id;
+        loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
+        document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
+    }
+});
+
+document.getElementById("cancel-delete").addEventListener("click", () => {
+    cnpjDelete = null;
+    document.getElementById("delete-modal").classList.add("hidden");
+});
+  
+cancelBtn.addEventListener('click', () => {
+    editingIndex = null;
+    saveBtn.textContent = 'Salvar';
+
+    const oldPreview = document.getElementById("current-image-preview");
+    if (oldPreview) oldPreview.remove();
+});
+
+searchInput.addEventListener("input", applyFilters);
+filterCategory.addEventListener("change", applyFilters);
+startDateInput.addEventListener('change', calculateEndDate);
+contractMonthsSelect.addEventListener('change', calculateEndDate);
+
+// Função para formatar CNPJ
+function formatCNPJ(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 14) value = value.slice(0, 14);
+    
+    if (value.length > 12) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/, '$1.$2.$3/$4-$5');
+    } else if (value.length > 8) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4}).*/, '$1.$2.$3/$4');
+    } else if (value.length > 5) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{3}).*/, '$1.$2.$3');
+    } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d{3}).*/, '$1.$2');
+    }
+    
+    input.value = value;
+}

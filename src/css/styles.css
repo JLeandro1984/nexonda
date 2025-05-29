@@ -22,12 +22,19 @@ body {
 
 header {
   background-color: var(--primary-color);
-  padding: 0 2rem 1rem 2rem;
+  padding: 0 1rem 1rem 2rem;
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0;
 }
 
 .admin-btn {
@@ -116,13 +123,6 @@ nav {
 
 .language-option:hover {
   background: #f5f5f5;
-}
-
-header nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 0 20px;
 }
 
 .logo img {
@@ -834,4 +834,8 @@ body.dark-mode #premium-ads {
     align-self: flex-end;
     margin: 0;
   }
+}
+
+.d-none {
+  display: none !important;
 }

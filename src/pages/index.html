@@ -47,8 +47,7 @@
           <!-- Seletor de Idiomas -->
           <div
             id="language-selector-container"
-            class="language-selector"
-            style="display: none"
+            class="language-selector d-none"
           >
             <button id="language-button" class="language-button">
               <img
@@ -72,12 +71,17 @@
               </div>
             </div>
           </div>
+
           <!-- Toggle Dark Mode -->
           <div class="dark-mode-toggle">
             <button id="dark-mode-btn" aria-label="Alternar modo escuro">
               <i class="fas fa-moon"></i>
             </button>
           </div>
+        </div>
+
+        <div class="user-info d-none">
+          <user-menu></user-menu>
         </div>
       </nav>
     </header>

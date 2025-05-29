@@ -7,7 +7,7 @@ class UserMenu extends HTMLElement {
   async connectedCallback() {
     const html = await fetch('../components/user-menu.html').then(r => r.text());
     const css = await fetch('../components/user-menu.css').then(r => r.text());
-debugger
+
     this.shadowRoot.innerHTML = `
       <style>${css}</style>
       ${html}

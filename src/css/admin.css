@@ -16,50 +16,12 @@ body {
   padding: 20px;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 0;
-  margin-bottom: 40px;
-  border-bottom: 1px solid #ddd;
-}
-
-header h1 {
-  font-size: 2rem;
-  color: #2c3e50;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.user-info span {
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.logout-btn {
-  padding: 8px 16px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.logout-btn:hover {
-  background-color: #c0392b;
-}
-
 .content {
   background-color: white;
   border-radius: 8px;
   padding: 30px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
 }
 
 .welcome-section {
@@ -68,12 +30,14 @@ header h1 {
 }
 
 .welcome-section h2 {
-  color: #2c3e50;
+  color: var(--primary-color);
   margin-bottom: 10px;
+  font-size: 2rem;
 }
 
 .welcome-section p {
-  color: #7f8c8d;
+  color: var(--text-color);
+  font-size: 1.2rem;
 }
 
 .options-grid {
@@ -90,6 +54,7 @@ header h1 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
+  border: 1px solid #eee;
 }
 
 .option-card:hover {
@@ -98,24 +63,54 @@ header h1 {
 }
 
 .option-card h2 {
-  color: #2c3e50;
+  color: var(--primary-color);
   margin-bottom: 10px;
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.option-card h2 i {
+  color: var(--secondary-color);
 }
 
 .option-card p {
-  color: #666;
+  color: var(--text-color);
   line-height: 1.5;
 }
 
 @media (max-width: 768px) {
-  header {
-    flex-direction: column;
-    gap: 20px;
-    text-align: center;
-  }
-
   .options-grid {
     grid-template-columns: 1fr;
   }
+
+  .welcome-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .welcome-section p {
+    font-size: 1.1rem;
+  }
+
+  .option-card {
+    padding: 20px;
+  }
+}
+
+/* Dark mode */
+body.dark-mode .content,
+body.dark-mode .option-card {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+body.dark-mode .welcome-section h2,
+body.dark-mode .option-card h2 {
+  color: var(--text-color);
+}
+
+body.dark-mode .welcome-section p,
+body.dark-mode .option-card p {
+  color: #aaa;
 }

@@ -1,15 +1,3 @@
-import { firestore } from '../js/firebase-config.js';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  doc,
-  updateDoc,
-  deleteDoc
-} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
-
 // Função para carregar propagandas premium
 async function loadPremiumAds() {
   const sectionAds = document.querySelector('#premium-ads');
@@ -17,12 +5,11 @@ async function loadPremiumAds() {
   if (!adsContainer) return;
 
   try {
-    // Carrega os dados do Firebase
+    // Carrega os dados da Firebase Function
     const premiumAds = await getPremiumAdsFromFirebase();
     
     // Filtra apenas propagandas ativas e premium
     const activeAds = premiumAds.filter(ad => {
-      debugger
       const endDate = new Date(ad.endDate);
       const today = new Date();
       return ad.isActive && endDate >= today;
@@ -76,7 +63,7 @@ async function loadPremiumAds() {
         <div class="premium-ad-content">
           <h3>${ad.title}</h3>
           <p title="${ad.description}">${shortDescription}</p>
-          <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank">Saiba mais</a>
+          <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank" onclick="trackAdClick('${ad.id}')">Saiba mais</a>
         </div>
       `;
       
@@ -113,28 +100,34 @@ async function loadPremiumAds() {
   }
 }
 
-// Função para obter anúncios premium do Firebase
+// Função para obter anúncios premium da Firebase Function
 async function getPremiumAdsFromFirebase() {
   try {
-    const querySnapshot = await getDocs(collection(firestore, 'premiumAds'));
-    const premiumAds = [];
-    
-    querySnapshot.forEach((doc) => {
-      const adData = doc.data();
-      premiumAds.push({
-        id: doc.id,
-        ...adData
-      });
-    });
-    
-    return premiumAds;
+    const response = await fetch('https://publicpremiumads-lnpdkkqg5q-uc.a.run.app');
+    if (!response.ok) {
+      throw new Error('Erro ao carregar propagandas');
+    }
+    return await response.json();
   } catch (error) {
-    console.error('Erro ao buscar anúncios do Firebase:', error);
+    console.error('Erro ao buscar anúncios:', error);
     return [];
   }
 }
 
-// Restante do código permanece igual...
+// Função para rastrear cliques nos anúncios
+async function trackAdClick(adId) {
+  try {
+    await fetch('https://publicpremiumads-lnpdkkqg5q-uc.a.run.app/track', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ adId, type: 'click' })
+    });
+  } catch (error) {
+    console.error('Erro ao rastrear clique:', error);
+  }
+}
 
 // Adiciona indicadores de scroll
 function addCarouselIndicators(carousel, container) {

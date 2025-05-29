@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administração - Sistema de Logotipos</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/admin.css" />
+
+    <script type="module" src="../components/user-menu.js"></script>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div class="logo">
+          <img
+            src="../images/brandConnect/logo_brandConnect.png"
+            alt="BrandConnect"
+          />
+        </div>
+        <div class="user-info">
+          <user-menu></user-menu>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="content">
+        <div class="welcome-section">
+          <h2>Painel de Administração</h2>
+          <p>Bem-vindo ao painel de controle do sistema</p>
+        </div>
+
+        <div class="options-grid">
+          <div class="option-card" data-option="manage-logos">
+            <h2><i class="fas fa-images"></i> Gerenciar Logotipos</h2>
+            <p>Adicione, edite ou remova logotipos do sistema</p>
+          </div>
+          <div class="option-card" data-option="settings">
+            <h2><i class="fas fa-cog"></i> Configurações</h2>
+            <p>Configure as preferências do sistema</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="../js/admin.js" type="module"></script>
+  </body>
+</html>

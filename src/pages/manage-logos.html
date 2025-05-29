@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerenciar Logotipos - Logo Gallery Admin</title>
+
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/manage-logos.css" />
+    <script type="module" src="../components/user-menu.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <nav>
+          <div class="logo">
+            <img
+              src="../images/brandConnect/logo_brandConnect.png"
+              alt="BrandConnect"
+            />
+          </div>
+          <div class="user-info">
+            <user-menu></user-menu>
+          </div>
+        </nav>
+      </header>
+
+      <main class="content">
+        <div class="logo-management">
+          <div class="logo-form-container">
+            <h2>Adicionar Novo Logotipo</h2>
+            <form id="logo-form">
+              <div class="form-group">
+                <label for="client-name">Razão Social:</label>
+                <input type="text" id="client-name" required />
+              </div>
+              <div class="form-group">
+                <label for="client-fantasy-name">Nome Fantasia:</label>
+                <input type="text" id="client-fantasy-name" />
+              </div>
+              <div class="form-group">
+                <label for="client-cnpj">CNPJ:</label>
+                <input
+                  type="text"
+                  id="client-cnpj"
+                  placeholder="00.000.000/0000-00"
+                  required
+                />
+                <span
+                  id="cnpj-feedback"
+                  style="color: red; font-size: 0.9em"
+                ></span>
+              </div>
+
+              <div class="form-group">
+                <label for="client-city">Cidade:</label>
+                <input type="text" id="client-city" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-uf">UF:</label>
+                <select id="client-uf" required>
+                  <option value="">Selecione</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="telephone">Telefone:</label>
+                <input
+                  type="text"
+                  id="telephone"
+                  name="telephone"
+                  placeholder="(XX) XXXX-XXXX"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="cellphone">Celular:</label>
+                <input
+                  type="text"
+                  id="cellphone"
+                  name="cellphone"
+                  placeholder="(XX) XXXXX-XXXX"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" required />
+                <small id="email-error" style="color: red; display: none"
+                  >E-mail inválido</small
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="client-website">Website:</label>
+                <input type="url" id="client-website" />
+              </div>
+
+              <div class="form-group">
+                <label for="client-videoUrl">Url vídeo:</label>
+                <input type="url" id="client-videoUrl" />
+              </div>
+
+              <div class="form-group">
+                <label for="client-instagramUrl">Instagram:</label>
+                <input type="url" id="client-instagramUrl" />
+              </div>
+
+              <div class="form-group">
+                <label for="client-facebookUrl">Facebook:</label>
+                <input type="url" id="client-facebookUrl" />
+              </div>
+
+              <div class="form-group">
+                <label for="client-whatsapp">WhatsApp:</label>
+                <input
+                  type="tel"
+                  id="client-whatsapp"
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="logo-category">Categoria:</label>
+                <select id="logo-category" required>
+                  <option value="">Selecione uma categoria</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="logo-description">Descrição:</label>
+                <textarea id="logo-description"></textarea>
+              </div>
+
+              <!-- Data Inicial -->
+              <div class="form-group">
+                <label for="start-date">Contrato - Data Inicial::</label>
+                <input type="date" id="start-date" required />
+              </div>
+
+              <!-- Seletor de Meses -->
+              <div class="form-group">
+                <label for="contract-months">Tempo de Contrato:</label>
+                <select id="contract-months" required>
+                  <option value="">Selecione</option>
+                  <option value="6">6 meses</option>
+                  <option value="12">12 meses</option>
+                  <option value="24">24 meses</option>
+                  <option value="36">36 meses</option>
+                </select>
+              </div>
+
+              <!-- Data Final -->
+              <div class="form-group">
+                <label for="end-date">Contrato - Data Final:</label>
+                <input type="date" id="end-date" readonly required />
+              </div>
+
+              <div class="form-group">
+                <label for="plan_type">Tipo de plano:</label>
+                <select id="plan_type" required>
+                  <option value="">Selecione</option>
+                  <option value="basico">Basico</option>
+                  <option value="premium">Premium</option>
+                  <option value="premium-plus">Premium Plus</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="client_level">Nível do cliente (0 a 10):</label>
+                <select id="client_level" required>
+                  <option value="">Selecione</option>
+                  <!-- Gerando opções de 0 a 10 -->
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="contract_value">Valor do Contrato:</label>
+                <input type="text" id="contract_value" required value="0,00" />
+              </div>
+
+              <div
+                class="form-group"
+                style="display: flex; flex-direction: column"
+              >
+                <label>Ativo:</label>
+                <div style="display: flex; gap: 20px; margin-top: 5px">
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="ativo-true"
+                      name="contract-active"
+                      value="true"
+                      required
+                    />
+                    Sim
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="ativo-false"
+                      name="contract-active"
+                      value="false"
+                      required
+                    />
+                    Não
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="logo-image">Imagem do Logotipo:</label>
+                <button type="button" id="btn-upload-image">
+                  Selecionar Imagem
+                </button>
+                <input
+                  type="text"
+                  id="logo-image-url"
+                  readonly
+                  placeholder="URL da imagem será exibida aqui"
+                />
+                <small
+                  >Formatos aceitos: JPG, PNG, SVG. Tamanho máximo: 2MB.</small
+                >
+              </div>
+              <input
+                type="file"
+                id="logo-image"
+                name="logo-image"
+                accept="image/*"
+                style="display: none"
+              />
+
+              <div class="form-actions">
+                <button type="submit" class="save-btn">Salvar</button>
+                <button type="reset" class="cancel-btn">Cancelar</button>
+                <button type="button" id="cancel-button" style="display: none">
+                  Cancelar Edição
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div id="logos-list" class="logos-list">
+            <h2>Logotipos Cadastrados</h2>
+            <div class="search-filter">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Buscar por nome..."
+              />
+              <select id="filter-category">
+                <option value="">Todas as Categorias</option>
+              </select>
+            </div>
+            <div class="logos-grid" id="logos-grid"></div>
+          </div>
+        </div>
+
+        <!-- Seção de Propagandas Premium -->
+        <div class="admin-section">
+          <h2><i class="fas fa-ad"></i> Cadastrar Nova Propaganda Premium</h2>
+          <form id="ad-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-title">Título da Propaganda*</label>
+                <input
+                  type="text"
+                  id="ad-title"
+                  required
+                  placeholder="Ex: Oferta Especial de Verão"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="ad-client">Cliente Premium*</label>
+                <select id="ad-client" required>
+                  <option value="">Selecione um cliente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="ad-description">Descrição*</label>
+              <textarea
+                id="ad-description"
+                required
+                placeholder="Descreva a promoção ou campanha"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-type">Tipo de Mídia*</label>
+                <select id="ad-type" required>
+                  <option value="image">Imagem (Banner)</option>
+                  <option value="video">Vídeo</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="ad-media">URL da Mídia*</label>
+                <input
+                  type="url"
+                  id="ad-media"
+                  required
+                  placeholder="https://exemplo.com/banner.jpg"
+                />
+                <small class="hint">Para vídeos: YouTube ou link MP4</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="ad-link">Link de Destino*</label>
+              <input
+                type="url"
+                id="ad-link"
+                required
+                placeholder="https://exemplo.com/promocao"
+              />
+              <small class="hint"
+                >Página para onde o usuário será direcionado ao clicar</small
+              >
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-start">Data de Início*</label>
+                <input type="date" id="ad-start" required />
+              </div>
+
+              <div class="form-group">
+                <label for="ad-end">Data de Término*</label>
+                <input type="date" id="ad-end" required />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="save-btn">
+                <i class="fas fa-save"></i> Salvar Propaganda
+              </button>
+              <button type="reset" class="cancel-btn">
+                <i class="fas fa-times"></i> Limpar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de Propagandas Cadastradas -->
+        <div class="admin-section">
+          <h2><i class="fas fa-list"></i> Propagandas Cadastradas</h2>
+          <div class="ads-controls">
+            <div class="search-filter">
+              <input
+                type="text"
+                id="ad-search-input"
+                placeholder="Buscar propagandas..."
+              />
+              <select id="ad-filter-status">
+                <option value="all">Todas</option>
+                <option value="active">Ativas</option>
+                <option value="inactive">Inativas</option>
+                <option value="upcoming">Futuras</option>
+                <option value="expired">Expiradas</option>
+              </select>
+            </div>
+          </div>
+          <div class="premium-ads-list" id="premium-ads-list">
+            <!-- As propagandas serão carregadas aqui -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="delete-modal" class="modal hidden">
+      <div class="modal-content">
+        <h2>Confirmar Exclusão</h2>
+        <p>Tem certeza que deseja excluir este logotipo?</p>
+        <div class="modal-actions">
+          <button id="confirm-delete" class="btn confirm">Excluir</button>
+          <button id="cancel-delete" class="btn cancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Vídeo -->
+    <div id="youtube-overlay" class="d-none"></div>
+    <div id="youtube-modal" class="d-none">
+      <div id="youtube-player"></div>
+      <button
+        class="close-btn"
+        onclick="closeYouTubePlayer()"
+        aria-label="Fechar vídeo"
+      >
+        X
+      </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="../js/youtube-api.js"></script>
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/manage-logos.js"></script>
+    <script type="module" src="../js/manage-advertising.js"></script>
+  </body>
+</html>

@@ -1,34 +1,29 @@
-import { firestore, serverTimestamp} from '../js/firebase-config.js';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  doc,
-  updateDoc,
-  deleteDoc
-} from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 import { categories } from './categories.js';
-import { ufs } from './ufs.js';  
- 
-// Removed STORAGE_KEY since we're not using localStorage anymore
+import { ufs } from './ufs.js';
+
+// Constants
+const STORAGE_KEY = 'contactFormData';
 const categorySelect = document.getElementById("category-select");
 
-// Carrega logos do Firebase Firestore
+// Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
-        const logosCollection = collection(firestore, 'logos');
-        const querySnapshot = await getDocs(logosCollection);
-        
-        const logos = [];
-        querySnapshot.forEach((doc) => {
-            logos.push({ id: doc.id, ...doc.data() });
+        const response = await fetch('https://publiclogos-lnpdkkqg5q-uc.a.run.app', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
-        
-        return logos;
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Erro ao carregar logotipos');
+        }
+
+        const logos = await response.json();
+        return Array.isArray(logos) ? logos : [];
     } catch (error) {
-        console.error("Error loading logos from Firestore:", error);
+        console.error("Error loading logos:", error);
         return [];
     }
 }
@@ -441,21 +436,27 @@ clearIcon.addEventListener('click', () => {
 // Formulário preenchido pelo cliente
 document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('contact-form');
+  if (!form) return; // Exit if form doesn't exist
+
   const inputs = form.querySelectorAll('input, textarea');
-  const STORAGE_KEY = 'contactFormData';           // Rascunho temporário
-  const alertBox = createAlertBox();               // Alerta visual
+  const alertBox = createAlertBox();
 
   // Carrega o rascunho salvo localmente
   function loadFormData() {
       const savedData = localStorage.getItem(STORAGE_KEY);
       if (savedData) {
-          const formData = JSON.parse(savedData);
-          inputs.forEach(input => {
-              const fieldName = input.getAttribute('placeholder') || input.name;
-              if (formData[fieldName]) {
-                  input.value = formData[fieldName];
-              }
-          });
+          try {
+              const formData = JSON.parse(savedData);
+              inputs.forEach(input => {
+                  const fieldName = input.getAttribute('placeholder') || input.name;
+                  if (formData[fieldName]) {
+                      input.value = formData[fieldName];
+                  }
+              });
+          } catch (error) {
+              console.error('Error loading form data:', error);
+              localStorage.removeItem(STORAGE_KEY); // Clear invalid data
+          }
       }
   }
 
@@ -475,8 +476,14 @@ document.addEventListener('DOMContentLoaded', function () {
       alertBox.className = `alert-box ${type}`;
       document.body.appendChild(alertBox);
       setTimeout(() => {
-          alertBox.classList.add('fade-out');
-          setTimeout(() => document.body.removeChild(alertBox), 500);
+          if (alertBox.parentNode) {  // Verifica se o elemento ainda está no DOM
+              alertBox.classList.add('fade-out');
+              setTimeout(() => {
+                  if (alertBox.parentNode) {  // Verifica novamente antes de remover
+                      document.body.removeChild(alertBox);
+                  }
+              }, 500);
+          }
       }, 3000);
   }
 
@@ -496,22 +503,43 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   }
 
-  // Salva os dados no Firebase Firestore
+  // Salva os dados no Firebase Functions
   async function saveToFirebase(formData) {
       try {
-          // Adiciona timestamp do servidor
-          formData.createdAt = serverTimestamp();
-          
-          // Referência para a coleção de contatos
-          const contactsRef = collection(firestore, 'contacts');
-          
-          // Adiciona o documento
-          await addDoc(contactsRef, formData);
-          
-          return true;
+          const headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+          };
+
+          // Garantir que os dados estejam no formato correto
+          const contactData = {
+              name: formData.Nome?.trim(),
+              email: formData.Email?.trim(),
+              message: formData.Mensagem?.trim(),
+              createdAt: new Date().toISOString()
+          };
+
+          // Validação básica
+          if (!contactData.name || !contactData.email || !contactData.message) {
+              throw new Error('Por favor, preencha todos os campos obrigatórios.');
+          }
+
+          const response = await fetch('https://publiccontacts-lnpdkkqg5q-uc.a.run.app', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(contactData)
+          });
+
+          if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(errorData.error || 'Erro ao salvar contato');
+          }
+
+          const result = await response.json();
+          return result;
       } catch (error) {
-          console.error("Erro ao salvar no Firebase:", error);
-          return false;
+          console.error("Error saving contact:", error);
+          throw error;
       }
   }
 
@@ -532,7 +560,14 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       try {
-          // Salva no Firebase
+          // Desabilita o botão de envio
+          const submitButton = form.querySelector('button[type="submit"]');
+          if (submitButton) {
+              submitButton.disabled = true;
+              submitButton.textContent = 'Enviando...';
+          }
+
+          // Salva no Firebase Functions
           const saved = await saveToFirebase(formData);
           
           if (saved) {
@@ -546,7 +581,14 @@ document.addEventListener('DOMContentLoaded', function () {
           }
       } catch (error) {
           console.error("Erro no envio:", error);
-          showAlert("Ocorreu um erro inesperado. Tente novamente.", "Erro", "error");
+          showAlert(error.message || "Ocorreu um erro inesperado. Tente novamente.", "Erro", "error");
+      } finally {
+          // Reabilita o botão de envio
+          const submitButton = form.querySelector('button[type="submit"]');
+          if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.textContent = 'Enviar';
+          }
       }
   });
 
