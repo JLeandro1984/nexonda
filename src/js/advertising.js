@@ -102,6 +102,7 @@ async function loadPremiumAds() {
 
 // Função para obter anúncios premium da Firebase Function
 async function getPremiumAdsFromFirebase() {
+  
   try {
     const response = await fetch('https://publicpremiumads-lnpdkkqg5q-uc.a.run.app');
     if (!response.ok) {

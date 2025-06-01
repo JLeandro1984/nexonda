@@ -72,10 +72,10 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 // API de Logos
-const logosApi = {
+const logosApi = {   
     // Listar todos os logos
     getAll: () => apiRequest('logos'),
-    
+        
     // Adicionar novo logo
     add: (logoData) => apiRequest('logos', {
         method: 'POST',
@@ -98,8 +98,8 @@ const logosApi = {
         const token = await getAuthToken();
         const formData = new FormData();
         formData.append('image', file);
-
-        const response = await fetch(`${API_BASE_URL}/api/uploadImage`, {
+debugger
+        const response = await fetch(`${API_BASE_URL}/uploadImage`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`

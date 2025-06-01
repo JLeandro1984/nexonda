@@ -1,5 +1,6 @@
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
 import { app } from './firebase-config.js';
+import { showAlert } from '../components/alert.js';
 
 const auth = getAuth(app);
 let currentUser = null;
@@ -51,7 +52,7 @@ async function loadUsers() {
         });
     } catch (error) {
         console.error('Erro ao carregar usuários:', error);
-        alert('Erro ao carregar lista de usuários');
+        showAlert('Erro ao carregar lista de usuários', 'info');
     }
 }
 
@@ -77,12 +78,12 @@ async function handleAddUser(event) {
             throw new Error('Erro ao adicionar usuário');
         }
 
-        alert('Usuário adicionado com sucesso!');
+        showAlert('Usuário adicionado com sucesso!', 'success');
         document.getElementById('add-user-form').reset();
         loadUsers();
     } catch (error) {
         console.error('Erro ao adicionar usuário:', error);
-        alert('Erro ao adicionar usuário');
+        showAlert('Erro ao adicionar usuário', 'error');
     }
 }
 
@@ -109,11 +110,11 @@ async function handleDeleteUser(event) {
             throw new Error('Erro ao remover usuário');
         }
 
-        alert('Usuário removido com sucesso!');
+        showAlert('Usuário removido com sucesso!', 'success');
         loadUsers();
     } catch (error) {
         console.error('Erro ao remover usuário:', error);
-        alert('Erro ao remover usuário');
+        showAlert('Erro ao remover usuário', 'error');
     }
 }
 
@@ -149,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const currentUserData = users.find(u => u.email === user.email);
                 
                 if (!currentUserData?.isAdmin) {
-                    alert('Acesso negado. Apenas administradores podem acessar esta página.');
+                    showAlert('Acesso negado. Apenas administradores podem acessar esta página.', 'infor');
                     window.location.href = 'admin.html';
                     return;
                 }

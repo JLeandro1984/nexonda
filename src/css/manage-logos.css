@@ -970,6 +970,50 @@
   cursor: pointer;
 }
 
+.opening-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/*Inputs Horário de Funcionamento*/
+#opening-hours-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opening-day {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Espaço fixo para o label do dia */
+.opening-day > label:first-child {
+  min-width: 120px;
+  font-weight: 600;
+}
+
+/* Inputs de horário com largura fixa */
+.opening-day input[type="time"] {
+  width: 100px;
+}
+
+/* A palavra "às" */
+.opening-day .separator {
+  white-space: nowrap;
+}
+
+/* Label do checkbox fica na ponta direita */
+.opening-day .closed-label {
+  margin-left: auto; /* empurra para o fim */
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+
 /* Responsividade para tablets e smartphones */
 @media (max-width: 1024px) {
   .logo-management {

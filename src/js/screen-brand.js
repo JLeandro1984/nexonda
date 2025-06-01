@@ -1,5 +1,6 @@
 import { categories } from './categories.js';
 import { ufs } from './ufs.js';
+import { showAlert } from '../components/alert.js';
 
 // Constants
 const STORAGE_KEY = 'contactFormData';
@@ -193,19 +194,13 @@ function contratoAtivo(logo) {
 // Popula categorias no select de filtro
 function populateFilterCategories() {
     categories.forEach(group => {
-        // Cria o optgroup e define o label diretamente
         const optgroup = document.createElement("optgroup");
-        
-         // Adiciona o atributo data-lang ao optgroup
-         //optgroup.setAttribute('data-lang', group.value);
         optgroup.label = group.label; 
         
         group.options.forEach(option => {
             const optionElement = document.createElement("option");
-            optionElement.value = option.value; // O valor comparado com logo.category
+            optionElement.value = option.value; 
             optionElement.textContent = option.label;
-
-            // Adiciona um atributo "data-lang" ao option
             optionElement.setAttribute('data-lang', option.value);
             
             optgroup.appendChild(optionElement);
@@ -218,49 +213,74 @@ function populateFilterCategories() {
 async function updateLogoDisplay() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const locationTerm = document.getElementById('location-input')?.value.toLowerCase() || '';
+    const isUselocation = document.getElementById('use-location').checked;
+    let cityeUselocation = "";
+
+    if (isUselocation) {
+        cityeUselocation = document.getElementById('detected-city').textContent;
+    }
+
     const selectedCategory = categorySelect.value;
     const logos = await loadLogosFromStorage();
+
+    const normalizar = termo => (termo || "").trim().toLowerCase();
+    const separarPartes = termo => normalizar(termo).split(/[-\s]{1,}/).filter(Boolean);
+
+    const comparaComLogo = (partes, logo) => {
+        if (!partes.length) return true;
+        const city = normalizar(logo.clientCity);
+        const uf = normalizar(logo.clientUf);
+
+        if (partes.length === 2) {
+            const [p1, p2] = partes;
+            return (
+                (city.includes(p1) && uf.includes(p2)) ||
+                (city.includes(p2) && uf.includes(p1))
+            );
+        } else if (partes.length === 1) {
+            const [p] = partes;
+            return city.includes(p) || uf.includes(p);
+        }
+
+        return false;
+    };
 
     const filteredLogos = logos.filter(logo => {
         if (!contratoAtivo(logo)) return false;
 
-        const matchesSearch = logo.clientName.toLowerCase().includes(searchTerm);
+        // Filtro por nome (obrigatório se preenchido)
+        const matchesSearch = !searchTerm || logo.clientName?.toLowerCase().includes(searchTerm);
+        if (!matchesSearch) return false;
 
-            // Separar cidade e UF (suporta "cidade - uf", "cidade-uf", "cidade uf" ou apenas "cidade")
-            let [parteUm, parteDois] = locationTerm
-            .split(/[-\s]{1,}/) // separa por hífen ou espaço(s)
-            .map(s => s.trim().toLowerCase());
-       
-            // Se ambos cidade e UF forem fornecidos, deve fazer a verificação exata
-            const matchesLocation = !locationTerm || (
-                (parteUm && parteDois) 
-                ? (logo.clientCity?.toLowerCase().includes(parteUm) && logo.clientUf?.toLowerCase() === parteDois) 
-                : (parteUm && logo.clientCity?.toLowerCase().includes(parteUm)) || 
-                    (parteUm && logo.clientUf?.toLowerCase() === parteUm)
-            );
+        // Filtro por localização (obrigatório se algum termo de localização estiver preenchido)
+        const hasLocationFilter = locationTerm || cityeUselocation;
+        if (hasLocationFilter) {
+            const partesLocation = separarPartes(locationTerm);
+            const partesGeo = separarPartes(cityeUselocation);
 
+            const locationTermValid = partesLocation.length > 0 && comparaComLogo(partesLocation, logo);
+            const geoLocationValid = partesGeo.length > 0 && comparaComLogo(partesGeo, logo);
 
+            // Se ambos os filtros forem inválidos, retorna falso
+            if (!locationTermValid && !geoLocationValid) {
+                return false;
+            }
+        }
+
+        // Filtro por categoria (obrigatório se selecionado)
         const matchesCategory = !selectedCategory || logo.category === selectedCategory;
+        if (!matchesCategory) return false;
 
-        return matchesSearch && matchesLocation && matchesCategory;
+        return true;
     });
 
+    // Atualiza a UI com os logos filtrados
     const container = document.getElementById('logo-container');
     container.innerHTML = '';
-
-    if (filteredLogos.length === 0) {
-        container.innerHTML = `
-            <div class="no-results">
-                <p>Nenhum logo encontrado.</p>
-                <p>Tente ajustar sua pesquisa ou selecione outra categoria.</p>
-            </div>
-        `;
-    } else {
-        filteredLogos.forEach(logo => {
-            const logoElement = createLogoElement(logo);
-            container.appendChild(logoElement);
-        });
-    }
+    filteredLogos.forEach(logo => {
+        const logoElement = createLogoElement(logo);
+        container.appendChild(logoElement);
+    });
 }
 
 
@@ -283,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chave  = `mostrarAdmin${parteUm}${parteDois}`; 
   
     const params = new URLSearchParams(window.location.search);
-    const mostrarAdmin = params.get(chave) === 'true';
+    const mostrarAdmin = true //params.get(chave) === 'true';
   
     const adminBtn = document.getElementById('admin-btn');
     adminBtn.style.display = 'none';
@@ -313,8 +333,7 @@ checkbox.addEventListener('change', () => {
 
     if (cachedLocation) {
       const cidadeUF = JSON.parse(cachedLocation);
-      locationInput.value = cidadeUF;
-      citySpan.textContent = `Cidade: ${cidadeUF}`;
+      citySpan.textContent = `${cidadeUF}`;
       updateLogoDisplay();
       return;
     }
@@ -338,8 +357,7 @@ checkbox.addEventListener('change', () => {
             const uf = ufs.find(uf => uf.nome.toLowerCase() === estadoCompleto.toLowerCase())?.sigla || '';
 
             const cidadeUF = `${cidade}${uf ? ' - ' + uf : ''}`;
-            locationInput.value = cidadeUF;
-            citySpan.textContent = `Cidade: ${cidadeUF}`;
+            citySpan.textContent = `${cidadeUF}`;
 
             // Salva no localStorage
             localStorage.setItem('userLocation', JSON.stringify(cidadeUF));
@@ -362,7 +380,6 @@ checkbox.addEventListener('change', () => {
     }
   } else {
     citySpan.textContent = "Localização não informada";
-    locationInput.value = '';
     localStorage.removeItem('userLocation'); // Limpa o cache
     updateLogoDisplay();
   }
@@ -374,52 +391,99 @@ document.getElementById('location-input').addEventListener('input', updateLogoDi
 
 async function getUniqueCitiesFromLogos() {
     const logos = await loadLogosFromStorage();
-    const citySet = new Set();
-  
+    const cityMap = new Map(); // Usamos Map para manter a ordem
+
     logos.forEach(logo => {
-      if (logo.clientCity) {
-        citySet.add(logo.clientCity.trim());
-      }
+        if (logo.clientCity && logo.clientUf) {
+            const key = `${logo.clientCity.trim().toLowerCase()}-${logo.clientUf.trim().toLowerCase()}`;
+            const displayValue = `${logo.clientCity.trim()} - ${logo.clientUf.trim()}`;
+            
+            if (!cityMap.has(key)) {
+                cityMap.set(key, displayValue);
+            }
+        }
     });
-  
-    return Array.from(citySet).sort();
+
+    return Array.from(cityMap.values()).sort((a, b) => a.localeCompare(b));
 }
   
 const inputElement = document.getElementById("location-input");
 const suggestionsList = document.getElementById("suggestions-list");
 
 inputElement.addEventListener("input", async function () {
-  const searchTerm = this.value.toLowerCase();
-  suggestionsList.innerHTML = "";
+    const searchTerm = this.value.toLowerCase().trim();
+    suggestionsList.innerHTML = "";
 
-  const cidades = await getUniqueCitiesFromLogos();
-  if (searchTerm.length > 0) {
-    const filteredCities = cidades.filter(city =>
-      city.toLowerCase().includes(searchTerm)
+    if (searchTerm.length < 2) {
+        suggestionsList.style.display = "none";
+        return;
+    }
+
+    const rawCities = await getUniqueCitiesFromLogos();
+    const uniqueCityMap = new Map(); // chave: nome normalizado, valor: nome original
+
+    rawCities.forEach(city => {
+        const normalized = city.trim().toLowerCase();
+        if (!uniqueCityMap.has(normalized)) {
+            uniqueCityMap.set(normalized, city.trim());
+        }
+    });
+
+    const filteredCities = Array.from(uniqueCityMap.values()).filter(city =>
+        city.toLowerCase().includes(searchTerm)
     );
 
-    filteredCities.forEach(city => {
-      const suggestionItem = document.createElement("div");
-      suggestionItem.classList.add("suggestion-item");
-      suggestionItem.textContent = city;
+    // Evitar adicionar sugestões duplicadas visualmente
+    const added = new Set();
 
-      suggestionItem.addEventListener("click", function () {
-        inputElement.value = city;
-        suggestionsList.innerHTML = "";
-        updateLogoDisplay(); // Filtrar com base na cidade escolhida
-      });
+    if (filteredCities.length > 0) {
+        filteredCities.forEach(city => {
+            if (!added.has(city)) {
+                added.add(city);
 
-      suggestionsList.appendChild(suggestionItem);
-    });
-  }
+                const suggestionItem = document.createElement("div");
+                suggestionItem.classList.add("suggestion-item");
+                suggestionItem.textContent = city;
+
+                suggestionItem.addEventListener("click", function () {
+                    inputElement.value = city;
+                    suggestionsList.innerHTML = "";
+                    suggestionsList.style.display = "none";
+                    updateLogoDisplay();
+                });
+
+                suggestionsList.appendChild(suggestionItem);
+            }
+        });
+        suggestionsList.style.display = "block";
+    } else {
+        suggestionsList.style.display = "none";
+    }
+
+    removeDuplicateSuggestions();
 });
+function removeDuplicateSuggestions() {
+    const items = document.querySelectorAll(".suggestion-item");
+    const seen = new Set();
+
+    items.forEach(item => {
+        const text = item.textContent.trim();
+
+        if (seen.has(text)) {
+            item.remove();
+        } else {
+            seen.add(text);
+        }
+    });
+}
 
 document.addEventListener("click", function (event) {
-    if (!inputElement.contains(event.target) && !suggestionsList.contains(event.target)) {
-      suggestionsList.innerHTML = "";
+    if (event.target !== inputElement && 
+        !suggestionsList.contains(event.target)) {
+        suggestionsList.style.display = "none";
     }
 });
-  
+
 //Limpar input Cidade e/ou UF
 const clearIcon = document.getElementById('clear-location');
 locationInput.addEventListener('input', () => {
@@ -468,23 +532,6 @@ document.addEventListener('DOMContentLoaded', function () {
           formData[fieldName] = input.value;
       });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-  }
-
-  // Mostra uma mensagem de alerta
-  function showAlert(message, title = "Mensagem", type = "info") {
-      alertBox.textContent = message;
-      alertBox.className = `alert-box ${type}`;
-      document.body.appendChild(alertBox);
-      setTimeout(() => {
-          if (alertBox.parentNode) {  // Verifica se o elemento ainda está no DOM
-              alertBox.classList.add('fade-out');
-              setTimeout(() => {
-                  if (alertBox.parentNode) {  // Verifica novamente antes de remover
-                      document.body.removeChild(alertBox);
-                  }
-              }, 500);
-          }
-      }, 3000);
   }
 
   // Cria o elemento de alerta

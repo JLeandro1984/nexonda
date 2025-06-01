@@ -52,6 +52,56 @@
                 ></span>
               </div>
 
+              <div
+                class="form-group"
+                style="display: flex; flex-direction: column"
+              >
+                <label>Permitir mostrar endereço:</label>
+                <div style="display: flex; gap: 20px; margin-top: 5px">
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="show-address-true"
+                      name="show-address-active"
+                      value="true"
+                      required
+                    />
+                    Sim
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 5px">
+                    <input
+                      type="radio"
+                      id="show-address-false"
+                      name="show-address-active"
+                      value="false"
+                      required
+                    />
+                    Não
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="client-cep">CEP:</label>
+                <input type="text" id="client-cep" maxlength="9" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-address">Endereço:</label>
+                <input type="text" id="client-address" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-number">Nº:</label>
+                <input type="text" id="client-number" required />
+              </div>
+
+              <div class="form-group">
+                <label for="client-neighborhood">Cidade:</label>
+                <input type="text" id="client-neighborhood" required />
+              </div>
+
               <div class="form-group">
                 <label for="client-city">Cidade:</label>
                 <input type="text" id="client-city" required />
@@ -62,6 +112,16 @@
                 <select id="client-uf" required>
                   <option value="">Selecione</option>
                 </select>
+              </div>
+
+              <div class="form-group">
+                <label for="client-lat">Latitude:</label>
+                <input type="text" id="client-lat" readonly />
+              </div>
+
+              <div class="form-group">
+                <label for="client-lng">Longitude:</label>
+                <input type="text" id="client-lng" readonly />
               </div>
 
               <div class="form-group">
@@ -94,22 +154,38 @@
 
               <div class="form-group">
                 <label for="client-website">Website:</label>
-                <input type="url" id="client-website" />
+                <input
+                  type="url"
+                  placeholder="ex: https://exemplo.com"
+                  id="client-website"
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-videoUrl">Url vídeo:</label>
-                <input type="url" id="client-videoUrl" />
+                <input
+                  type="url"
+                  placeholder="ex: https://www.youtube.com/seucanal"
+                  id="client-videoUrl"
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-instagramUrl">Instagram:</label>
-                <input type="url" id="client-instagramUrl" />
+                <input
+                  type="url"
+                  placeholder="ex: https://www.instagram.com/usuario"
+                  id="client-instagramUrl"
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-facebookUrl">Facebook:</label>
-                <input type="url" id="client-facebookUrl" />
+                <input
+                  type="url"
+                  placeholder="ex: https://www.facebook.com/usuario"
+                  id="client-facebookUrl"
+                />
               </div>
 
               <div class="form-group">
@@ -243,6 +319,139 @@
                 accept="image/*"
                 style="display: none"
               />
+
+              <div>
+                <h3>Horário de Funcionamento:</h3>
+                <div
+                  id="opening-hours-container"
+                  style="display: flex; flex-direction: column; gap: 10px"
+                >
+                  <div class="opening-day" data-day="monday">
+                    <label for="monday-start">Segunda-feira:</label>
+                    <input type="time" id="monday-start" name="monday_start" />
+                    <span>às</span>
+                    <input type="time" id="monday-end" name="monday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="monday-closed"
+                        name="monday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="tuesday">
+                    <label for="tuesday-start">Terça-feira:</label>
+                    <input
+                      type="time"
+                      id="tuesday-start"
+                      name="tuesday_start"
+                    />
+                    <span>às</span>
+                    <input type="time" id="tuesday-end" name="tuesday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="tuesday-closed"
+                        name="tuesday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="wednesday">
+                    <label for="wednesday-start">Quarta-feira:</label>
+                    <input
+                      type="time"
+                      id="wednesday-start"
+                      name="wednesday_start"
+                    />
+                    <span>às</span>
+                    <input
+                      type="time"
+                      id="wednesday-end"
+                      name="wednesday_end"
+                    />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="wednesday-closed"
+                        name="wednesday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="thursday">
+                    <label for="thursday-start">Quinta-feira:</label>
+                    <input
+                      type="time"
+                      id="thursday-start"
+                      name="thursday_start"
+                    />
+                    <span>às</span>
+                    <input type="time" id="thursday-end" name="thursday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="thursday-closed"
+                        name="thursday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="friday">
+                    <label for="friday-start">Sexta-feira:</label>
+                    <input type="time" id="friday-start" name="friday_start" />
+                    <span>às</span>
+                    <input type="time" id="friday-end" name="friday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="friday-closed"
+                        name="friday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="saturday">
+                    <label for="saturday-start">Sábado:</label>
+                    <input
+                      type="time"
+                      id="saturday-start"
+                      name="saturday_start"
+                    />
+                    <span>às</span>
+                    <input type="time" id="saturday-end" name="saturday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="saturday-closed"
+                        name="saturday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+
+                  <div class="opening-day" data-day="sunday">
+                    <label for="sunday-start">Domingo:</label>
+                    <input type="time" id="sunday-start" name="sunday_start" />
+                    <span>às</span>
+                    <input type="time" id="sunday-end" name="sunday_end" />
+                    <label class="closed-label">
+                      <input
+                        type="checkbox"
+                        id="sunday-closed"
+                        name="sunday_closed"
+                      />
+                      Fechado
+                    </label>
+                  </div>
+                </div>
+              </div>
 
               <div class="form-actions">
                 <button type="submit" class="save-btn">Salvar</button>

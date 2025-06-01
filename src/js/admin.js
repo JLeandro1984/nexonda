@@ -1,3 +1,5 @@
+import { showAlert } from '../components/alert.js';
+
 // DOM Elements
 const userInfoSpan = document.getElementById('user-name');
 const logoutBtn = document.getElementById('logout-button');
@@ -125,7 +127,7 @@ function handleManageLogos() {
 
 // Função para mostrar mensagem de funcionalidade em desenvolvimento
 function handleSettings() {
-    alert('Funcionalidade em desenvolvimento');
+    showAlert('Funcionalidade em desenvolvimento.', 'info');
 }
 
 // Função para inicializar a interface do admin

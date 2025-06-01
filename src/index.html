@@ -6,9 +6,9 @@
     <title>Galeria de Logos Corporativos</title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="../css/styles.css" />
-    <link rel="stylesheet" href="../css/video-modal.css" />
-    <link rel="stylesheet" href="../css/advertising.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="./css/video-modal.css" />
+    <link rel="stylesheet" href="./css/advertising.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -20,6 +20,7 @@
 
     <!-- JS Bootstrap (com Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="./components/user-menu.js"></script>
   </head>
 
   <body>
@@ -27,7 +28,7 @@
       <nav>
         <div class="logo">
           <img
-            src="../images/brandConnect/logo_brandConnect.png"
+            src="./images/brandConnect/logo_brandConnect.png"
             alt="BrandConnect"
           />
         </div>
@@ -37,7 +38,7 @@
           <a href="#about" data-lang="about">Sobre</a>
           <a href="#contact" data-lang="contact">Contato</a>
           <a
-            href="admin.html"
+            href="./pages/admin.html"
             id="admin-btn"
             class="admin-btn"
             data-lang="admin-area"
@@ -52,21 +53,21 @@
             <button id="language-button" class="language-button">
               <img
                 id="current-flag"
-                src="../images/flags/br.png"
+                src="./images/flags/br.png"
                 alt="Current Language"
               />
             </button>
             <div class="language-options">
               <div class="language-option" data-lang-code="pt-BR">
-                <img src="../images/flags/br.png" alt="Português" />
+                <img src="./images/flags/br.png" alt="Português" />
                 <span data-lang="language-portuguese">Português</span>
               </div>
               <div class="language-option" data-lang-code="en-US">
-                <img src="../images/flags/us.png" alt="English" />
+                <img src="./images/flags/us.png" alt="English" />
                 <span data-lang="language-english">English</span>
               </div>
               <div class="language-option" data-lang-code="es-MX">
-                <img src="../images/flags/mx.png" alt="Español" />
+                <img src="./images/flags/mx.png" alt="Español" />
                 <span data-lang="language-spanish">Español</span>
               </div>
             </div>
@@ -218,11 +219,11 @@
     </div>
 
     <!-- Scripts -->
-    <script type="module" src="../js/screen-brand.js"></script>
-    <script type="module" src="../js/main.js"></script>
-    <script src="../js/click-tracker.js" defer></script>
+    <script type="module" src="./js/screen-brand.js"></script>
+    <script type="module" src="./js/main.js"></script>
+    <script src="./js/click-tracker.js" defer></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="../js/youtube-api.js"></script>
-    <script type="module" src="../js/advertising.js"></script>
+    <script src="./js/youtube-api.js"></script>
+    <script type="module" src="./js/advertising.js"></script>
   </body>
 </html>
