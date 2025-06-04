@@ -171,48 +171,66 @@ const getContext = (req) => {
 };
 
 // --- Função para upload de imagem para Firebase Storage ---
-exports.uploadImage = functions.https.onRequest({
-  cors: true,
-  maxInstances: 10
-}, handleCors(authenticateMiddleware(async (req, res) => {
-  const { image } = req.body;
-  const userId = req.user.uid;
+exports.uploadImage = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    // Responde corretamente a requisição preflight CORS
+    if (req.method === 'OPTIONS') {
+      return res.status(204).send('');
+    }
 
-  if (!image || !userId) {
-    return res.status(400).json({ error: 'Dados incompletos' });
-  }
+    try {
+      // Autenticação (middleware manual inline, substitua pelo seu se quiser)
+      const authHeader = req.headers.authorization || '';
+      const idToken = authHeader.replace('Bearer ', '');
+      if (!idToken) {
+        return res.status(401).json({ error: 'Token ausente' });
+      }
 
-  try {
-    // Extrai o conteúdo base64
-    const base64Data = image.split(';base64,').pop();
-    const imageBuffer = Buffer.from(base64Data, 'base64');
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      const userEmail = decodedToken.email || decodedToken.uid;
 
-    const bucket = admin.storage().bucket();
-    const fileName = `logos/${userId}/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.png`;
-    const file = bucket.file(fileName);
+      const { oldImagePath, newImage } = req.body;
+      if (!oldImagePath || !newImage || !userEmail) {
+        return res.status(400).json({ error: 'Dados incompletos para atualização' });
+      }
 
-    await file.save(imageBuffer, {
-      metadata: {
-        contentType: 'image/png'
-      },
-      resumable: false
-    });
+      if (!oldImagePath.startsWith(`logos/${userEmail}/`)) {
+        return res.status(403).json({ error: 'Não autorizado para atualizar esta imagem' });
+      }
 
-    // Gera URL assinada
-    const [url] = await file.getSignedUrl({
-      action: 'read',
-      expires: '03-01-2030'
-    });
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(oldImagePath);
 
-    res.status(200).json({
-      firebaseUrl: url,
-      storagePath: fileName
-    });
-  } catch (error) {
-    console.error('Erro no upload:', error);
-    res.status(500).json({ error: 'Erro no upload da imagem' });
-  }
-})));
+      // Exclui a imagem antiga
+      await file.delete().catch(() => {}); // ignora erro se não existir
+
+      // Converte base64 em buffer
+      const base64Data = newImage.split(';base64,').pop();
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+
+      // Salva nova imagem
+      await file.save(imageBuffer, {
+        metadata: { contentType: 'image/png' },
+        resumable: false
+      });
+
+      // Gera URL assinada
+      const [url] = await file.getSignedUrl({
+        action: 'read',
+        expires: '03-01-2030'
+      });
+
+      res.status(200).json({
+        firebaseUrl: url,
+        storagePath: oldImagePath
+      });
+
+    } catch (error) {
+      console.error('Erro ao atualizar imagem:', error);
+      res.status(500).json({ error: 'Erro ao atualizar imagem' });
+    }
+  });
+});
 
 // --- Função para deletar imagem do Firebase Storage ---
 exports.deleteImage = functions.https.onRequest({

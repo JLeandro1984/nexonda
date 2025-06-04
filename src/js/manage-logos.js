@@ -251,6 +251,15 @@ logoForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     adicionarHttpsNosUrls();
 
+    const saveBtn = logoForm.querySelector('.save-btn');
+    const btnText = saveBtn.querySelector('.btn-text');
+    const spinner = saveBtn.querySelector('.spinner');
+
+    // Mostrar spinner e desabilitar botão
+    saveBtn.disabled = true;
+    btnText.textContent = 'Salvando...';
+    spinner.classList.remove('hidden');
+
     try {
         const formData = new FormData(logoForm);
         const logoData = {
@@ -278,7 +287,12 @@ logoForm.addEventListener("submit", async (e) => {
             openingHours: obterHorarioFuncionamento()
         };
 
+          /* 🔽 LIMPEZA DOS CAMPOS OPCIONAIS */
+           //ex: if (!logoData.contractMonths) delete logoData.contractMonths;
+          //ex:  if (!logoData.contractValue) delete logoData.contractValue;
+        
         if (editingIndex) {
+            logoData.id = editingIndex;
             await logosApi.update(editingIndex, logoData);
             showAlert('Logotipo atualizado com sucesso!', 'success');
         } else {
@@ -286,35 +300,70 @@ logoForm.addEventListener("submit", async (e) => {
             showAlert('Logotipo adicionado com sucesso!', 'success');
         }
 
-         debugger;
         // Recarrega a lista de logos
         logos = await logosApi.getAll();
         renderLogos(logos);
-        
+
         // Limpa o formulário
         logoForm.reset();
         logoForm.querySelector("#logo-preview").style.display = 'none';
         editingIndex = null;
-        logoForm.querySelector('.save-btn').textContent = 'Salvar';
-        logoForm.querySelector('.save-btn').classList.remove('update');
-        
+        saveBtn.classList.remove('update');
+
     } catch (error) {
         console.error("Erro ao salvar logo:", error);
         showAlert('Erro ao salvar logotipo. Por favor, tente novamente.', 'error');
+    } finally {
+        // Restaurar botão
+        saveBtn.disabled = false;
+        btnText.textContent = editingIndex ? 'Atualizar' : 'Salvar';
+        spinner.classList.add('hidden');
     }
 });
 
-// Upload de imagem
+
 logoImageInput.addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    try {
-        const result = await logosApi.uploadImage(file);
-        logoImageUrl.value = result.imageUrl;
-    } catch (error) {
-        showAlert('Erro ao fazer upload da imagem: ' + error.message, 'error');
-    }
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const maxSize = 5 * 1024 * 1024;
+
+  if (!validTypes.includes(file.type)) {
+      showAlert('Tipo de arquivo inválido. Use JPG, PNG ou GIF.', 'error');
+      return;
+  }
+
+  if (file.size > maxSize) {
+      showAlert('Arquivo muito grande. Tamanho máximo: 5MB.', 'error');
+      return;
+  }
+
+  try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+          const base64Image = reader.result; // já com data:image/png;base64,...
+
+          const result = await logosApi.uploadImageBase64(base64Image);
+
+          if (!result || !result.firebaseUrl) {  // chave corrigida aqui
+              throw new Error('URL da imagem não recebida do servidor');
+          }
+
+          document.getElementById("logo-image-url").value = result.firebaseUrl;  // usar firebaseUrl
+          showAlert('Imagem enviada com sucesso!', 'success');
+      };
+
+      reader.readAsDataURL(file);
+  } catch (error) {
+      console.error('Erro detalhado no upload:', error);
+
+      if (error.message.includes('PERMISSION_DENIED')) {
+          showAlert('Erro: o arquivo pode estar acima do limite de 5MB ou não autorizado.', 'error');
+      } else {
+          showAlert('Erro ao enviar imagem: ' + (error.message || 'Erro desconhecido'), 'error');
+      }
+  }
 });
 
 // Funções auxiliares
@@ -425,16 +474,44 @@ function aplicarMascaraTelefone(input, isCelular = false) {
 }
 
 /*Anexar imagem*/
-document.getElementById("logo-image").addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    try {
-      const result = await logosApi.uploadImage(file);
-      document.getElementById("logo-image-url").value = result.imageUrl;
-    } catch (error) {        
-         showAlert('Erro ao enviar imagem' + error.message, 'error');
-    }
-});
+// document.getElementById("logo-image").addEventListener("change", async (event) => {
+//     const file = event.target.files[0];
+//     if (!file) return;
+
+//     // Validações do arquivo
+//     const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+//     const maxSize = 5 * 1024 * 1024; // 5MB
+
+//     if (!validTypes.includes(file.type)) {
+//         showAlert('Tipo de arquivo inválido. Use apenas imagens (JPG, PNG ou GIF).', 'error');
+//         return;
+//     }
+
+//     if (file.size > maxSize) {
+//         showAlert('Arquivo muito grande. O tamanho máximo permitido é 5MB.', 'error');
+//         return;
+//     }
+
+//     try {
+//         console.log('Iniciando upload do arquivo:', {
+//             nome: file.name,
+//             tipo: file.type,
+//             tamanho: file.size
+//         });
+
+//         const result = await logosApi.uploadImage(file);
+        
+//         if (!result || !result.imageUrl) {
+//             throw new Error('URL da imagem não recebida do servidor');
+//         }
+
+//         document.getElementById("logo-image-url").value = result.imageUrl;
+//         showAlert('Imagem enviada com sucesso!', 'success');
+//     } catch (error) {        
+//         console.error('Erro detalhado no upload:', error);
+//         showAlert('Erro ao enviar imagem: ' + (error.message || 'Erro desconhecido'), 'error');
+//     }
+// });
   
 document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telephone');
@@ -641,11 +718,11 @@ document.getElementById("confirm-delete").addEventListener("click", async () => 
         try {
             const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
             if (logoToDelete) {
-                // Exclui a imagem do Cloudinary
-                await deleteImage(logoToDelete.imagem);
+                const imagePath = extractFirebasePathFromUrl(logoToDelete.imagem);
+                await logosApi.deleteImage(imagePath);
 
                 // Exclui o logo do Firestore
-                await deleteLogoFromFirestore(logoToDelete.id);
+                await logosApi.delete(logoToDelete.id);
 
                 // Remove o logo da lista local
                 logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
@@ -664,6 +741,11 @@ document.getElementById("confirm-delete").addEventListener("click", async () => 
     }
 });
 
+function extractFirebasePathFromUrl(url) {
+  const decodedUrl = decodeURIComponent(url);
+  const matches = decodedUrl.match(/\/o\/(.*?)\?alt/);
+  return matches ? matches[1] : null;
+}
 // Outros event listeners
 logosGrid.addEventListener("click", (e) => {
     if (e.target.classList.contains("delete-btn")) {

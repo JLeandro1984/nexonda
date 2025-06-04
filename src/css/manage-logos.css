@@ -1014,6 +1014,32 @@
   user-select: none;
 }
 
+/*Efeito no botão salvar durante o add ou update*/
+.spinner {
+  border: 3px solid #fff;
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 /* Responsividade para tablets e smartphones */
 @media (max-width: 1024px) {
   .logo-management {

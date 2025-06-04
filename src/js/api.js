@@ -19,6 +19,21 @@ async function getAuthToken() {
     }
 }
 
+// Função para decodificar o token JWT
+// function decodeJwt(token) {
+//     try {
+//         const base64Url = token.split('.')[1];
+//         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+//         const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+//             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+//         }).join(''));
+//         return JSON.parse(jsonPayload);
+//     } catch (error) {
+//         console.error('Erro ao decodificar token:', error);
+//         return null;
+//     }
+// }
+
 // Função para fazer requisições à API
 async function apiRequest(endpoint, options = {}) {
     try {
@@ -94,25 +109,49 @@ const logosApi = {
     }),
     
     // Upload de imagem
-    uploadImage: async (file) => {
-        const token = await getAuthToken();
-        const formData = new FormData();
-        formData.append('image', file);
-debugger
-        const response = await fetch(`${API_BASE_URL}/uploadImage`, {
+   uploadImageBase64: async (base64Image) => {
+        try {
+            const token = await getAuthToken();
+            if (!token) throw new Error('Token não encontrado');
+
+            // Enviar direto o base64 completo, incluindo o prefixo "data:image/..."
+            const response = await fetch(`${API_BASE_URL}/uploadImage`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
-            body: formData
-        });
+            body: JSON.stringify({ image: base64Image }) // envio correto esperado pelo backend
+            });
 
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ error: 'Erro no upload da imagem' }));
-            throw new Error(error.error || 'Erro no upload da imagem');
+            if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Erro no upload');
+            }
+
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            throw error;
         }
+    },
+    deleteImage: async (imagePath) => {
+    const token = await getAuthToken();
+        debugger;
+    const response = await fetch(`${API_BASE_URL}/deleteImage`, {
+        method: 'POST',
+        headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ imagePath })
+    });
 
-        return await response.json();
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Erro ao deletar imagem');
+    }
     }
 };
 

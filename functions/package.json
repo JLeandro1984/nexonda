@@ -16,7 +16,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "firebase-admin": "^11.8.0",
-    "firebase-functions": "^4.9.0",
+    "firebase-functions": "^6.3.2",
     "google-auth-library": "^9.6.3",
     "node-fetch": "^2.6.1"
   },
