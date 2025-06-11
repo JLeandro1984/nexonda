@@ -128,12 +128,12 @@ nav {
   filter: brightness(0) invert(1);
 }
 
-a,
-a:visited,
-a:focus,
-a:active {
-  color: inherit;
-  text-decoration: none;
+.logo-item-wrapper {
+  display: flex;
+  justify-content: center; /* centraliza horizontalmente */
+  gap: 5px; /* espaço entre os elementos */
+  flex-wrap: wrap; /* quebra para próxima linha se necessário */
+  padding: 0;
 }
 
 .nav-menu,
@@ -841,6 +841,10 @@ body.dark-mode #premium-ads {
   #logo-container .logo-item {
     max-width: 80%;
     aspect-ratio: 16 / 9;
+  }
+
+  .btn-container {
+    gap: 5px;
   }
 
   #about {

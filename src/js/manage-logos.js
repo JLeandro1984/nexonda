@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const YOUR_CLOUD_NAME = "dmq4e5bm5";
 
         async function uploadImageToCloudinary(file) {
-            debugger;
+           
             const formData = new FormData();
             formData.append("file", file);
             formData.append("upload_preset", YOUR_UPLOAD_PRESET);
@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
  });
 
 let editingIndex = null;
+let editingDeleteToken = null;
 let logos = [];
 let isNavigating = false;
 
@@ -123,7 +124,7 @@ function decodeJwt(token) {
 async function checkAuth() {
     if (authState.isChecking) return authState.isAuthenticated;
     authState.isChecking = true;
-
+debugger
     try {
         // Verifica se há um token na URL (caso venha do redirecionamento do Google)
         const urlParams = new URLSearchParams(window.location.search);
@@ -141,8 +142,9 @@ async function checkAuth() {
         
         if (!token) {
             console.log('Token não encontrado no localStorage');
-            authState.isAuthenticated = false;
-            return false;
+           // authState.isAuthenticated = false;            
+            window.location.href = 'login.html';
+            //return false;
         }
 
         console.log('Enviando requisição para verificar token...');
@@ -289,8 +291,8 @@ function renderLogos(list) {
             <td>${logo.clientName || 'N/A'}</td>
             <td>${logo.clientFantasyName || 'N/A'}</td>
             <td>${logo.clientCNPJ || 'N/A'}</td>
-            <td>${logo.clientPhone || 'N/A'}</td>
-            <td>${logo.clientCity ? `${logo.clientCity}/${logo.clientUF}` : 'N/A'}</td>
+            <td>${logo.cellphone || 'N/A'}</td>
+            <td>${logo.clientCity ? `${logo.clientCity}/${logo.clientUf}` : 'N/A'}</td>
             <td>${categoria}</td>
             <td class="${statusClass}">${dataContrato}</td>
             <td>${valorContrato}</td>
@@ -305,7 +307,7 @@ function renderLogos(list) {
         `;
         tbody.appendChild(row);
     });
-    debugger;
+   
        // Inicializa totalContractValue como 0
         let totalContractValue = 0;
 
@@ -415,9 +417,9 @@ logoForm.addEventListener("submit", async (e) => {
                 
        if (file) {
             // Se estiver editando e houver uma imagem anterior com deleteToken, exclui do Cloudinary
-            if (editingIndex && logoData.deleteToken) {
-                try {
-                    await deleteLogoFromCloudinary(logoData.deleteToken);
+            if (editingIndex && editingDeleteToken) {
+                try {                                       
+                    await deleteLogoFromCloudinary(editingDeleteToken);
                 } catch (error) {
                     console.warn("Não foi possível excluir imagem anterior:", error);
                 }
@@ -427,14 +429,13 @@ logoForm.addEventListener("submit", async (e) => {
             const { imageUrl: newUrl, deleteToken: newToken } = await uploadImageToCloudinary(file);
             logoData.imageUrl = newUrl;
             logoData.deleteToken = newToken;
-        } else {
-            // Se imagem não foi alterada, manter os dados originais
-            logoData.imageUrl = formData.get('logo-image-url');  
-            logoData.deleteToken = logoBeingEdited?.deleteToken;
         }
                         
         if (editingIndex) {
-            logoData.id = editingIndex;
+            const logo = logos.find(l => l.id === editingIndex);
+              //logoData.deleteToken = logo.deleteToken
+             // logoData.imageUrl = logo.imageUrl
+              logoData.id = editingIndex;
 
             await logosApi.update(editingIndex, logoData);
             showAlert('Logotipo atualizado com sucesso!', 'success');
@@ -451,6 +452,7 @@ logoForm.addEventListener("submit", async (e) => {
         logoForm.reset();
         logoForm.querySelector("#logo-preview_img").style.display = 'none';
         editingIndex = null;
+        editingDeleteToken = null;
         saveBtn.classList.remove('update');
 
     } catch (error) {
@@ -573,7 +575,8 @@ function getCategoryLabelByValue(value) {
 }
 
 // Funções globais para edição e exclusão
-window.editLogo = function(logoId) {
+window.editLogo = function (logoId) {
+    debugger
     const logo = logos.find(l => l.id === logoId);
     if (logo) {
         editingIndex = logoId;
@@ -622,14 +625,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Página carregada, inicializando...');
     handleNavigation();
 });
-
-// document.getElementById("logo-image").addEventListener("change", (event) => {  
-//     debugger
-//     const file = event.target.files[0];
-//     if (file) {
-//         logoImageUrl.value = file.name;
-//     }
-// });
 
 // Funções de máscara e validação (mantidas iguais)
 cnpjInput.addEventListener('input', function () {
@@ -704,8 +699,11 @@ function aplicarMascaraTelefone(input, isCelular = false) {
 document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telephone');
     const celularInput = document.getElementById('cellphone');
+    const clientWhatsappInput = document.getElementById('client_whatsapp');
+
     aplicarMascaraTelefone(telefoneInput);
     aplicarMascaraTelefone(celularInput, true);
+    aplicarMascaraTelefone(clientWhatsappInput, true);
 });
 
 // Validação de valor do contrato (mantida igual)
@@ -771,22 +769,46 @@ emailInput.addEventListener('input', function () {
   }
 });
 
+// Carrega os dados de um logo no formulário para edição  
 // Carrega os dados de um logo no formulário para edição    
 function loadLogoForEdit(logo) {
     console.log('Carregando logo para edição:', logo); // Debug
     
     // Preenche os campos do formulário
     const form = document.getElementById("logo-form");
+    
+    // Informações básicas
     form.querySelector("#client-name").value = logo.clientName || '';
     form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
     form.querySelector("#client-CNPJ").value = logo.clientCNPJ || '';
-    form.querySelector("#client-phone").value = logo.clientPhone || '';
-    form.querySelector("#client-email").value = logo.clientEmail || '';
-    form.querySelector("#client-city").value = logo.clientCity || '';
-    form.querySelector("#client-uf").value = logo.clientUF || '';
-    form.querySelector("#logo-category").value = logo.category || '';
     
-    // Formata as datas
+    // Endereço
+    form.querySelector("#client-cep").value = logo.clientCep || '';
+    form.querySelector("#client-address").value = logo.clientAddress || '';
+    form.querySelector("#client-number").value = logo.clientNumber || '';
+    form.querySelector("#client-neighborhood").value = logo.clientNeighborhood || '';
+    form.querySelector("#client-city").value = logo.clientCity || '';
+    form.querySelector("#client-uf").value = logo.clientUf || '';
+    form.querySelector("#client-lat").value = logo.clientLat || '';
+    form.querySelector("#client-lng").value = logo.clientLng || '';
+    
+    // Contatos
+    form.querySelector("#telephone").value = logo.telephone || '';
+    form.querySelector("#cellphone").value = logo.cellphone || '';
+    form.querySelector("#email").value = logo.email || '';
+    
+    // URLs
+    form.querySelector("#client-website").value = logo.websiteUrl || logo.clientWebsite || '';
+    form.querySelector("#client-videoUrl").value = logo.videoUrl || logo.clientVideoUrl || '';
+    form.querySelector("#client-instagramUrl").value = logo.instagramUrl || logo.clientInstagramUrl || '';
+    form.querySelector("#client-facebookUrl").value = logo.facebookUrl || logo.clientFacebookUrl || '';
+    form.querySelector("#client-whatsapp").value = logo.clientWhatsapp || '';
+    
+    // Categoria e descrição
+    form.querySelector("#logo-category").value = logo.category || logo.logoCategory || '';
+    form.querySelector("#logo-description").value = logo.description || logo.logoDescription || '';
+    
+    // Contrato
     if (logo.startDate) {
         const startDate = new Date(logo.startDate);
         form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
@@ -798,29 +820,123 @@ function loadLogoForEdit(logo) {
     }
     
     form.querySelector("#contract-months").value = logo.contractMonths || '';
-    form.querySelector("#contract-value").value = logo.contractValue || '';
+    form.querySelector("#plan_type").value = logo.planType || '';
+    form.querySelector("#client_level").value = logo.clientLevel || '';
+    form.querySelector("#contract_value").value = logo.contractValue || '';
     
-    // Atualiza a imagem do logo
+    // Radio buttons
+    if (logo.contractActive !== undefined) {
+        const activeValue = logo.contractActive.toString();
+        form.querySelector(`input[name="contract-active"][value="${activeValue}"]`).checked = true;
+    }
+    
+    if (logo.showAddressActive !== undefined) {
+        const showAddressValue = logo.showAddressActive.toString();
+        form.querySelector(`input[name="show-address-active"][value="${showAddressValue}"]`).checked = true;
+    }
+    
+    // Horário de funcionamento
+    if (logo.openingHours) {
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        days.forEach(day => {
+            const dayData = logo.openingHours[day];
+            if (dayData) {
+                form.querySelector(`#${day}-start`).value = dayData.start || '';
+                form.querySelector(`#${day}-end`).value = dayData.end || '';
+                form.querySelector(`#${day}-closed`).checked = dayData.closed || false;
+            }
+        });
+    } else {
+        // Verifica os campos closed individuais (para compatibilidade com versões antigas)
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        days.forEach(day => {
+            const closedField = `${day}Closed`;
+            if (logo[closedField] !== undefined) {
+                form.querySelector(`#${day}-closed`).checked = logo[closedField] === 'on';
+            }
+        });
+    }
+    
+    // Imagem do logo
+    editingDeleteToken = logo.deleteToken;
     const logoPreview = form.querySelector("#logo-preview_img");
-    if (logo.imagem) {
-        logoPreview.src = logo.imagem;
+    const logoImageUrl = logo.imageUrl;
+    if (logoImageUrl) {
+        logoPreview.src = logoImageUrl;
         logoPreview.style.display = 'block';
+        form.querySelector("#logo-image-url").value = logoImageUrl;
     } else {
         logoPreview.src = 'placeholder.png';
         logoPreview.style.display = 'none';
+        form.querySelector("#logo-image-url").value = '';
     }
 
     // Atualiza o botão de salvar
-    const saveBtn = form.querySelector('.save-btn');
-    saveBtn.textContent = 'Atualizar';
-    saveBtn.classList.add('update');
-
-    // Mostra o formulário
-    form.style.display = 'block';
+    const saveBtn = form.querySelector('.save-btn .btn-text');
+    if (saveBtn) {
+        saveBtn.textContent = 'Atualizar';
+    } else {
+        form.querySelector('.save-btn').textContent = 'Atualizar';
+    }
+    form.querySelector('.save-btn').classList.add('update');
+    
+    // Mostra o botão de cancelar edição se estiver oculto
+   // document.getElementById('cancel-button').style.display = 'inline-block';
     
     // Scroll para o formulário
     form.scrollIntoView({ behavior: 'smooth' });
 }
+
+// function loadLogoForEdit(logo) {
+//     console.log('Carregando logo para edição:', logo); // Debug
+    
+//     // Preenche os campos do formulário
+//     const form = document.getElementById("logo-form");
+//     form.querySelector("#client-name").value = logo.clientName || '';
+//     form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
+//     form.querySelector("#client-CNPJ").value = logo.clientCNPJ || '';
+//     form.querySelector("#telephone").value = logo.telephone || '';
+//     form.querySelector("#telephone").value = logo.telephone || '';
+//     form.querySelector("#client-email").value = logo.clientEmail || '';
+//     form.querySelector("#client-city").value = logo.clientCity || '';
+//     form.querySelector("#client-uf").value = logo.clientUf || '';
+//     form.querySelector("#logo-category").value = logo.category || '';
+    
+//     // Formata as datas
+//     if (logo.startDate) {
+//         const startDate = new Date(logo.startDate);
+//         form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
+//     }
+    
+//     if (logo.endDate) {
+//         const endDate = new Date(logo.endDate);
+//         form.querySelector("#end-date").value = endDate.toISOString().split('T')[0];
+//     }
+    
+//     form.querySelector("#contract-months").value = logo.contractMonths || '';
+//     form.querySelector("#contract-value").value = logo.contractValue || '';
+    
+//     // Atualiza a imagem do logo
+//     const logoPreview = form.querySelector("#logo-preview_img");
+//     if (logo.imagem) {
+//         logoPreview.src = logo.imagem;
+//         logoPreview.style.display = 'block';
+//     } else {
+//         logoPreview.src = 'placeholder.png';
+//         logoPreview.style.display = 'none';
+//     }
+
+//     // Atualiza o botão de salvar
+//     const saveBtn = form.querySelector('.save-btn');
+//     saveBtn.textContent = 'Atualizar';
+//     saveBtn.classList.add('update');
+
+//     // Mostra o formulário
+//     form.style.display = 'block';
+    
+//     // Scroll para o formulário
+//     form.scrollIntoView({ behavior: 'smooth' });
+// }
 
 // Filtra e atualiza a lista exibida
 function applyFilters() {
@@ -945,11 +1061,12 @@ logosGrid.addEventListener("click", (e) => {
         document.getElementById("delete-modal").classList.remove("hidden");
     }
 
-    if (e.target.classList.contains("edit-btn")) {
-        const cnpjEditar = e.target.dataset.id;
-        loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
-        document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
-    }
+    // if (e.target.classList.contains("edit-btn")) {
+    //     debugger
+    //     const cnpjEditar = e.target.dataset.id;
+    //     loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
+    //     document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
+    // }
 });
 
 document.getElementById("cancel-delete").addEventListener("click", () => {
@@ -1092,7 +1209,7 @@ document.getElementById('client-CNPJ').addEventListener('blur', async function (
 
   // Formata visualmente
   cnpjInput.value = formatCNPJ(cnpj);
-    debugger;
+   
   // Busca dados pelo CNPJ
   const cnpjData = await fetchCNPJData(cnpj);
   if (cnpjData) {
@@ -1175,7 +1292,7 @@ async function obterCoordenadasGoogle() {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
       endereco
     )}&key=${API_KEY}`;
-      debugger;
+     
     try {
       const response = await fetch(url);
       const data = await response.json();
