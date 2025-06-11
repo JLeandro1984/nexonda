@@ -19,21 +19,6 @@ async function getAuthToken() {
     }
 }
 
-// Função para decodificar o token JWT
-// function decodeJwt(token) {
-//     try {
-//         const base64Url = token.split('.')[1];
-//         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-//         const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-//             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-//         }).join(''));
-//         return JSON.parse(jsonPayload);
-//     } catch (error) {
-//         console.error('Erro ao decodificar token:', error);
-//         return null;
-//     }
-// }
-
 // Função para fazer requisições à API
 async function apiRequest(endpoint, options = {}) {
     try {
@@ -108,53 +93,59 @@ const logosApi = {
         method: 'DELETE'
     }),
     
-    // Upload de imagem
-   uploadImageBase64: async (base64Image) => {
-        try {
-            const token = await getAuthToken();
-            if (!token) throw new Error('Token não encontrado');
+    /*
+        // Upload de imagem para Cloudinary
+        uploadImageBase64: async (base64Image, publicId = null) => {
+            try {
+                const token = await getAuthToken();
+                if (!token) throw new Error('Token não encontrado');
 
-            // Enviar direto o base64 completo, incluindo o prefixo "data:image/..."
-            const response = await fetch(`${API_BASE_URL}/uploadImage`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ image: base64Image }) // envio correto esperado pelo backend
+                const response = await fetch(`${API_BASE_URL}/uploadImage`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        base64Image,   // Envia a imagem inteira (com "data:image/png;base64,...")
+                        publicId       // Opcional: reescreve a imagem anterior
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Erro no upload');
+                }
+
+                const result = await response.json();
+                return result; // { secureUrl, publicId }
+            } catch (error) {
+                console.error('Erro no upload:', error);
+                throw error;
+            }
+        },
+
+        // Exclusão da imagem no Cloudinary
+        deleteImage: async (publicId) => {
+            const token = await getAuthToken();
+            const response = await fetch(`${API_BASE_URL}/deleteImage`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ publicId })
             });
 
             if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || 'Erro no upload');
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || 'Erro ao deletar imagem');
             }
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error('Erro no upload:', error);
-            throw error;
         }
-    },
-    deleteImage: async (imagePath) => {
-    const token = await getAuthToken();
-        debugger;
-    const response = await fetch(`${API_BASE_URL}/deleteImage`, {
-        method: 'POST',
-        headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ imagePath })
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro ao deletar imagem');
-    }
-    }
+    */
 };
 
+    
 // API de Contatos
 const contactsApi = {
     // Listar todos os contatos

@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="../css/styles.css" />
     <link rel="stylesheet" href="../css/manage-logos.css" />
     <script type="module" src="../components/user-menu.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
   </head>
   <body>
     <div class="container">
@@ -32,17 +36,27 @@
             <form id="logo-form">
               <div class="form-group">
                 <label for="client-name">Razão Social:</label>
-                <input type="text" id="client-name" required />
+                <input
+                  type="text"
+                  id="client-name"
+                  name="client-name"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="client-fantasy-name">Nome Fantasia:</label>
-                <input type="text" id="client-fantasy-name" />
-              </div>
-              <div class="form-group">
-                <label for="client-cnpj">CNPJ:</label>
                 <input
                   type="text"
-                  id="client-cnpj"
+                  id="client-fantasy-name"
+                  name="client-fantasy-name"
+                />
+              </div>
+              <div class="form-group">
+                <label for="client-CNPJ">CNPJ:</label>
+                <input
+                  type="text"
+                  id="client-CNPJ"
+                  name="client-CNPJ"
                   placeholder="00.000.000/0000-00"
                   required
                 />
@@ -84,44 +98,70 @@
 
               <div class="form-group">
                 <label for="client-cep">CEP:</label>
-                <input type="text" id="client-cep" maxlength="9" required />
+                <input
+                  type="text"
+                  id="client-cep"
+                  name="client_cep"
+                  maxlength="9"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-address">Endereço:</label>
-                <input type="text" id="client-address" required />
+                <input
+                  type="text"
+                  id="client-address"
+                  name="client_address"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-number">Nº:</label>
-                <input type="text" id="client-number" required />
+                <input
+                  type="text"
+                  id="client-number"
+                  name="client_number"
+                  required
+                />
               </div>
 
               <div class="form-group">
-                <label for="client-neighborhood">Cidade:</label>
-                <input type="text" id="client-neighborhood" required />
+                <label for="client-neighborhood">Bairro:</label>
+                <input
+                  type="text"
+                  id="client-neighborhood"
+                  name="client_neighborhood"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-city">Cidade:</label>
-                <input type="text" id="client-city" required />
+                <input
+                  type="text"
+                  id="client-city"
+                  name="client_city"
+                  required
+                />
               </div>
 
               <div class="form-group">
                 <label for="client-uf">UF:</label>
-                <select id="client-uf" required>
+                <select id="client-uf" name="client_uf" required>
                   <option value="">Selecione</option>
                 </select>
               </div>
 
               <div class="form-group">
                 <label for="client-lat">Latitude:</label>
-                <input type="text" id="client-lat" readonly />
+                <input type="text" id="client-lat" name="client_lat" readonly />
               </div>
 
               <div class="form-group">
                 <label for="client-lng">Longitude:</label>
-                <input type="text" id="client-lng" readonly />
+                <input type="text" id="client-lng" name="client_lng" readonly />
               </div>
 
               <div class="form-group">
@@ -146,7 +186,7 @@
 
               <div class="form-group">
                 <label for="email">E-mail:</label>
-                <input type="email" id="email" required />
+                <input type="email" id="email" name="email" required />
                 <small id="email-error" style="color: red; display: none"
                   >E-mail inválido</small
                 >
@@ -158,6 +198,7 @@
                   type="url"
                   placeholder="ex: https://exemplo.com"
                   id="client-website"
+                  name="client_website"
                 />
               </div>
 
@@ -167,6 +208,7 @@
                   type="url"
                   placeholder="ex: https://www.youtube.com/seucanal"
                   id="client-videoUrl"
+                  name="client_video_url"
                 />
               </div>
 
@@ -176,6 +218,7 @@
                   type="url"
                   placeholder="ex: https://www.instagram.com/usuario"
                   id="client-instagramUrl"
+                  name="client_instagram_url"
                 />
               </div>
 
@@ -185,6 +228,7 @@
                   type="url"
                   placeholder="ex: https://www.facebook.com/usuario"
                   id="client-facebookUrl"
+                  name="client-facebookUrl"
                 />
               </div>
 
@@ -193,32 +237,36 @@
                 <input
                   type="tel"
                   id="client-whatsapp"
+                  name="client_whatsapp"
                   placeholder="(00) 00000-0000"
                 />
               </div>
 
               <div class="form-group">
                 <label for="logo-category">Categoria:</label>
-                <select id="logo-category" required>
+                <select id="logo-category" name="logo_category" required>
                   <option value="">Selecione uma categoria</option>
                 </select>
               </div>
 
               <div class="form-group">
                 <label for="logo-description">Descrição:</label>
-                <textarea id="logo-description"></textarea>
+                <textarea
+                  id="logo-description"
+                  name="logo_description"
+                ></textarea>
               </div>
 
               <!-- Data Inicial -->
               <div class="form-group">
                 <label for="start-date">Contrato - Data Inicial::</label>
-                <input type="date" id="start-date" required />
+                <input type="date" id="start-date" name="start_date" required />
               </div>
 
               <!-- Seletor de Meses -->
               <div class="form-group">
                 <label for="contract-months">Tempo de Contrato:</label>
-                <select id="contract-months" required>
+                <select id="contract-months" name="contract_months" required>
                   <option value="">Selecione</option>
                   <option value="6">6 meses</option>
                   <option value="12">12 meses</option>
@@ -230,12 +278,12 @@
               <!-- Data Final -->
               <div class="form-group">
                 <label for="end-date">Contrato - Data Final:</label>
-                <input type="date" id="end-date" readonly required />
+                <input type="date" id="end-date" name="end_date" readonly />
               </div>
 
               <div class="form-group">
                 <label for="plan_type">Tipo de plano:</label>
-                <select id="plan_type" required>
+                <select id="plan_type" name="plan_type" required>
                   <option value="">Selecione</option>
                   <option value="basico">Basico</option>
                   <option value="premium">Premium</option>
@@ -245,7 +293,7 @@
 
               <div class="form-group">
                 <label for="client_level">Nível do cliente (0 a 10):</label>
-                <select id="client_level" required>
+                <select id="client_level" name="client_level" required>
                   <option value="">Selecione</option>
                   <!-- Gerando opções de 0 a 10 -->
                   <option value="0">0</option>
@@ -264,7 +312,13 @@
 
               <div class="form-group">
                 <label for="contract_value">Valor do Contrato:</label>
-                <input type="text" id="contract_value" required value="0,00" />
+                <input
+                  type="text"
+                  id="contract_value"
+                  name="contract_value"
+                  required
+                  value="0,00"
+                />
               </div>
 
               <div
@@ -305,12 +359,26 @@
                 <input
                   type="text"
                   id="logo-image-url"
+                  name="logo_image_url"
                   readonly
                   placeholder="URL da imagem será exibida aqui"
                 />
                 <small
                   >Formatos aceitos: JPG, PNG, SVG. Tamanho máximo: 2MB.</small
                 >
+                <!-- 🔽 Pré-visualização da imagem -->
+                <img
+                  id="logo-preview_img"
+                  src="placeholder.png"
+                  alt="Pré-visualização do logotipo"
+                  style="
+                    display: none;
+                    max-width: 100px;
+                    margin-top: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                  "
+                />
               </div>
               <input
                 type="file"

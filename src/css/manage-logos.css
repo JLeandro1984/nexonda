@@ -235,34 +235,6 @@
   margin-top: 1rem;
 }
 
-.edit-btn,
-.delete-btn {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.edit-btn {
-  background-color: var(--secondary-color);
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: var(--primary-color);
-}
-
-.delete-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c0392b;
-}
-
 .no-results {
   text-align: center;
   padding: 2rem;
@@ -352,29 +324,11 @@
 }
 
 .actions button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 0.8em;
-}
-
-.edit-btn {
-  background-color: #3498db;
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #2980b9;
-}
-
-.delete-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c0392b;
+  padding: 5px 10px !important;
+  border: none !important;
+  border-radius: 3px !important;
+  cursor: pointer !important;
+  font-size: 0.8em !important;
 }
 
 /* Ajustes para o formulário quando estiver editando */
@@ -625,35 +579,6 @@
   color: var(--secondary-color);
 }
 
-.ad-actions {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.ad-actions button {
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  transition: background-color 0.3s;
-}
-
-.edit-btn {
-  background-color: var(--secondary-color);
-  color: white;
-}
-
-.edit-btn:hover {
-  background-color: #2980b9;
-}
-
 .toggle-btn {
   background-color: #f39c12;
   color: white;
@@ -661,15 +586,6 @@
 
 .toggle-btn:hover {
   background-color: #e67e22;
-}
-
-.delete-btn {
-  background-color: #e74c3c;
-  color: white;
-}
-
-.delete-btn:hover {
-  background-color: #c0392b;
 }
 
 /* Estilos para a lista de propagandas */
@@ -848,6 +764,10 @@
   color: white;
 }
 
+.edit-btn:hover {
+  background-color: var(--primary-color);
+}
+
 .toggle-btn {
   background-color: #f39c12;
   color: white;
@@ -858,6 +778,9 @@
   color: white;
 }
 
+.delete-btn:hover {
+  background-color: #c0392b;
+}
 /* Responsividade */
 @media (max-width: 768px) {
   .ads-list {

@@ -634,7 +634,6 @@ body.dark-mode {
 }
 
 body.dark-mode #search,
-body.dark-mode .logo-item,
 body.dark-mode .modal-box,
 body.dark-mode .premium-ads-container,
 body.dark-mode #contact-form input,
@@ -649,6 +648,9 @@ body.dark-mode #contact-form textarea::placeholder {
   color: #aaa;
 }
 
+body.dark-mode #premium-ads h2 {
+  color: #fff;
+}
 body.dark-mode .search-box input,
 body.dark-mode .category-filter select {
   background-color: #2d2d2d;
