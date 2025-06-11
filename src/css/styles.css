@@ -37,10 +37,6 @@ header nav {
   padding: 0;
 }
 
-.admin-btn {
-  display: none;
-}
-
 nav {
   display: flex;
   align-items: center; /* alinha verticalmente */
@@ -132,10 +128,48 @@ nav {
   filter: brightness(0) invert(1);
 }
 
+a,
+a:visited,
+a:focus,
+a:active {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav-menu,
+.nav-menu:link,
+.nav-menu:visited,
+.nav-menu:hover,
+.nav-menu:focus,
+.nav-menu:active {
+  color: #fff !important;
+  text-decoration: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.nav-menu:hover {
+  text-decoration: underline !important;
+}
+
 .admin-btn {
+  display: none;
   background-color: var(--accent-color);
   padding: 0.3rem 0.7rem;
   border-radius: 5px;
+}
+
+.admin-btn:hover {
+  color: white;
+  background-color: #500f08;
+}
+
+.admin-btn {
+  transition: transform 0.2s ease;
+}
+
+.admin-btn:hover {
+  transform: scaleY(1.1); /* ou scale(1.05) para crescer todo */
 }
 
 main {
