@@ -562,6 +562,7 @@
                 <input
                   type="text"
                   id="ad-title"
+                  name="title"
                   required
                   placeholder="Ex: Oferta Especial de Verão"
                 />
@@ -569,7 +570,7 @@
 
               <div class="form-group">
                 <label for="ad-client">Cliente Premium*</label>
-                <select id="ad-client" required>
+                <select id="ad-client" name="clientCNPJ" required>
                   <option value="">Selecione um cliente</option>
                 </select>
               </div>
@@ -579,6 +580,7 @@
               <label for="ad-description">Descrição*</label>
               <textarea
                 id="ad-description"
+                name="description"
                 required
                 placeholder="Descreva a promoção ou campanha"
               ></textarea>
@@ -587,7 +589,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="ad-type">Tipo de Mídia*</label>
-                <select id="ad-type" required>
+                <select id="ad-type" name="mediaType" required>
                   <option value="image">Imagem (Banner)</option>
                   <option value="video">Vídeo</option>
                 </select>
@@ -598,6 +600,7 @@
                 <input
                   type="url"
                   id="ad-media"
+                  name="mediaUrl"
                   required
                   placeholder="https://exemplo.com/banner.jpg"
                 />
@@ -610,6 +613,7 @@
               <input
                 type="url"
                 id="ad-link"
+                name="targetUrl"
                 required
                 placeholder="https://exemplo.com/promocao"
               />
@@ -620,13 +624,18 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="ad-start">Data de Início*</label>
-                <input type="date" id="ad-start" required />
+                <label for="ad-start-date">Data de Início*</label>
+                <input
+                  type="date"
+                  id="ad-start-date"
+                  name="startDate"
+                  required
+                />
               </div>
 
               <div class="form-group">
-                <label for="ad-end">Data de Término*</label>
-                <input type="date" id="ad-end" required />
+                <label for="ad-end-date">Data de Término*</label>
+                <input type="date" id="ad-end-date" name="endDate" required />
               </div>
             </div>
 
@@ -693,6 +702,13 @@
     </div>
 
     <!-- Scripts -->
+    <!-- jQuery (necessário para Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="../js/youtube-api.js"></script>
     <script type="module" src="../js/main.js"></script>

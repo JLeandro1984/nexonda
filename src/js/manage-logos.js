@@ -366,8 +366,7 @@ function contratoAtivo(logo) {
 logoForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     //adicionarHttpsNosUrls();  
-    debugger;
-
+    
     const saveBtn = logoForm.querySelector('.save-btn');
     const btnText = saveBtn.querySelector('.btn-text');
     const spinner = saveBtn.querySelector('.spinner');
@@ -379,31 +378,6 @@ logoForm.addEventListener("submit", async (e) => {
 
     try {
         const formData = new FormData(logoForm);
-        // const logoData = {
-        //     clientName: formData.get('client-name'),
-        //     clientFantasyName: formData.get('client-fantasy-name'),
-        //     clientCNPJ: formData.get('client-CNPJ'),
-        //     showAddressActive: formData.get('show-address-active') === 'true',
-        //     clientCep: formData.get('client-cep'),
-        //     clientAddress: formData.get('client-address'),
-        //     clientNumber: formData.get('client-number'),
-        //     clientNeighborhood: formData.get('client-neighborhood'),
-        //     clientCity: formData.get('client-city'),
-        //     clientUF: formData.get('client-uf'),
-        //     clientLat: formData.get('client-lat'),
-        //     clientLng: formData.get('client-lng'),
-        //     clientPhone: formData.get('client-phone'),
-        //     clientEmail: formData.get('client-email'),
-        //     category: formData.get('logo-category'),
-        //     startDate: formData.get('start-date'),
-        //     endDate: formData.get('end-date'),
-        //     contractMonths: formData.get('contract-months'),
-        //     contractValue: formData.get('contract-value'),
-        //     contractActive: formData.get('contract-active') === 'true',
-        //     imagem: formData.get('logo-image-url'),
-        //     openingHours: obterHorarioFuncionamento()
-        // };
-
         const logoData = {};
             for (let [key, value] of formData.entries()) {
                 console.log(`${key}: ${value}`);
@@ -585,12 +559,20 @@ function getCategoryLabelByValue(value) {
 
 // Funções globais para edição e exclusão
 window.editLogo = function (logoId) {
-    debugger
     const logo = logos.find(l => l.id === logoId);
     if (logo) {
         editingIndex = logoId;
         loadLogoForEdit(logo);
     }
+
+     // Scroll suave para a div do formulário
+        const formSection = document.querySelector('#logo-form');
+        if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Se desejar, também pode dar foco no primeiro input do formulário:
+        document.getElementById('client-name')?.focus();
 };
 
 window.deleteLogo = function (logoId, logoName = 'este logotipo') {

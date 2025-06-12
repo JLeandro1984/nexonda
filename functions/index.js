@@ -518,16 +518,17 @@ exports.premiumAds = functions.https.onRequest({
           }
 
           // Preparar dados para salvar
-          const adData = {
-            ...data,
-            userId: userId,
+         const adData = {
+            userId,
+            isActive: true,
+            clicks: 0,
+            impressions: 0,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             startDate: admin.firestore.Timestamp.fromDate(startDate),
             endDate: admin.firestore.Timestamp.fromDate(endDate),
-            isActive: true,
-            clicks: 0,
-            impressions: 0
+            ...data 
           };
+
 
           console.log('Dados para criação:', adData);
 

@@ -25,7 +25,7 @@ async function apiRequest(endpoint, options = {}) {
         if (!endpoint) {
             throw new Error('Endpoint é obrigatório');
         }
-        
+        debugger
         const token = await getAuthToken();
         console.log('Token obtido do localStorage:', token.substring(0, 20) + '...'); // Debug
 
@@ -36,7 +36,12 @@ async function apiRequest(endpoint, options = {}) {
         };
 
         // Garantindo que a URL sempre tenha um endpoint válido
-        const url = `${API_BASE_URL}/api/${endpoint}`;
+        let url = `${API_BASE_URL}/api/${endpoint}`;
+
+        if (!endpoint.includes('logos')) {
+            url = `${API_BASE_URL}/${endpoint}`;
+        }
+
         const requestOptions = {
             method: options.method || 'GET',
             headers: headers,
@@ -165,9 +170,10 @@ const contactsApi = {
 
 // API de Anúncios Premium
 const premiumAdsApi = {
+   
     // Listar todos os anúncios
     getAll: async () => {
-     
+      debugger;
         try {         
             // Força a chamada direta para o endpoint premiumAds
             const response = await fetch(`${API_BASE_URL}/premiumAds`, {
@@ -247,14 +253,23 @@ const premiumAdsApi = {
     }),
     
     // Atualizar anúncio
-    update: (adId, adData) => apiRequest(`premiumAds/${adId}`, {
-        method: 'PUT',
-        body: JSON.stringify(adData)
-    }),
+    // update: (adId, adData) => apiRequest(`premiumAds/${adId}`, {
+    //     method: 'PUT',
+    //     body: JSON.stringify(adData)
+    // }),
+    
+    update: (adId, adData) => {
+        return apiRequest('premiumAds', {
+            method: 'PUT',
+            body: JSON.stringify({ id: adId, ...adData })
+        });
+    },
+
     
     // Deletar anúncio
-    delete: (adId) => apiRequest(`premiumAds/${adId}`, {
-        method: 'DELETE'
+    delete: (adId) => apiRequest(`premiumAds`, {
+        method: 'DELETE',
+         body: JSON.stringify({ id: adId})
     })
 };
 

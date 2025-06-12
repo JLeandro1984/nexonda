@@ -32,12 +32,12 @@ async function init() {
             
             // Garante que ads seja um array
             ads = Array.isArray(response) ? response : [];            
-            if (ads.length === 0) {
-                showAlert('Nenhum anúncio encontrado.', 'info');
-            } else {
+            if (ads.length > 0) {
                 renderAds(ads);
-                populateClientSelect();
             }
+            
+            populateClientSelect();
+            
         } catch (error) {
             console.error('Erro ao carregar propagandas:', error);
             showAlert('Erro ao carregar anúncios. Por favor, tente novamente.', 'error');
@@ -55,7 +55,7 @@ async function loadClientsFromFirestore() {
   
       // Filtra apenas os com plano "premium-plus" e contrato ativo
       const clients = allLogos
-        .filter(logo => logo.planType === 'premium-plus')
+        /*.filter(logo => logo.planType === 'premium-plus')   - permitir cadastrar outros planos*/
         .filter(logo => isContractActive(logo))
         .map(logo => ({
           id: logo.id, // supondo que logo.id exista no objeto
@@ -85,7 +85,7 @@ async function loadClientsFromFirestore() {
 
     if (!clientSelect) return;
 
-    clientSelect.innerHTML = '<option value="">Selecione um cliente premium plus</option>';
+    clientSelect.innerHTML = '<option value="">Selecione um cliente</option>';
 
     const activeClients = clients.filter(client => isContractActive(client));
     activeClients.sort((a, b) => a.clientName.localeCompare(b.clientName));
@@ -97,25 +97,39 @@ async function loadClientsFromFirestore() {
       option.title = `CNPJ: ${formatCNPJ(client.clientCNPJ)} | Plano: ${client.planType}`;
       clientSelect.appendChild(option);
     });
+      
+      // Ative o Select2 no select
+        $('#ad-client').select2({
+        placeholder: "Selecione um cliente",
+        allowClear: true,
+        width: '100%'
+        });
   }
 
 // Event Listeners
 if (adForm) {
     adForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        
+        debugger
+
         try {
             const formData = new FormData(adForm);
-            const adData = {
-                title: formData.get('ad-title'),
-                description: formData.get('ad-description'),
-                mediaType: formData.get('ad-type'),
-                mediaUrl: formData.get('ad-media'),
-                targetUrl: formData.get('ad-link'),
-                clientCNPJ: formData.get('ad-client'),
-                startDate: formData.get('ad-start-date'),
-                endDate: formData.get('ad-end-date')
-            };
+            // const adData = {
+            //     title: formData.get('ad-title'),
+            //     description: formData.get('ad-description'),
+            //     mediaType: formData.get('ad-type'),
+            //     mediaUrl: formData.get('ad-media'),
+            //     targetUrl: formData.get('ad-link'),
+            //     clientCNPJ: formData.get('ad-client'),
+            //     startDate: formData.get('ad-start-date'),
+            //     endDate: formData.get('ad-end-date')
+            // };
+
+            const adData = {};
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+                 adData[key] = value;             
+            }
 
             if (editingIndex) {
                 await premiumAdsApi.update(editingIndex, adData);
@@ -147,6 +161,10 @@ if (adForm) {
     });
 }
 
+// function toCamelCase(str) {
+//   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+// }
+
 // Upload de imagem
 if (adImageInput) {
     adImageInput.addEventListener("change", async (event) => {
@@ -169,21 +187,40 @@ window.editAd = function(adId) {
         editingIndex = adId;
         loadAdForEdit(ad);
     }
+
+      // Scroll suave para a div do formulário
+        const formSection = document.querySelector('.admin-section');
+        if (formSection) {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+            // Se desejar, também pode dar foco no primeiro input do formulário:
+    document.getElementById('ad-title')?.focus();
+};
+window.deleteAd = async function (adId) {
+  const ad = ads.find(a => a.id === adId);
+  const adTitle = ad ? ad.title : 'este anúncio';
+
+  showConfirm(
+    `Deseja realmente excluir "${adTitle}"? Esta ação não poderá ser desfeita.`,
+    'Confirmar exclusão',
+    'warning',
+    async () => {
+      try {
+        await premiumAdsApi.delete(adId);
+        ads = ads.filter(a => a.id !== adId);
+        renderAds(ads);
+        showAlert('Anúncio excluído com sucesso!', 'success');
+      } catch (error) {
+        console.error('Erro ao excluir anúncio:', error);
+        showAlert('Erro ao excluir anúncio. Por favor, tente novamente.', 'error');
+      }
+    },
+    () => {
+      console.log('Exclusão cancelada pelo usuário.');
+    }
+  );
 };
 
-window.deleteAd = async function(adId) {
-    if (confirm('Tem certeza que deseja excluir este anúncio?')) {
-        try {
-            await premiumAdsApi.delete(adId);
-            ads = ads.filter(a => a.id !== adId);
-            renderAds(ads);
-            showAlert('Anúncio excluído com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao excluir anúncio:', error);
-            showAlert('Erro ao excluir anúncio. Por favor, tente novamente.', 'error');
-        }
-    }
-};
 
 // Funções auxiliares
 function renderAds(ads) {
@@ -290,8 +327,8 @@ function loadAdForEdit(ad) {
     const mediaUrlInput = document.getElementById('ad-media');
     const linkInput = document.getElementById('ad-link');
     const clientInput = document.getElementById('ad-client');
-    const startDateInput = document.getElementById('ad-start');
-    const endDateInput = document.getElementById('ad-end');
+    const startDateInput = document.getElementById('ad-start-date');
+    const endDateInput = document.getElementById('ad-end-date');
     const saveBtn = document.querySelector('.save-btn');
 
     if (titleInput) titleInput.value = ad.title;
@@ -299,15 +336,47 @@ function loadAdForEdit(ad) {
     if (mediaTypeInput) mediaTypeInput.value = ad.mediaType;
     if (mediaUrlInput) mediaUrlInput.value = ad.mediaUrl;
     if (linkInput) linkInput.value = ad.targetUrl;
-    if (clientInput) clientInput.value = ad.clientCNPJ;
-    if (startDateInput) startDateInput.value = ad.startDate;
-    if (endDateInput) endDateInput.value = ad.endDate;
+    //if (clientInput) clientInput.value = ad.clientCNPJ;
+
+    if (clientInput) {
+        // Atualiza o valor real
+        clientInput.value = ad.clientCNPJ;
+
+        // Atualiza a interface do Select2
+        $(clientInput).trigger('change');
+    }
+    
+   if (startDateInput) startDateInput.value = formatDateToInput(ad.startDate);
+    if (endDateInput) endDateInput.value = formatDateToInput(ad.endDate);
     
     if (saveBtn) {
         saveBtn.textContent = 'Atualizar';
         saveBtn.classList.add('update');
     }
 }
+
+function formatDateToInput(date) {
+  if (!date) return '';
+  
+  // Se for string, tenta extrair a data
+  if (typeof date === 'string') {
+    // Pega só os primeiros 10 caracteres: "YYYY-MM-DD"
+    return date.substring(0, 10);
+  }
+  
+  // Se for objeto Date
+  if (date instanceof Date) {
+    return date.toISOString().substring(0, 10);
+  }
+  
+  // Se for Firebase Timestamp
+  if (typeof date.toDate === 'function') {
+    return date.toDate().toISOString().substring(0, 10);
+  }
+
+  return '';
+}
+
 
 // Garante que a função init seja chamada quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
