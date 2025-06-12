@@ -346,19 +346,22 @@ exports.api = functions.https.onRequest({
         }
 
         if (req.method === 'DELETE') {
-            const { id } = req.body;
-            if (!id) {
-                return res.status(400).json({ error: 'ID do logotipo não fornecido' });
-            }
+          const pathParts = req.path.split('/').filter(Boolean); // remove strings vazias
+          const id = pathParts[pathParts.length - 1]; // último segmento da URL
+          console.log('ID extraído da URL:', id);
 
-            const doc = await logosCollection.doc(id).get();
-            if (!doc.exists || doc.data().userId !== userId) {
-                return res.status(404).json({ error: 'Logotipo não encontrado' });
-            }
+          if (!id) {
+              return res.status(400).json({ error: 'ID do logotipo não fornecido' });
+          }
 
-            await logosCollection.doc(id).delete();
-            return res.status(200).json({ message: 'Logotipo deletado com sucesso' });
-        }
+          const doc = await logosCollection.doc(id).get();
+          if (!doc.exists || doc.data().userId !== userId) {
+              return res.status(404).json({ error: 'Logotipo não encontrado' });
+          }
+
+          await logosCollection.doc(id).delete();
+          return res.status(200).json({ message: 'Logotipo deletado com sucesso' });
+      }
 
         return res.status(405).json({ error: 'Método não permitido' });
     } catch (error) {

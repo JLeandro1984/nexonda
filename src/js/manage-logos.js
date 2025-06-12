@@ -57,31 +57,40 @@ document.addEventListener('DOMContentLoaded', function () {
         // Tornando a função visível globalmente (para onclick do HTML)
         window.uploadImageToCloudinary = uploadImageToCloudinary;
         
-        async function deleteLogoFromCloudinary(deleteToken) {
-            const cloudName = "dmq4e5bm5"; 
-        
+       async function deleteLogoFromCloudinary(deleteToken) {
+            if (!deleteToken) {
+                console.warn("Token de exclusão não fornecido. Ignorando.");
+                return;
+            }
+
             try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/delete_by_token`, {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/delete_by_token`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
                     body: new URLSearchParams({ token: deleteToken })
                 });
-        
+
                 const data = await response.json();
-        
+
                 if (data.result === "ok") {
                     console.log("Imagem excluída com sucesso.");
-                } else {
-                    console.error("Erro ao excluir imagem:", data);
-                    throw new Error("Erro ao excluir imagem do Cloudinary.");
+
+                } else if (data?.error?.message.includes('Stale request - reported time is')) {
+                    console.warn("Token de exclusão vencido:", data);
+                }                
+                else {
+                    console.warn("Não foi possível excluir a imagem do Cloudinary:", data);
                 }
             } catch (error) {
                 console.error("Erro na requisição ao Cloudinary:", error);
-                throw error;
+                // Também não propaga erro — só loga
             }
         }
+
+    
+    window.deleteLogoFromCloudinary = deleteLogoFromCloudinary;
     // FIM - Função para inicializar o widget de upload do Cloudinary
  });
 
@@ -421,7 +430,7 @@ logoForm.addEventListener("submit", async (e) => {
                 try {                                       
                     await deleteLogoFromCloudinary(editingDeleteToken);
                 } catch (error) {
-                    console.warn("Não foi possível excluir imagem anterior:", error);
+                    showAlert("Não foi possível excluir imagem anterior:" + error, "error");
                 }
             }
 
@@ -584,19 +593,42 @@ window.editLogo = function (logoId) {
     }
 };
 
-window.deleteLogo = async function(logoId) {
-    if (confirm('Tem certeza que deseja excluir este logotipo?')) {
-        try {
-            await logosApi.delete(logoId);
-            logos = logos.filter(l => l.id !== logoId);
-            renderLogos(logos);
-            showAlert('Logotipo excluído com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao excluir logo:', error);
-            showAlert('Erro ao excluir logotipo. Por favor, tente novamente.', 'error');
+window.deleteLogo = function (logoId, logoName = 'este logotipo') {
+  showConfirm(
+    `Deseja realmente excluir ${logoName}? Esta ação não poderá ser desfeita.`,
+    'Confirmar exclusão',
+    'warning',
+    async () => {
+      try {
+        const logo = logos.find(l => l.id === logoId);
+        const deleteToken = logo?.deleteToken || null;
+
+        // Remove do Firestore
+        await logosApi.delete(logoId);
+
+        // Tenta remover do Cloudinary, se houver token válido
+        if (deleteToken) {
+              //só exclui se o token for válido, ou seja, se estiver dentro do prazo de 1 hora
+            await deleteLogoFromCloudinary(deleteToken);          
         }
+
+        // Atualiza a lista e re-renderiza
+        logos = logos.filter(l => l.id !== logoId);
+        renderLogos(logos);
+
+        showAlert('Logotipo excluído com sucesso!', 'Sucesso', 'success');
+      } catch (error) {
+        console.error('Erro ao excluir logotipo:', error);
+        showAlert('Erro ao excluir logotipo. Por favor, tente novamente.', 'Erro', 'error');
+      }
+    },
+    () => {
+      console.log('Exclusão cancelada pelo usuário.');
     }
+  );
 };
+
+
 
 // Função para salvar o token
 function saveAuthToken(token) {
@@ -887,57 +919,6 @@ function loadLogoForEdit(logo) {
     form.scrollIntoView({ behavior: 'smooth' });
 }
 
-// function loadLogoForEdit(logo) {
-//     console.log('Carregando logo para edição:', logo); // Debug
-    
-//     // Preenche os campos do formulário
-//     const form = document.getElementById("logo-form");
-//     form.querySelector("#client-name").value = logo.clientName || '';
-//     form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
-//     form.querySelector("#client-CNPJ").value = logo.clientCNPJ || '';
-//     form.querySelector("#telephone").value = logo.telephone || '';
-//     form.querySelector("#telephone").value = logo.telephone || '';
-//     form.querySelector("#client-email").value = logo.clientEmail || '';
-//     form.querySelector("#client-city").value = logo.clientCity || '';
-//     form.querySelector("#client-uf").value = logo.clientUf || '';
-//     form.querySelector("#logo-category").value = logo.category || '';
-    
-//     // Formata as datas
-//     if (logo.startDate) {
-//         const startDate = new Date(logo.startDate);
-//         form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
-//     }
-    
-//     if (logo.endDate) {
-//         const endDate = new Date(logo.endDate);
-//         form.querySelector("#end-date").value = endDate.toISOString().split('T')[0];
-//     }
-    
-//     form.querySelector("#contract-months").value = logo.contractMonths || '';
-//     form.querySelector("#contract-value").value = logo.contractValue || '';
-    
-//     // Atualiza a imagem do logo
-//     const logoPreview = form.querySelector("#logo-preview_img");
-//     if (logo.imagem) {
-//         logoPreview.src = logo.imagem;
-//         logoPreview.style.display = 'block';
-//     } else {
-//         logoPreview.src = 'placeholder.png';
-//         logoPreview.style.display = 'none';
-//     }
-
-//     // Atualiza o botão de salvar
-//     const saveBtn = form.querySelector('.save-btn');
-//     saveBtn.textContent = 'Atualizar';
-//     saveBtn.classList.add('update');
-
-//     // Mostra o formulário
-//     form.style.display = 'block';
-    
-//     // Scroll para o formulário
-//     form.scrollIntoView({ behavior: 'smooth' });
-// }
-
 // Filtra e atualiza a lista exibida
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
@@ -955,7 +936,7 @@ function applyFilters() {
         const matchesFantasyName = (logo.clientFantasyName || "").toLowerCase().includes(searchTerm);
         const matchesCNPJ = (logo.clientCNPJ || "").toLowerCase().includes(searchTerm);
         const matchesCity = (logo.clientCity || "").toLowerCase().includes(searchTerm);
-        const matchesUF = (logo.clientUF || "").toLowerCase().includes(searchTerm);
+        const matchesUF = (logo.clientUf || "").toLowerCase().includes(searchTerm);
         const matchesPlanType = (logo.planType || "").toLowerCase().includes(searchTerm);
         const matchesCategory = category === "" || logo.category === category;
         
@@ -1016,50 +997,52 @@ function calculateEndDate() {
     endDateInput.value = `${year}-${month}-${day}`;
 }
 
-let cnpjDelete = null;
-document.getElementById("confirm-delete").addEventListener("click", async () => {
-    if (cnpjDelete !== null) {
-        try {
-            const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
-            if (logoToDelete) {
+// let cnpjDelete = null;
+// document.getElementById("confirm-delete").addEventListener("click", async () => {
+//     debugger;
+//     if (cnpjDelete !== null) {
+//         try {
+//             const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
+//             if (logoToDelete) {
                
-               // const imagePath = extractFirebasePathFromUrl(logoToDelete.imagem);
-               // await logosApi.deleteImage(imagePath);
+//                // const imagePath = extractFirebasePathFromUrl(logoToDelete.imagem);
+//                 await logosApi.deleteImage(imagePath);
               
-                // Exclui a imagem do Cloudinary
-                await deleteLogoFromCloudinary(logoToDelete.deleteToken);
+//                 // Exclui a imagem do Cloudinary - só exclui caso o token esteja com válidade dentro de 1 hora
+//                 //await deleteLogoFromCloudinary(logoToDelete.deleteToken);
 
-                // Exclui o logo do Firestore
-                await logosApi.delete(logoToDelete.id);
+//                 // Exclui o logo do Firestore
+//                 await logosApi.delete(logoToDelete.id);
 
-                // Remove o logo da lista local
-                logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
+//                 // Remove o logo da lista local
+//                 logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
                 
-                // Renderiza novamente a lista de logos
-                renderLogos(logos);
+//                 // Renderiza novamente a lista de logos
+//                 renderLogos(logos);
 
-                showAlert("Excluído com sucesso", "Atenção!", "success");
-            }
-        } catch (error) {
-            console.error("Erro ao excluir logo:", error);
-           showAlert("Ocorreu um erro ao excluir. Por favor, tente novamente.","Erro","error");
-        }
-        cnpjDelete = null;
-        document.getElementById("delete-modal").classList.add("hidden");
-    }
-});
+//                 showAlert("Excluído com sucesso", "Atenção!", "success");
+//             }
+//         } catch (error) {
+//             console.error("Erro ao excluir logo:", error);
+//            showAlert("Ocorreu um erro ao excluir. Por favor, tente novamente.","Erro","error");
+//         }
+//         cnpjDelete = null;
+//         document.getElementById("delete-modal").classList.add("hidden");
+//     }
+// });
 
 function extractFirebasePathFromUrl(url) {
   const decodedUrl = decodeURIComponent(url);
   const matches = decodedUrl.match(/\/o\/(.*?)\?alt/);
   return matches ? matches[1] : null;
 }
+
 // Outros event listeners
-logosGrid.addEventListener("click", (e) => {
-    if (e.target.classList.contains("delete-btn")) {
-        cnpjDelete = e.target.dataset.id;
-        document.getElementById("delete-modal").classList.remove("hidden");
-    }
+//logosGrid.addEventListener("click", (e) => {
+    // if (e.target.classList.contains("delete-btn")) {
+    //     cnpjDelete = e.target.dataset.id;
+    //     document.getElementById("delete-modal").classList.remove("hidden");
+    // }
 
     // if (e.target.classList.contains("edit-btn")) {
     //     debugger
@@ -1067,7 +1050,7 @@ logosGrid.addEventListener("click", (e) => {
     //     loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
     //     document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
     // }
-});
+//});
 
 document.getElementById("cancel-delete").addEventListener("click", () => {
     cnpjDelete = null;

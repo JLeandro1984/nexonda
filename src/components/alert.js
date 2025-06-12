@@ -13,8 +13,9 @@ class AlertComponent {
           <p id="alert-message">Mensagem do alerta aqui</p>
         </div>
         <div class="alert-footer">
+          <button id="cancel-alert-btn" class="alert-button hidden">Cancelar</button>
+          <button id="confirm-alert-btn" class="alert-button hidden">Confirmar</button>
           <button id="close-alert-btn" class="alert-button">Fechar</button>
-          <!-- Botão de confirmar removido do template -->
         </div>
       </div>
     `;
@@ -22,76 +23,102 @@ class AlertComponent {
     document.body.appendChild(this.alertBox);
     this.init();
   }
-  
+
   init() {
-    // Elementos DOM
     this.alertTitle = document.getElementById('alert-title');
     this.alertMessage = document.getElementById('alert-message');
     this.alertIcon = document.getElementById('alert-icon');
     this.closeBtn = document.getElementById('close-alert-btn');
-    
-    // Event listeners
+    this.confirmBtn = document.getElementById('confirm-alert-btn');
+    this.cancelBtn = document.getElementById('cancel-alert-btn');
+
     this.closeBtn.addEventListener('click', () => this.hide());
+    this.cancelBtn.addEventListener('click', () => {
+      this.hide();
+      if (this.onCancel) this.onCancel();
+    });
+    this.confirmBtn.addEventListener('click', () => {
+      this.hide();
+      if (this.onConfirm) this.onConfirm();
+    });
+
     this.alertBox.addEventListener('click', (e) => {
       if (e.target === this.alertBox) this.hide();
     });
-    
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !this.alertBox.classList.contains('hidden')) {
         this.hide();
       }
     });
   }
-  
+
   show(message, title = 'Atenção', type = 'warning') {
-    // Configura ícones para cada tipo
+    this.setType(type);
+    this.alertTitle.textContent = title;
+    this.alertMessage.textContent = message;
+    this.showButtons({ close: true, confirm: false, cancel: false });
+    this.showBox();
+  }
+
+  confirm(message, title = 'Confirmação', type = 'warning', onConfirm = null, onCancel = null) {
+    this.setType(type);
+    this.alertTitle.textContent = title;
+    this.alertMessage.textContent = message;
+    this.onConfirm = onConfirm;
+    this.onCancel = onCancel;
+    this.showButtons({ close: false, confirm: true, cancel: true });
+    this.showBox();
+  }
+
+  setType(type) {
     const icons = {
       warning: '⚠️',
       error: '❌',
       success: '✅',
       info: 'ℹ️'
     };
-    
-    // Aplica configurações
-    this.alertTitle.textContent = title;
-    this.alertMessage.textContent = message;
     this.alertIcon.textContent = icons[type] || icons.warning;
-    
-    // Remove classes de tipo anteriores e adiciona a nova
-    this.alertBox.classList.remove(
-      'alert-warning', 'alert-error', 'alert-success', 'alert-info'
-    );
+    this.alertBox.classList.remove('alert-warning', 'alert-error', 'alert-success', 'alert-info');
     this.alertBox.classList.add(`alert-${type}`);
-    
-    // Mostra o alerta
-    this.alertBox.classList.remove('hidden');
-    setTimeout(() => {
-      this.alertBox.classList.add('active');
-    }, 10);
   }
-  
+
+  showButtons({ close = false, confirm = false, cancel = false }) {
+    this.closeBtn.classList.toggle('hidden', !close);
+    this.confirmBtn.classList.toggle('hidden', !confirm);
+    this.cancelBtn.classList.toggle('hidden', !cancel);
+  }
+
+  showBox() {
+    this.alertBox.classList.remove('hidden');
+    setTimeout(() => this.alertBox.classList.add('active'), 10);
+  }
+
   hide() {
     this.alertBox.classList.remove('active');
     setTimeout(() => {
       this.alertBox.classList.add('hidden');
+      this.onConfirm = null;
+      this.onCancel = null;
     }, 300);
   }
 }
 
-// Cria uma instância global
 const alertInstance = new AlertComponent();
 
-// Função simplificada sem opções de confirmação
 function showAlert(message, title = 'Atenção', type = 'warning') {
   alertInstance.show(message, title, type);
 }
 
-// Disponibiliza globalmente
+function showConfirm(message, title, type, onConfirm, onCancel) {
+  alertInstance.confirm(message, title, type, onConfirm, onCancel);
+}
+
 if (typeof window !== 'undefined') {
   window.showAlert = showAlert;
+  window.showConfirm = showConfirm;
   window.AlertComponent = AlertComponent;
 }
 
-// Exporta para módulos ES6
-export { showAlert, AlertComponent };
+export { showAlert, showConfirm, AlertComponent };
 export default AlertComponent;
