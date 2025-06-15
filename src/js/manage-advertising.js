@@ -4,7 +4,9 @@ import { showAlert } from '../components/alert.js';
 // Elementos DOM
 const adForm = document.getElementById("ad-form");
 const adsGrid = document.getElementById("premium-ads-list");
-const searchInput = document.getElementById("search-input");
+//const searchInput = document.getElementById("search-input");
+const adSearchInput = document.getElementById('ad-search-input');
+const adFilterStatus = document.getElementById('ad-filter-status');
 const adImageInput = document.getElementById("ad-image");
 const adImageUrl = document.getElementById("ad-image-url");
 const clientSelect = document.getElementById('ad-client');
@@ -32,10 +34,11 @@ async function init() {
             
             // Garante que ads seja um array
             ads = Array.isArray(response) ? response : [];            
-            if (ads.length > 0) {
-                renderAds(ads);
-            }
-            
+            // if (ads.length > 0) {
+            //     renderAds(ads);
+          // }
+          
+            renderAds();
             populateClientSelect();
             
         } catch (error) {
@@ -47,8 +50,7 @@ async function init() {
         showAlert('Erro ao inicializar a aplicação. Por favor, recarregue a página.', 'error');
     }
 }
-
-
+  
 async function loadClientsFromFirestore() {
     try {
       const allLogos = await logosApi.getAll(); // Supondo que retorna um array de objetos
@@ -110,20 +112,9 @@ async function loadClientsFromFirestore() {
 if (adForm) {
     adForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        debugger
-
+      
         try {
             const formData = new FormData(adForm);
-            // const adData = {
-            //     title: formData.get('ad-title'),
-            //     description: formData.get('ad-description'),
-            //     mediaType: formData.get('ad-type'),
-            //     mediaUrl: formData.get('ad-media'),
-            //     targetUrl: formData.get('ad-link'),
-            //     clientCNPJ: formData.get('ad-client'),
-            //     startDate: formData.get('ad-start-date'),
-            //     endDate: formData.get('ad-end-date')
-            // };
 
             const adData = {};
             for (let [key, value] of formData.entries()) {
@@ -221,15 +212,51 @@ window.deleteAd = async function (adId) {
   );
 };
 
-
-// Funções auxiliares
-function renderAds(ads) {
+function renderAds() {
+    const adsGrid = document.getElementById('premium-ads-list');
     if (!adsGrid) return;
-    
+
+    const searchTerm = (adSearchInput.value || '').toLowerCase();
+    const statusFilter = adFilterStatus.value;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Filtro - usando a variável 'ads' em vez de 'adsList'
+    const filtered = ads.filter(ad => {
+        const matchesSearch =
+            ad.title.toLowerCase().includes(searchTerm) ||
+            (ad.description && ad.description.toLowerCase().includes(searchTerm)) ||
+            (ad.clientName && ad.clientName.toLowerCase().includes(searchTerm));
+
+        const startDate = ad.startDate ? new Date(ad.startDate) : null;
+        const endDate = ad.endDate ? new Date(ad.endDate) : null;
+
+        if (!startDate || !endDate) return false;
+
+        switch (statusFilter) {
+            case 'active':
+                return startDate <= today && endDate >= today && ad.isActive;
+            case 'inactive':
+                return !ad.isActive;
+            case 'upcoming':
+                return startDate > today;
+            case 'expired':
+                return endDate < today;
+            default:
+                return matchesSearch;
+        }
+    });
+
+    // Renderização
     adsGrid.innerHTML = '';
-    ads.forEach(ad => {
-        const adElement = createAdElement(ad);
-        adsGrid.appendChild(adElement);
+    if (filtered.length === 0) {
+        adsGrid.innerHTML = '<div class="no-ads">Nenhuma propaganda encontrada.</div>';
+        return;
+    }
+
+    filtered.forEach(ad => {
+        const card = createAdElement(ad); // Usando createAdElement em vez de createAdCard
+        adsGrid.appendChild(card);
     });
 }
 
@@ -320,7 +347,7 @@ function createAdElement(ad) {
 }
 
 function loadAdForEdit(ad) {
-    debugger;
+  
     const titleInput = document.getElementById('ad-title');
     const descriptionInput = document.getElementById('ad-description');
     const mediaTypeInput = document.getElementById('ad-type');
@@ -381,7 +408,11 @@ function formatDateToInput(date) {
 // Garante que a função init seja chamada quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM carregado, inicializando gerenciamento de propagandas...');
-    // Adiciona um pequeno delay para garantir que todos os elementos estejam carregados
+  
+  if (adSearchInput) adSearchInput.addEventListener('input', renderAds);
+  if (adFilterStatus) adFilterStatus.addEventListener('change', renderAds);
+
+
     setTimeout(() => {
         console.log('Iniciando após delay...');
         init();

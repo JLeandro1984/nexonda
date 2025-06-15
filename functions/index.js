@@ -764,6 +764,7 @@ exports.publicContacts = functions.https.onRequest({
 }));
 
 // --- API pública para propagandas ---
+// --- API pública para propagandas --- 
 exports.publicPremiumAds = functions.https.onRequest({
   cors: true,
   maxInstances: 10
@@ -784,11 +785,25 @@ exports.publicPremiumAds = functions.https.onRequest({
 
   try {
     if (req.method === 'GET') {
+      // Obter data atual como string YYYY-MM-DD
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
       const querySnapshot = await premiumAdsCollection.get();
-      const ads = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+
+      // Filtrar anúncios com startDate <= hoje e endDate >= hoje
+      const ads = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(ad =>
+          ad.startDate &&
+          ad.endDate &&
+          ad.startDate <= todayStr &&
+          ad.endDate >= todayStr
+        );
+
       return res.status(200).json(ads);
     }
 
@@ -819,11 +834,13 @@ exports.publicPremiumAds = functions.https.onRequest({
     }
 
     return res.status(405).json({ error: 'Método não permitido' });
+
   } catch (error) {
     console.error('Erro na API pública de propagandas:', error);
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }));
+
 
 // --- API de autenticação ---
 exports.authenticate = functions.https.onRequest({
