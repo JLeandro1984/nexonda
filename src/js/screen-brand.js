@@ -64,7 +64,9 @@ function createLogoElement(logo) {
         videoButton.onclick = function(e) {
             e.stopPropagation();
             e.preventDefault();
-            openYouTubePlayer(videoUrl);
+            //openYouTubePlayer(videoUrl);
+
+            openCinemaPlayer(videoUrl);
         };
     
         buttonContainer.appendChild(videoButton);

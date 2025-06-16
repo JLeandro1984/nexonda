@@ -21,6 +21,7 @@
     <!-- JS Bootstrap (com Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="./components/user-menu.js"></script>
+    <link rel="stylesheet" href="./components/cinema-player.css" />
   </head>
 
   <body>
@@ -218,6 +219,19 @@
       </a>
     </div>
 
+    <div id="cinemaModal" class="cinema-modal" hidden>
+      <div class="cinema-backdrop" onclick="closeCinemaPlayer()"></div>
+      <div class="cinema-container">
+        <div class="cinema-screen">
+          <div class="screen-content" id="screenContent">
+            <video id="player" controls autoplay></video>
+            <div class="film-texture"></div>
+          </div>
+        </div>
+        <button class="cinema-close" onclick="closeCinemaPlayer()">✖</button>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script type="module" src="./js/screen-brand.js"></script>
     <script type="module" src="./js/main.js"></script>
@@ -225,5 +239,6 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="./js/youtube-api.js"></script>
     <script type="module" src="./js/advertising.js"></script>
+    <script src="./components/cinema-player.js"></script>
   </body>
 </html>
