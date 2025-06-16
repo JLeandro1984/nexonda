@@ -16,6 +16,8 @@
   width: 100%;
   height: 100%;
   cursor: pointer;
+  z-index: 1; /* Adicionado */
+  pointer-events: none; /* Permite clicar nos elementos à frente */
 }
 
 .cinema-container {
@@ -23,9 +25,10 @@
   width: 90%;
   max-width: 800px;
   background-color: #000;
-  border: 2px solid #e50914;
+  border: none;
   border-radius: 8px;
   overflow: hidden;
+  z-index: 2; /* Adicionado */
 }
 
 .cinema-screen {
@@ -73,9 +76,20 @@
   border: none;
   padding: 6px 10px;
   border-radius: 4px;
-  cursor: pointer;
+  cursor: pointer !important;
   font-size: 16px;
-  z-index: 2;
+  z-index: 3; /* Aumentado */
+  pointer-events: auto; /* Garante que recebe eventos */
+  transition: all 0.2s ease; /* Adicionado para feedback visual */
+}
+
+.cinema-close:hover {
+  background: #f40612;
+  transform: scale(1.05);
+}
+
+.cinema-close:active {
+  transform: scale(0.95);
 }
 
 /* Ajustes para dispositivos móveis */
@@ -83,11 +97,10 @@
   .cinema-container {
     width: 95%;
     max-width: none;
-    border-width: 1px;
   }
 
   .cinema-screen {
-    aspect-ratio: 9/16; /* Muda a proporção para retrato em mobile */
+    aspect-ratio: 9/16;
   }
 
   .cinema-close {
@@ -97,7 +110,7 @@
     right: 5px;
   }
 
-  /* Opcional: forçar tela cheia em mobile */
+  /* Layout fullscreen para mobile */
   .cinema-modal {
     padding: 0;
     align-items: flex-start;
@@ -105,7 +118,6 @@
 
   .cinema-container {
     border-radius: 0;
-    border: none;
     width: 100%;
     height: 100%;
   }
