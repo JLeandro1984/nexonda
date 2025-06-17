@@ -1,3 +1,5 @@
+import { showAlert } from '../components/alert.js';
+
 // Variáveis globais
 let carouselInterval = null;
 let updateTimeout = null;
@@ -161,26 +163,6 @@ function createMediaContent(ad) {
   }
   return '';
 }
-
-// function createVideoContent(ad) {
-//   if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
-//     const videoId = getYouTubeVideoId(ad.mediaUrl);
-//     return `
-//       <div class="youtube-video-container" onclick="openCinemaPlayer('${ad.mediaUrl}')">
-//         <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">
-//         <div class="play-overlay">
-//           <i class="fas fa-play"></i>
-//         </div>
-//       </div>
-//     `;
-//   }
-//   return `
-//     <video width="100%" height="180" controls>
-//       <source src="${ad.mediaUrl}" type="video/mp4">
-//       Seu navegador não suporta vídeos HTML5.
-//     </video>
-//   `;
-// }
 
 function createVideoContent(ad) {
   if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
@@ -397,11 +379,38 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
   const videoContainer = e.target.closest('[data-video-url]');
   if (videoContainer) {
     e.preventDefault();
+
     const videoUrl = videoContainer.dataset.videoUrl;
-    openCinemaPlayer(videoUrl);
+
+    // Detecta se é YouTube ou Firebase Storage MP4 ou outro vídeo suportado
+    const isYouTube = (url) => {
+      try {
+        const hostname = new URL(url).hostname;
+        return hostname.includes('youtube.com') || hostname.includes('youtu.be');
+      } catch {
+        return false;
+      }
+    };
+
+    const isFirebaseStorageMp4 = (url) => {
+      try {
+        // URLs do Firebase Storage geralmente têm esse padrão e terminam com .mp4?alt=media
+        return url.includes('firebasestorage.googleapis.com') && (url.endsWith('.mp4') || url.includes('.mp4?'));
+      } catch {
+        return false;
+      }
+    };
+   
+      if (isYouTube(videoUrl) || isFirebaseStorageMp4(videoUrl)) {
+        window.openYouTubePlayer(videoUrl);
+      } else {
+        console.warn('URL de vídeo não suportada:', videoUrl);
+        showAlert('Formato de vídeo não suportado.');
+      }
+   
   }
 });

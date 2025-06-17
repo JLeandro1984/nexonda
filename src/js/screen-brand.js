@@ -36,10 +36,10 @@ function createLogoElement(logo) {
     logoItem.className = 'logo-item';
 
     // Obtém a URL da imagem e do vídeo
-    const imageSrc = logo.imageUrl || logo.imagem || '';
-    const videoUrl = logo.videoUrl || "";
-    const instagramUrl = logo.instagramUrl || "";
-    const facebookUrl = logo.facebookUrl || "";
+    const imageSrc = logo.imageUrl || '';
+    const videoUrl =   logo.clientVideoUrl || "";
+    const instagramUrl = logo.clientInstagramUrl || "";
+    const facebookUrl = logo.clientFacebookUrl || "";
     const clientWhatsapp = logo.clientWhatsapp || "";
 
     // Preenche o conteúdo do card
@@ -61,13 +61,36 @@ function createLogoElement(logo) {
         videoButton.innerHTML = '<i class="fab fa-youtube"></i>'; 
 
          // Evento de clique no botão de vídeo
-        videoButton.onclick = function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            //openYouTubePlayer(videoUrl);
-
-            openCinemaPlayer(videoUrl);
+     videoButton.onclick = function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+         debugger;
+        // Supondo que videoUrl está definido nesse escopo
+        const isYouTube = (url) => {
+            try {
+            const hostname = new URL(url).hostname;
+            return hostname.includes('youtube.com') || hostname.includes('youtu.be');
+            } catch {
+            return false;
+            }
         };
+
+        const isFirebaseMp4 = (url) => {
+            try {
+            return url.includes('firebasestorage.googleapis.com') && (url.endsWith('.mp4') || url.includes('.mp4?'));
+            } catch {
+            return false;
+            }
+        };
+
+        if (isYouTube(videoUrl) || isFirebaseMp4(videoUrl)) {
+            // Aqui você pode usar sua função que trata os dois casos
+            openYouTubePlayer(videoUrl);
+        } else {
+            showAlert('Formato de vídeo não suportado.', 'warning');
+        }
+        };
+
     
         buttonContainer.appendChild(videoButton);
 

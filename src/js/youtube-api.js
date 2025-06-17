@@ -1,3 +1,5 @@
+import { showAlert } from "../components/alert.js";
+
 let ytPlayer;
 let lastVideoUrl = ''; // Para armazenar o último vídeo
 
@@ -8,72 +10,85 @@ function onYouTubeIframeAPIReady() {
 
 // Função para abrir o player
 function openYouTubePlayer(videoUrl) {
-  const videoId = getYouTubeVideoId(videoUrl);
-  if (!videoId) return alert('ID de vídeo inválido.');
-
-  lastVideoUrl = videoUrl; // Guarda a URL do vídeo para fallback
-
   const modal = document.getElementById('youtube-modal');
-  const modalPlayer = document.getElementById('youtube-player');
+  const overlay = document.getElementById('youtube-overlay');
+  const ytContainer = document.getElementById('youtube-player');
+  const videoTag = document.getElementById('custom-video-player');
 
-    // Exibe o modal ao remover a classe d-none   
-    document.getElementById('youtube-overlay').classList.remove('d-none');
-    modal.classList.remove('d-none');
+  const videoId = getYouTubeVideoId(videoUrl);
+  const isMp4 = videoUrl.endsWith('.mp4') || videoUrl.includes('.mp4?');
 
-  // Vamos forçar a exibição do botão de fechar enquanto o player carrega
+  overlay.classList.remove('d-none');
+  modal.classList.remove('d-none');
   document.querySelector('.close-btn').style.display = 'block';
 
-  // Se o ytPlayer foi destruído ou não existe, cria novamente
-  if (!ytPlayer) {
-      ytPlayer = new YT.Player(modalPlayer, {
-          height: '100%',
-          width: '100%',
-          videoId: videoId,
-          playerVars: {
-              autoplay: 1,
-              controls: 1,
-              modestbranding: 1,
-              rel: 0,
-              mute: 1
+  if (videoId) {
+    ytContainer.style.display = 'block';
+    videoTag.style.display = 'none';
+
+    if (!ytPlayer) {
+      ytPlayer = new YT.Player(ytContainer, {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          modestbranding: 1,
+          rel: 0,
+          mute: 1,
+        },
+        events: {
+          onReady: () => ytPlayer.playVideo(),
+          onError: () => {
+            window.open(videoUrl, '_blank');
+            closeYouTubePlayer();
           },
-          events: {
-              onReady: () => {
-                  //console.log('Player do YouTube pronto!');
-                  ytPlayer.playVideo();
-              },
-              onError: (error) => {
-                  console.error('Erro ao carregar o vídeo', error);
-                  // Em caso de erro, podemos redirecionar o usuário
-                  window.open(lastVideoUrl, '_blank');
-                  closeYouTubePlayer();
-              }
-          }
+        },
       });
-  } else {
-      ytPlayer.loadVideoById(videoId); // Carrega o vídeo se o player já estiver ativo
+    } else {
+      ytPlayer.loadVideoById(videoId);
       ytPlayer.playVideo();
+    }
+  } else if (isMp4) {
+    ytContainer.style.display = 'none';
+    videoTag.style.display = 'block';
+
+    videoTag.src = videoUrl;
+    videoTag.load();
+    videoTag.play();
+  } else {
+    alert('Formato de vídeo não suportado.');
+    closeYouTubePlayer();
   }
 }
 
   
 // Função para fechar o player
 function closeYouTubePlayer() {
-      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo(); // Para o vídeo
-        ytPlayer.clearVideo(); // Limpa o vídeo do player
-    }
+  const modal = document.getElementById('youtube-modal');
+  const overlay = document.getElementById('youtube-overlay');
+  const modalPlayer = document.getElementById('youtube-player');
+  const videoTag = document.getElementById('custom-video-player');
 
-    // Esconde o modal novamente adicionando a classe d-none
-    document.getElementById('youtube-overlay').classList.add('d-none');
-    document.getElementById('youtube-modal').classList.add('d-none');
-    document.querySelector('.close-btn').style.display = 'none'; // Esconde o botão de fechar
+  if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+    ytPlayer.stopVideo();
+    ytPlayer.destroy();
+    ytPlayer = null;
+  }
 
-    // Limpa o conteúdo do player (se necessário)
-    if (ytPlayer) {
-        ytPlayer.destroy();  // Destrói o player se necessário para reiniciar a próxima vez
-        ytPlayer = null; // Redefine o ytPlayer
-    }
+  if (videoTag) {
+    videoTag.pause();
+    videoTag.src = '';
+    videoTag.style.display = 'none';
+  }
+
+  modalPlayer.style.display = 'none';
+  overlay.classList.add('d-none');
+  modal.classList.add('d-none');
+  document.querySelector('.close-btn').style.display = 'none';
 }
+
 
 // Função para obter o ID do vídeo a partir da URL
 function getYouTubeVideoId(url) {
@@ -97,10 +112,7 @@ function getYouTubeVideoId(url) {
     }
 }
   
-// function getYouTubeVideoId(url) {
-//     const regex =
-//       /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-//     const match = url.match(regex);
-//     return match ? match[1] : null;
-// }
+window.openYouTubePlayer = openYouTubePlayer;
+window.closeYouTubePlayer = closeYouTubePlayer;
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
   
