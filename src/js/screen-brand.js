@@ -7,28 +7,30 @@ const STORAGE_KEY = 'contactFormData';
 const categorySelect = document.getElementById("category-select");
 
 // Função para aplicar a cor predominante do logo como fundo do container
-window.applyLogoBgColor = function(imgElement) {
-  if (!window.ColorThief) return;
-  const colorThief = new ColorThief();
-  const card = imgElement.closest('.logo-card');
-  const container = imgElement.closest('.logo-img-container');
+//css logo-card ... opacity ... foi comentado
 
-  function setBg() {
-    try {
-      const color = colorThief.getColor(imgElement);
-      container.style.backgroundColor = `rgb(${color[0]},${color[1]},${color[2]})`;
-    } catch (e) {
-      container.style.backgroundColor = '#fff';
-    }
-    card.classList.add('visible');  // mostra o card só depois que a cor foi aplicada
-  }
+//window.applyLogoBgColor = function(imgElement) {
+  // if (!window.ColorThief) return;
+  // const colorThief = new ColorThief();
+  // const card = imgElement.closest('.logo-card');
+  // const container = imgElement.closest('.logo-img-container');
 
-  if (imgElement.complete && imgElement.naturalHeight !== 0) {
-    requestAnimationFrame(setBg);
-  } else {
-    imgElement.addEventListener('load', () => requestAnimationFrame(setBg), { once: true });
-  }
-};
+  // function setBg() {
+  //   try {
+  //     const color = colorThief.getColor(imgElement);
+  //     container.style.backgroundColor = `rgb(${color[0]},${color[1]},${color[2]})`;
+  //   } catch (e) {
+  //     container.style.backgroundColor = '#fff';
+  //   }
+  //   card.classList.add('visible');  // mostra o card só depois que a cor foi aplicada
+  // }
+
+  // if (imgElement.complete && imgElement.naturalHeight !== 0) {
+  //   requestAnimationFrame(setBg);
+  // } else {
+  //   imgElement.addEventListener('load', () => requestAnimationFrame(setBg), { once: true });
+  // }
+//};
 
 
 // Carrega logos do Firebase Functions
@@ -208,7 +210,7 @@ async function loadLogos() {
 
     // Após renderizar, aplicar cor de fundo nos logos
     if (window.ColorThief) {
-      document.querySelectorAll('.logo-img').forEach(applyLogoBgColor);
+     // document.querySelectorAll('.logo-img').forEach(applyLogoBgColor);
     }
 }
 
@@ -322,7 +324,7 @@ debugger
     });
   
    if (window.ColorThief) {
-          document.querySelectorAll('.logo-img').forEach(applyLogoBgColor);
+         // document.querySelectorAll('.logo-img').forEach(applyLogoBgColor);
       }
 }
 
