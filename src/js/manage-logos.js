@@ -2,6 +2,7 @@ import { logosApi } from './api.js';
 import { categories } from './categories.js';
 import { ufs } from './ufs.js';
 import { showAlert } from '../components/alert.js';
+import {uploadToCloudinaryByType, deleteFromCloudinaryByToken, showMediaPreview} from './cloudinary-utils.js';
 
 
 // Elementos DOM
@@ -21,104 +22,6 @@ const endDateInput = document.getElementById('end-date');
 const logoImageInput = document.getElementById("logo-image");
 const logoImageUrl = document.getElementById("logo-image-url");
 let emailUser = "";
-
-document.addEventListener('DOMContentLoaded', function () {
- // INICIO - Função para inicializar o widget de upload do Cloudinary
-        const YOUR_UPLOAD_PRESET = "brandConnectPresetName";
-        const YOUR_CLOUD_NAME = "dmq4e5bm5";
-
-        async function uploadImageToCloudinary(file) {
-           
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", YOUR_UPLOAD_PRESET);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/image/upload`, {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.secure_url) {
-                return {
-                    imageUrl: data.secure_url,
-                    deleteToken: data.delete_token // útil se você ativou "Retornar token de exclusão"
-                };
-            } else {
-                throw new Error("Erro ao fazer upload da imagem para o Cloudinary.");
-            }
-
-            
-            if (data.delete_token) {
-                console.log("Token de exclusão recebido:", data.delete_token);
-            }
-        }
-        // Tornando a função visível globalmente (para onclick do HTML)
-        window.uploadImageToCloudinary = uploadImageToCloudinary;
-        
-       //aceita imagens e videos
-        async function uploadFileToCloudinary(file) {
-            const type = file.type.startsWith("video/") ? "video" : "image";
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("upload_preset", YOUR_UPLOAD_PRESET);
-
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/${type}/upload`, {
-                method: "POST",
-                body: formData
-            });
-
-            const data = await response.json();
-
-            if (data.secure_url) {
-                return {
-                    url: data.secure_url,
-                    deleteToken: data.delete_token,
-                    resourceType: type
-                };
-            } else {
-                throw new Error("Erro ao fazer upload para o Cloudinary.");
-            }
-        }
-        window.uploadFileToCloudinary = uploadFileToCloudinary;
-
-       async function deleteLogoFromCloudinary(deleteToken) {
-            if (!deleteToken) {
-                console.warn("Token de exclusão não fornecido. Ignorando.");
-                return;
-            }
-
-            try {
-                const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/delete_by_token`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: new URLSearchParams({ token: deleteToken })
-                });
-
-                const data = await response.json();
-
-                if (data.result === "ok") {
-                    console.log("Imagem excluída com sucesso.");
-
-                } else if (data?.error?.message.includes('Stale request - reported time is')) {
-                    console.warn("Token de exclusão vencido:", data);
-                }                
-                else {
-                    console.warn("Não foi possível excluir a imagem do Cloudinary:", data);
-                }
-            } catch (error) {
-                console.error("Erro na requisição ao Cloudinary:", error);
-                // Também não propaga erro — só loga
-            }
-        }
-
-    
-    window.deleteLogoFromCloudinary = deleteLogoFromCloudinary;
-    // FIM - Função para inicializar o widget de upload do Cloudinary
- });
 
 let editingIndex = null;
 let editingDeleteToken = null;
@@ -416,10 +319,11 @@ logoForm.addEventListener("submit", async (e) => {
             }
         // Campos que não vêm do formulário diretamente:
         logoData.openingHours = obterHorarioFuncionamento();
-        
-                  
-          /* 🔽 LIMPEZA DOS CAMPOS OPCIONAIS */
-           //ex: if (!logoData.contractMonths) delete logoData.contractMonths;
+             
+        if (!logoData.openingHours) return;
+
+        /* 🔽 LIMPEZA DOS CAMPOS OPCIONAIS */
+        //ex: if (!logoData.contractMonths) delete logoData.contractMonths;
         //ex:  if (!logoData.contractValue) delete logoData.contractValue;
         
         const file = logoImageInput.files[0];
@@ -428,22 +332,26 @@ logoForm.addEventListener("submit", async (e) => {
             // Se estiver editando e houver uma imagem anterior com deleteToken, exclui do Cloudinary
             if (editingIndex && editingDeleteToken) {
                 try {                                       
-                    await deleteLogoFromCloudinary(editingDeleteToken);
+                    await deleteFromCloudinaryByToken(editingDeleteToken);
                 } catch (error) {
-                    showAlert("Não foi possível excluir imagem anterior:" + error, "error");
+                    console.error("Não foi possível excluir imagem anterior:", error);
                 }
             }
 
-            // Faz upload da nova imagem
-            const { imageUrl: newUrl, deleteToken: newToken } = await uploadImageToCloudinary(file);
-            logoData.imageUrl = newUrl;
-            logoData.deleteToken = newToken;
+            try {
+                // Faz upload da nova imagem (tipo: "image")
+                const { url: newUrl, deleteToken: newToken } = await uploadToCloudinaryByType(file, "image");
+
+                logoData.imageUrl = newUrl;
+                logoData.deleteToken = newToken;
+            } catch (err) {
+                showAlert("Erro ao fazer upload da nova imagem: " + err.message + " Por favor, tente novamente.", "error");
+                return; 
+            }
         }
                         
         if (editingIndex) {
             const logo = logos.find(l => l.id === editingIndex);
-              //logoData.deleteToken = logo.deleteToken
-             // logoData.imageUrl = logo.imageUrl
               logoData.id = editingIndex;
 
             await logosApi.update(editingIndex, logoData);
@@ -512,62 +420,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
-
-// logoImageInput.addEventListener("change", async (event) => {
-//   const file = event.target.files[0];
-//   if (!file) return;
-  
-//   const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-//   const maxSize = 5 * 1024 * 1024;
-
-//   if (!validTypes.includes(file.type)) {
-//       showAlert('Tipo de arquivo inválido. Use JPG, PNG ou GIF.', 'error');
-//       return;
-//   }
-
-//   if (file.size > maxSize) {
-//       showAlert('Arquivo muito grande. Tamanho máximo: 5MB.', 'error');
-//       return;
-//   }
-
-//   try {
-//       const reader = new FileReader();
-//       reader.onloadend = async () => {
-//           const base64Image = reader.result; // já com "data:image/png;base64,..."
-
-//           if (!emailUser) {
-//               showAlert('Usuário não autenticado', 'error');
-//               return;
-//           }
-
-//           // Usar publicId único para usuário e logo, pode ser por exemplo:
-//           const publicId = `logos/${emailUser}/logo`;
-
-//           // Chamar upload passando base64 e publicId
-//           const result = await logosApi.uploadImageBase64(base64Image, publicId);
-
-//           if (!result || !result.secureUrl || !result.publicId) {
-//               throw new Error('Resposta inválida do servidor');
-//           }
-
-//           // Salva URL e publicId para uso futuro (deletar/atualizar)
-//           document.getElementById("logo-image-url").value = result.secureUrl;
-//           document.getElementById("logo-public-id").value = result.publicId; // elemento escondido para guardar publicId
-
-//           showAlert('Imagem enviada com sucesso!', 'success');
-//       };
-
-//       reader.readAsDataURL(file);
-//   } catch (error) {
-//       console.error('Erro detalhado no upload:', error);
-
-//       if (error.message.includes('PERMISSION_DENIED')) {
-//           showAlert('Erro: arquivo acima do limite de 5MB ou não autorizado.', 'error');
-//       } else {
-//           showAlert('Erro ao enviar imagem: ' + (error.message || 'Erro desconhecido'), 'error');
-//       }
-//   }
-// });
 
 // Funções auxiliares
 function getCategoryLabelByValue(value) {
@@ -695,46 +547,6 @@ function aplicarMascaraTelefone(input, isCelular = false) {
         input.value = valor;
     });
 }
-
-/*Anexar imagem*/
-// document.getElementById("logo-image").addEventListener("change", async (event) => {
-//     const file = event.target.files[0];
-//     if (!file) return;
-
-//     // Validações do arquivo
-//     const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-//     const maxSize = 5 * 1024 * 1024; // 5MB
-
-//     if (!validTypes.includes(file.type)) {
-//         showAlert('Tipo de arquivo inválido. Use apenas imagens (JPG, PNG ou GIF).', 'error');
-//         return;
-//     }
-
-//     if (file.size > maxSize) {
-//         showAlert('Arquivo muito grande. O tamanho máximo permitido é 5MB.', 'error');
-//         return;
-//     }
-
-//     try {
-//         console.log('Iniciando upload do arquivo:', {
-//             nome: file.name,
-//             tipo: file.type,
-//             tamanho: file.size
-//         });
-
-//         const result = await logosApi.uploadImage(file);
-        
-//         if (!result || !result.imageUrl) {
-//             throw new Error('URL da imagem não recebida do servidor');
-//         }
-
-//         logoImageUrl.value = result.imageUrl;
-//         showAlert('Imagem enviada com sucesso!', 'success');
-//     } catch (error) {        
-//         console.error('Erro detalhado no upload:', error);
-//         showAlert('Erro ao enviar imagem: ' + (error.message || 'Erro desconhecido'), 'error');
-//     }
-// });
   
 document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telephone');
@@ -809,7 +621,6 @@ emailInput.addEventListener('input', function () {
   }
 });
 
-// Carrega os dados de um logo no formulário para edição  
 // Carrega os dados de um logo no formulário para edição    
 function loadLogoForEdit(logo) {
     console.log('Carregando logo para edição:', logo); // Debug
@@ -874,18 +685,21 @@ function loadLogoForEdit(logo) {
         const showAddressValue = logo.showAddressActive.toString();
         form.querySelector(`input[name="show-address-active"][value="${showAddressValue}"]`).checked = true;
     }
-    
+    debugger
     // Horário de funcionamento
     if (logo.openingHours) {
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        days.forEach(day => {
-            const dayData = logo.openingHours[day];
-            if (dayData) {
+        debugger;
+            days.forEach(day => {
+                const dayData = logo.openingHours[day];
+                if (dayData) {
                 form.querySelector(`#${day}-start`).value = dayData.start || '';
+                form.querySelector(`#${day}-lunch-start`).value = dayData.lunch_start || '';
+                form.querySelector(`#${day}-lunch-end`).value = dayData.lunch_end || '';
                 form.querySelector(`#${day}-end`).value = dayData.end || '';
                 form.querySelector(`#${day}-closed`).checked = dayData.closed || false;
-            }
-        });
+                }
+            });
     } else {
         // Verifica os campos closed individuais (para compatibilidade com versões antigas)
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -1005,60 +819,11 @@ function calculateEndDate() {
     endDateInput.value = `${year}-${month}-${day}`;
 }
 
-// let cnpjDelete = null;
-// document.getElementById("confirm-delete").addEventListener("click", async () => {
-//  
-//     if (cnpjDelete !== null) {
-//         try {
-//             const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
-//             if (logoToDelete) {
-               
-//                // const imagePath = extractFirebasePathFromUrl(logoToDelete.imagem);
-//                 await logosApi.deleteImage(imagePath);
-              
-//                 // Exclui a imagem do Cloudinary - só exclui caso o token esteja com válidade dentro de 1 hora
-//                 //await deleteLogoFromCloudinary(logoToDelete.deleteToken);
-
-//                 // Exclui o logo do Firestore
-//                 await logosApi.delete(logoToDelete.id);
-
-//                 // Remove o logo da lista local
-//                 logos = logos.filter(l => l.clientCNPJ !== cnpjDelete);
-                
-//                 // Renderiza novamente a lista de logos
-//                 renderLogos(logos);
-
-//                 showAlert("Excluído com sucesso", "Atenção!", "success");
-//             }
-//         } catch (error) {
-//             console.error("Erro ao excluir logo:", error);
-//            showAlert("Ocorreu um erro ao excluir. Por favor, tente novamente.","Erro","error");
-//         }
-//         cnpjDelete = null;
-//         document.getElementById("delete-modal").classList.add("hidden");
-//     }
-// });
-
 function extractFirebasePathFromUrl(url) {
   const decodedUrl = decodeURIComponent(url);
   const matches = decodedUrl.match(/\/o\/(.*?)\?alt/);
   return matches ? matches[1] : null;
 }
-
-// Outros event listeners
-//logosGrid.addEventListener("click", (e) => {
-    // if (e.target.classList.contains("delete-btn")) {
-    //     cnpjDelete = e.target.dataset.id;
-    //     document.getElementById("delete-modal").classList.remove("hidden");
-    // }
-
-    // if (e.target.classList.contains("edit-btn")) {
-    //    
-    //     const cnpjEditar = e.target.dataset.id;
-    //     loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
-    //     document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });
-    // }
-//});
 
 document.getElementById("cancel-delete").addEventListener("click", () => {
     cnpjDelete = null;
@@ -1101,39 +866,48 @@ contractMonthsSelect.addEventListener('change', calculateEndDate);
 
   diasDaSemana.forEach((dia) => {
     const startEl = document.getElementById(`${dia}-start`);
+    const lunchStartEl = document.getElementById(`${dia}-lunch-start`);
+    const lunchEndEl = document.getElementById(`${dia}-lunch-end`);
     const endEl = document.getElementById(`${dia}-end`);
     const closed = document.getElementById(`${dia}-closed`).checked;
 
     const start = startEl.value.trim();
+    const lunchStart = lunchStartEl.value.trim();
+    const lunchEnd = lunchEndEl.value.trim();
     const end = endEl.value.trim();
 
+    // Valida apenas o início e fim principais, almoço pode ser vazio
     if (!closed && (!start || !end)) {
       valido = false;
       diaInvalido = dia;
-      startEl.classList.add('erro');
-      endEl.classList.add('erro');
+
+      // Marca erro apenas nos obrigatórios
+      [startEl, endEl].forEach(el => {
+        if (!el.value.trim()) el.classList.add('erro');
+        else el.classList.remove('erro');
+      });
     } else {
-      startEl.classList.remove('erro');
-      endEl.classList.remove('erro');
+      // Remove erros
+      [startEl, endEl, lunchStartEl, lunchEndEl].forEach(el => el.classList.remove('erro'));
     }
 
     horarios[dia] = {
       start: closed ? null : start,
+      lunch_start: closed ? null : lunchStart || null,
+      lunch_end: closed ? null : lunchEnd || null,
       end: closed ? null : end,
       closed: closed
     };
   });
 
   if (!valido) {
-    showAlert(`Preencha os horários corretamente para: ${diaInvalido}`,'warning');
+    showAlert(`Preencha os horários corretamente para: ${diaInvalido}`, 'warning');
     return null;
   }
 
   return horarios;
 }
-
-
-
+  
 //Apis para Obter "CNPJ" e "CPF"
 async function fetchCNPJData(cnpj) {
   try {
@@ -1306,4 +1080,4 @@ async function obterCoordenadasGoogle() {
     document.getElementById('client-uf').addEventListener('blur', obterCoordenadasGoogle);
     document.getElementById('client-number').addEventListener('blur', obterCoordenadasGoogle);
     document.getElementById('client-city').addEventListener('blur', obterCoordenadasGoogle);
-    
+ 

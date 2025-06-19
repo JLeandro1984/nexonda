@@ -971,6 +971,77 @@ select {
   display: block;
 }
 
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*Css horário de funconamento*/
+.opening-day {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 12px;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between; /* separa os itens */
+  align-items: center;
+  width: 100%; /* ocupa toda a largura */
+  font-weight: bold;
+  margin-bottom: 8px;
+  background: #eeeef1;
+}
+
+.day-inputs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.day-inputs .time-group {
+  display: flex;
+  flex-direction: column;
+  width: 70px;
+}
+
+.day-inputs .time-group label {
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.day-inputs input[type="time"] {
+  width: 102%;
+}
+
+.closed-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: normal;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.opening-day span {
+  margin-left: 10px;
+}
+
+.opening-day:not(:last-child) {
+  margin-bottom: 16px;
+}
 @keyframes spin {
   0% {
     transform: rotate(0deg);
