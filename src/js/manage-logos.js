@@ -57,6 +57,32 @@ document.addEventListener('DOMContentLoaded', function () {
         // Tornando a função visível globalmente (para onclick do HTML)
         window.uploadImageToCloudinary = uploadImageToCloudinary;
         
+       //aceita imagens e videos
+        async function uploadFileToCloudinary(file) {
+            const type = file.type.startsWith("video/") ? "video" : "image";
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", YOUR_UPLOAD_PRESET);
+
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${YOUR_CLOUD_NAME}/${type}/upload`, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.secure_url) {
+                return {
+                    url: data.secure_url,
+                    deleteToken: data.delete_token,
+                    resourceType: type
+                };
+            } else {
+                throw new Error("Erro ao fazer upload para o Cloudinary.");
+            }
+        }
+        window.uploadFileToCloudinary = uploadFileToCloudinary;
+
        async function deleteLogoFromCloudinary(deleteToken) {
             if (!deleteToken) {
                 console.warn("Token de exclusão não fornecido. Ignorando.");
@@ -133,7 +159,7 @@ function decodeJwt(token) {
 async function checkAuth() {
     if (authState.isChecking) return authState.isAuthenticated;
     authState.isChecking = true;
-debugger
+
     try {
         // Verifica se há um token na URL (caso venha do redirecionamento do Google)
         const urlParams = new URLSearchParams(window.location.search);
@@ -981,7 +1007,7 @@ function calculateEndDate() {
 
 // let cnpjDelete = null;
 // document.getElementById("confirm-delete").addEventListener("click", async () => {
-//     debugger;
+//  
 //     if (cnpjDelete !== null) {
 //         try {
 //             const logoToDelete = logos.find(l => l.clientCNPJ === cnpjDelete);
@@ -1027,7 +1053,7 @@ function extractFirebasePathFromUrl(url) {
     // }
 
     // if (e.target.classList.contains("edit-btn")) {
-    //     debugger
+    //    
     //     const cnpjEditar = e.target.dataset.id;
     //     loadLogoForEdit(logos.find(l => l.id === cnpjEditar));
     //     document.querySelector('.logo-form-container').scrollIntoView({ behavior: 'smooth' });

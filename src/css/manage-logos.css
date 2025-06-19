@@ -928,6 +928,49 @@
   line-height: 38px !important;
 }
 
+/* .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.form-group {
+  width: 100%;
+}
+
+.form-group label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+} */
+
+input[type="url"],
+input[type="file"],
+select {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+#media-preview {
+  width: 100%;
+  text-align: center;
+}
+
+#media-preview img,
+#media-preview video {
+  width: 100%;
+  max-width: 320px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  display: block;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

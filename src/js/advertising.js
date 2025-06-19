@@ -178,7 +178,7 @@ function createVideoContent(ad) {
   }
   return `
     <div data-video-url="${ad.mediaUrl}">
-      <video width="100%" height="180" controls>
+      <video width="100%" height="180" muted autoplay playsinline>
         <source src="${ad.mediaUrl}" type="video/mp4">
         Seu navegador não suporta vídeos HTML5.
       </video>
@@ -383,7 +383,7 @@ document.addEventListener('click', function (e) {
   const videoContainer = e.target.closest('[data-video-url]');
   if (videoContainer) {
     e.preventDefault();
-
+debugger
     const videoUrl = videoContainer.dataset.videoUrl;
 
     // Detecta se é YouTube ou Firebase Storage MP4 ou outro vídeo suportado
@@ -404,8 +404,17 @@ document.addEventListener('click', function (e) {
         return false;
       }
     };
+
+    const isCloudinaryMp4 = (url) => {
+        try {
+          return url.includes('res.cloudinary.com') && (url.endsWith('.mp4') || url.includes('.mp4?'));
+        } catch {
+          return false;
+        }
+     };
+    
    
-      if (isYouTube(videoUrl) || isFirebaseStorageMp4(videoUrl)) {
+      if (isYouTube(videoUrl) || isFirebaseStorageMp4(videoUrl) || isCloudinaryMp4(videoUrl)) {
         window.openYouTubePlayer(videoUrl);
       } else {
         console.warn('URL de vídeo não suportada:', videoUrl);

@@ -12,7 +12,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
-    <link rel="stylesheet" href="./components/alert.css" />
   </head>
   <body>
     <div class="container">
@@ -588,6 +587,14 @@
             </div>
 
             <div class="form-row">
+              <!-- Pré-visualização no topo -->
+              <div
+                class="form-group"
+                style="text-align: center; background-color: #c8cece96"
+              >
+                <div id="media-preview" style="margin-bottom: 12px"></div>
+              </div>
+
               <div class="form-group">
                 <label for="ad-type">Tipo de Mídia*</label>
                 <select id="ad-type" name="mediaType" required>
@@ -597,15 +604,28 @@
               </div>
 
               <div class="form-group">
+                <label for="ad-upload">Arquivo da Mídia*</label>
+                <input
+                  type="file"
+                  id="ad-upload"
+                  name="mediaFile"
+                  accept="image/*,video/*"
+                  required
+                />
+                <small class="hint">Suporta imagens ou vídeos .mp4</small>
+              </div>
+
+              <div class="form-group">
                 <label for="ad-media">URL da Mídia*</label>
                 <input
                   type="url"
                   id="ad-media"
                   name="mediaUrl"
                   required
-                  placeholder="https://exemplo.com/banner.jpg"
+                  placeholder="https://res.cloudinary.com/..."
+                  readonly
                 />
-                <small class="hint">Para vídeos: YouTube ou link MP4</small>
+                <small class="hint">URL gerada após upload</small>
               </div>
             </div>
 

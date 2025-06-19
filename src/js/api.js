@@ -25,7 +25,7 @@ async function apiRequest(endpoint, options = {}) {
         if (!endpoint) {
             throw new Error('Endpoint é obrigatório');
         }
-        debugger
+        
         const token = await getAuthToken();
         console.log('Token obtido do localStorage:', token.substring(0, 20) + '...'); // Debug
 
@@ -172,8 +172,7 @@ const contactsApi = {
 const premiumAdsApi = {
    
     // Listar todos os anúncios
-    getAll: async () => {
-      debugger;
+    getAll: async () => {      
         try {         
             // Força a chamada direta para o endpoint premiumAds
             const response = await fetch(`${API_BASE_URL}/premiumAds`, {

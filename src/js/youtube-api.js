@@ -10,6 +10,7 @@ function onYouTubeIframeAPIReady() {
 
 // Função para abrir o player
 function openYouTubePlayer(videoUrl) {
+  debugger
   const modal = document.getElementById('youtube-modal');
   const overlay = document.getElementById('youtube-overlay');
   const ytContainer = document.getElementById('youtube-player');

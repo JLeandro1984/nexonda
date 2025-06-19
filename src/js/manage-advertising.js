@@ -136,8 +136,15 @@ if (adForm) {
             
             // Limpa o formulário
             adForm.reset();
-            const preview = adForm.querySelector("#ad-preview");
-            if (preview) preview.style.display = 'none';
+            const previewContainer = document.getElementById("media-preview");
+            const mediaInput = document.getElementById("ad-upload");
+            const mediaUrlInput = document.getElementById("ad-media");            
+            mediaUrlInput.value = "";
+            mediaInput.value = ""; 
+            previewContainer.innerHTML = "";
+            
+            // const preview = adForm.querySelector("#ad-preview");
+            // if (preview) preview.style.display = 'none';
             editingIndex = null;
             const saveBtn = adForm.querySelector('.save-btn');
             if (saveBtn) {
@@ -437,3 +444,114 @@ function getYouTubeVideoId(url) {
       return null;
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  const mediaTypeSelect = document.getElementById("ad-type");
+  const mediaInput = document.getElementById("ad-upload");
+  const mediaUrlInput = document.getElementById("ad-media");
+  const previewContainer = document.getElementById("media-preview");
+
+  let currentDeleteToken = null; // Armazena o token atual para exclusão
+
+  mediaInput.addEventListener("change", async function () {
+    const file = mediaInput.files[0];
+      if (!file) return;
+            
+    const type = mediaTypeSelect.value; // 'image' ou 'video'
+
+      if (!file.type.includes(type)) {
+        showAlert(`Tipo de mídia incompatível. Esperado: ${type.toUpperCase()}. Altere o tipo ou selecione o arquivo correto.`, "warning");
+          mediaUrlInput.value = "";
+          mediaInput.value = ""; 
+         return;
+      }
+
+    // 🔄 Deleta mídia anterior antes de fazer novo upload
+    if (currentDeleteToken) {
+      await deleteLogoFromCloudinary(currentDeleteToken);
+      currentDeleteToken = null;
+      mediaUrlInput.value = "";
+      previewContainer.innerHTML = "";
+    }
+
+    try {
+      const { url, deleteToken } = await uploadToCloudinaryByType(file, type);
+      mediaUrlInput.value = url;
+      currentDeleteToken = deleteToken;
+
+      if (url) showMediaPreview(url, type);
+    } catch (err) {
+      alert("Erro no upload: " + err.message);
+    }
+  });
+
+  async function uploadToCloudinaryByType(file, type) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "brandConnectPresetName");
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/dmq4e5bm5/${type}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.secure_url) {
+      return {
+        url: data.secure_url,
+        deleteToken: data.delete_token || null,
+      };
+    }
+
+    throw new Error(data.error?.message || "Erro ao fazer upload");
+  }
+
+  async function deleteLogoFromCloudinary(deleteToken) {
+    try {
+      const response = await fetch(
+        "https://api.cloudinary.com/v1_1/dmq4e5bm5/delete_by_token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ token: deleteToken }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.result === "ok") {
+        console.log("Mídia anterior deletada com sucesso.");
+      } else {
+        console.warn("Falha ao deletar mídia anterior:", data);
+      }
+    } catch (error) {
+      console.error("Erro ao deletar mídia do Cloudinary:", error);
+    }
+  }
+
+  function showMediaPreview(url, type) {
+    previewContainer.innerHTML = ""; // limpa preview anterior
+
+    if (type === "image") {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "Pré-visualização da imagem";
+      img.style.maxWidth = "300px";
+      img.style.borderRadius = "8px";
+      previewContainer.appendChild(img);
+    } else if (type === "video") {
+      const video = document.createElement("video");
+      video.src = url;
+      video.controls = true;
+      video.style.maxWidth = "300px";
+      video.style.borderRadius = "8px";
+      previewContainer.appendChild(video);
+    }
+  }
+});
