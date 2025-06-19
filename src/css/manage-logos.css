@@ -962,10 +962,10 @@ select {
 #media-preview img,
 #media-preview video {
   width: 100%;
-  max-width: 320px;
+  max-width: 320px !important;
   height: 120px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 6px !important;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   margin: 0 auto;
   display: block;
@@ -1042,6 +1042,18 @@ select {
 .opening-day:not(:last-child) {
   margin-bottom: 16px;
 }
+
+.media-preview-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #c8cece96;
+  padding: 12px 0 0 0;
+  text-align: center;
+  border-radius: 8px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

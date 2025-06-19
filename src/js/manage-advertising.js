@@ -18,6 +18,7 @@ const mediaInput = document.getElementById("ad-upload");
 const mediaUrlInput = document.getElementById("ad-media");
 const previewContainer = document.getElementById("media-preview");
   
+previewContainer.innerHTML = "";
 let currentDeleteToken = null;
 let editingIndex = null;
 let ads = [];
@@ -316,12 +317,15 @@ function createAdElement(ad) {
         </div>
         `;
     } else {
-        mediaContent = `
-        <video width="100%" height="180" controls>
-            <source src="${ad.mediaUrl}" type="video/mp4">
-            Seu navegador não suporta vídeos HTML5.
+      // Extrai poster do vídeo (substitui .mp4 por .jpg e adiciona `so_1` para pegar o frame do segundo 1)
+      const posterUrl = ad.mediaUrl.replace('/upload/', '/upload/so_1/').replace('.mp4', '.jpg');
+
+      mediaContent = `
+        <video width="100%" height="180" controls poster="${posterUrl}">
+          <source src="${ad.mediaUrl}" type="video/mp4">
+          Seu navegador não suporta vídeos HTML5.
         </video>
-        `;
+      `;
     }
     }
 
@@ -452,7 +456,8 @@ function getYouTubeVideoId(url) {
 
 document.addEventListener("DOMContentLoaded", function () {
   currentDeleteToken = null;
-
+  const loadingEl = document.getElementById("upload-loading");
+  
   mediaInput.addEventListener("change", async function () {
 
     debugger;
@@ -468,6 +473,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+     // 👉 Exibe carregando
+    loadingEl.style.display = "block";
+
     if (currentDeleteToken) {
       await deleteFromCloudinaryByToken(currentDeleteToken);
       currentDeleteToken = null;
@@ -482,7 +490,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (url) showMediaPreview(previewContainer, url, type);
     } catch (err) {
-      alert("Erro no upload: " + err.message);
+      showAlert("Erro no upload: " + err.message, "error");
+    } finally {
+      // ✅ Esconde carregando
+      loadingEl.style.display = "none";
     }
   });
 });
@@ -497,3 +508,19 @@ document.addEventListener("DOMContentLoaded", () => {
     showAlert("URL copiada com sucesso!", "success");
   });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+   
+    const cancelButton = document.getElementById('ad-btn-cancelar');
+
+    if (cancelButton) {
+        cancelButton.addEventListener('click', (e) => {
+        e.preventDefault(); // Opcional: impede o reset automático do formulário
+        console.log('Botão Cancelar clicado');
+         previewContainer.innerHTML = "";
+            
+        const form = cancelButton.closest('form');
+        if (form) form.reset();
+        });
+    }
+  });

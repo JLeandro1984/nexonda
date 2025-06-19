@@ -176,9 +176,12 @@ function createVideoContent(ad) {
       </div>
     `;
   }
+  // 🔁 Gera automaticamente um poster com base no vídeo do Cloudinary
+  const posterUrl = ad.mediaUrl.replace('/upload/', '/upload/so_1/').replace('.mp4', '.jpg');
+
   return `
     <div data-video-url="${ad.mediaUrl}">
-      <video width="100%" height="180" muted autoplay playsinline>
+      <video width="100%" height="180" muted autoplay playsinline poster="${posterUrl}">
         <source src="${ad.mediaUrl}" type="video/mp4">
         Seu navegador não suporta vídeos HTML5.
       </video>

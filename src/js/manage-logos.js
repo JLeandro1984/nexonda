@@ -58,6 +58,13 @@ function decodeJwt(token) {
     }
 }
 
+
+    function habilitarTodosOsHorarios() {
+        document.querySelectorAll('.opening-day input[type="time"]').forEach(input => {
+            input.disabled = false;
+        });
+    }
+
 // Função para verificar se o usuário está autenticado
 async function checkAuth() {
     if (authState.isChecking) return authState.isAuthenticated;
@@ -379,7 +386,8 @@ logoForm.addEventListener("submit", async (e) => {
         // Restaurar botão
         saveBtn.disabled = false;
         btnText.textContent = editingIndex ? 'Atualizar' : 'Salvar';
-        spinner.classList.add('hidden');
+        spinner.classList.add('hidden');        
+        habilitarTodosOsHorarios();
     }
 });
 
@@ -418,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function () {
             logoPreview.style.display = 'none';
         }
     });
-
 });
 
 // Funções auxiliares
@@ -687,29 +694,52 @@ function loadLogoForEdit(logo) {
     }
     debugger
     // Horário de funcionamento
-    if (logo.openingHours) {
+   if (logo.openingHours) {
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-        debugger;
-            days.forEach(day => {
-                const dayData = logo.openingHours[day];
-                if (dayData) {
-                form.querySelector(`#${day}-start`).value = dayData.start || '';
-                form.querySelector(`#${day}-lunch-start`).value = dayData.lunch_start || '';
-                form.querySelector(`#${day}-lunch-end`).value = dayData.lunch_end || '';
-                form.querySelector(`#${day}-end`).value = dayData.end || '';
-                form.querySelector(`#${day}-closed`).checked = dayData.closed || false;
-                }
-            });
-    } else {
-        // Verifica os campos closed individuais (para compatibilidade com versões antigas)
-        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
         days.forEach(day => {
-            const closedField = `${day}Closed`;
-            if (logo[closedField] !== undefined) {
-                form.querySelector(`#${day}-closed`).checked = logo[closedField] === 'on';
+            const dayData = logo.openingHours[day];
+            if (dayData) {
+            const startEl = form.querySelector(`#${day}-start`);
+            const lunchStartEl = form.querySelector(`#${day}-lunch-start`);
+            const lunchEndEl = form.querySelector(`#${day}-lunch-end`);
+            const endEl = form.querySelector(`#${day}-end`);
+            const closedEl = form.querySelector(`#${day}-closed`);
+
+            startEl.value = dayData.start || '';
+            lunchStartEl.value = dayData.lunch_start || '';
+            lunchEndEl.value = dayData.lunch_end || '';
+            endEl.value = dayData.end || '';
+            closedEl.checked = dayData.closed || false;
+
+            // ✅ Aplica o 'disabled' aos time inputs se o dia estiver marcado como fechado
+            const isClosed = closedEl.checked;
+            [startEl, lunchStartEl, lunchEndEl, endEl].forEach(input => {
+                input.disabled = isClosed;
+            });
             }
         });
     }
+   
+    
+//    else {
+//             // Fallback para versões antigas (compatibilidade)
+//             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+//             days.forEach(day => {
+//                 const closedField = `${day}Closed`;
+//                 if (logo[closedField] !== undefined) {
+//                 const closedEl = form.querySelector(`#${day}-closed`);
+//                 closedEl.checked = logo[closedField] === 'on';
+
+//                 // Aplica o 'disabled' nesse caso também
+//                 const timeInputs = form.querySelectorAll(`[id^="${day}-"][type="time"]`);
+//                 timeInputs.forEach(input => {
+//                     input.disabled = closedEl.checked;
+//                 });
+//                 }
+//             });
+//         }
+
     
     // Imagem do logo
     editingDeleteToken = logo.deleteToken;
@@ -1075,6 +1105,28 @@ async function obterCoordenadasGoogle() {
       alert('Erro ao buscar coordenadas.');
     }
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+  const cancelButton = document.getElementById('btn-cancelar');
+
+    if (cancelButton) {
+        cancelButton.addEventListener('click', (e) => {
+        e.preventDefault(); // Opcional: impede o reset automático do formulário
+        console.log('Botão Cancelar clicado');
+
+            const previewImg = document.getElementById('logo-preview_img');
+
+            if (previewImg) {
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+            }
+            
+         habilitarTodosOsHorarios();
+        const form = cancelButton.closest('form');
+        if (form) form.reset();
+        });
+    }
+  });
 
   // Sugestão: rodar ao sair do campo UF ou ao clicar em botão
     document.getElementById('client-uf').addEventListener('blur', obterCoordenadasGoogle);
