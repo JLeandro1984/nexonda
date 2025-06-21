@@ -355,7 +355,7 @@ section {
 
 /* Grade responsiva para a galeria */
 #gallery {
-  padding: 0 32px;
+  padding: 40px 20px;
 }
 
 .gallery-container {
@@ -705,10 +705,26 @@ section {
 
 footer {
   background-color: var(--primary-color);
-  color: white;
+  color: #fff;
   text-align: center;
-  padding: 2rem;
-  margin-top: 4rem;
+  padding: 20px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer-links {
+  margin-top: 10px;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  transition: text-decoration 0.3s;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
 }
 
 .info-circle {
