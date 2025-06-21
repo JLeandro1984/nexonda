@@ -36,7 +36,7 @@ const categorySelect = document.getElementById("category-select");
 // Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
-        const response = await fetch('https://publiclogos-lnpdkkqg5q-uc.a.run.app', {
+        const response = await fetch('/public-logos', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -107,36 +107,37 @@ function createLogoCard(logo) {
   const youtubeUrl = logo.videoUrl || logo.clientVideoUrl;
   const websiteUrl = logo.clientWebsite || logo.websiteUrl || '';
 
-  // Nome fantasia
+  // Nome fantasia e CNPJ
   const companyName = logo.clientFantasyName || logo.clientName || '';
+  const companyCNPJ = logo.clientCNPJ || '';
   const showTooltip = companyName.length > 22;
 
   // Monta botões sociais se houver URL
   let socialButtons = '';
   if (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl) {
-    socialButtons = `<div class=\"btn-container\" style=\"margin-top: 10px;\">
-      ${whatsappUrl ? `<a class=\"whatsapp-btn\" href=\"${whatsappUrl.startsWith('http') ? whatsappUrl : 'https://wa.me/' + whatsappUrl}\" target=\"_blank\" title=\"WhatsApp\"><i class=\"fab fa-whatsapp\"></i></a>` : ''}
-      ${instagramUrl ? `<a class=\"instagram-btn\" href=\"${instagramUrl}\" target=\"_blank\" title=\"Instagram\"><i class=\"fab fa-instagram\"></i></a>` : ''}
-      ${facebookUrl ? `<a class=\"facebook-btn\" href=\"${facebookUrl}\" target=\"_blank\" title=\"Facebook\"><i class=\"fab fa-facebook-f\"></i></a>` : ''}
-      ${youtubeUrl ? `<button class=\"video-btn\" title=\"YouTube/Video\" onclick=\"openYouTubePlayer('${youtubeUrl.replace(/'/g, "\\'")}')\"><i class=\"fab fa-youtube\"></i></button>` : ''}
+    socialButtons = `<div class="btn-container" style="margin-top: 10px;">
+      ${whatsappUrl ? `<a class="whatsapp-btn" href="${whatsappUrl.startsWith('http') ? whatsappUrl : 'https://wa.me/' + whatsappUrl}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+      ${instagramUrl ? `<a class="instagram-btn" href="${instagramUrl}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ''}
+      ${facebookUrl ? `<a class="facebook-btn" href="${facebookUrl}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>` : ''}
+      ${youtubeUrl ? `<button class="video-btn" title="YouTube/Video" onclick="openYouTubePlayer('${youtubeUrl.replace(/'/g, "\\'")}')"><i class="fab fa-youtube"></i></button>` : ''}
     </div>`;
   }
 
   // Card HTML
   const cardId = `logo-card-${Math.random().toString(36).substr(2, 9)}`;
   const cardContent = `
-    <div class=\"logo-card\">
-      <div class=\"logo-img-container\">
-        <img src=\"${logo.imageUrl || logo.imagem || ''}\" alt=\"Logo da ${companyName}\" class=\"logo-img\" crossorigin=\"anonymous\" />
+    <div class="logo-card">
+      <div class="logo-img-container">
+        <img src="${logo.imageUrl || logo.imagem || ''}" alt="Logo da ${companyName}" class="logo-img" crossorigin="anonymous" />
       </div>
-      <div class=\"logo-card-body\">
-        <div class=\"logo-info-row\">
-          <span class=\"icon info-icon small-info-icon\" title=\"Para mais informações clique aqui.\" data-logo=\"${encodeURIComponent(JSON.stringify(logo))}\">
-            <i class=\"fas fa-info-circle\"></i>
+      <div class="logo-card-body">
+        <div class="logo-info-row">
+          <span class="icon info-icon small-info-icon" title="Para mais informações clique aqui." data-logo="${encodeURIComponent(JSON.stringify(logo))}">
+            <i class="fas fa-info-circle"></i>
           </span>
-          <span class=\"status-label ${statusColor}\" style=\"margin-left: 6px; font-size: 0.95em;\">${statusText}</span>
+          <span class="status-label ${statusColor}" style="margin-left: 6px; font-size: 0.95em;">${statusText}</span>
         </div>
-        <div class=\"company-name\"${showTooltip ? ` title=\"${companyName}\"` : ''}>${companyName}</div>
+        <div class="company-name"${showTooltip ? ` title="${companyName}"` : ''}>${companyName}</div>
         ${socialButtons}
       </div>
     </div>
@@ -155,14 +156,16 @@ function createLogoCard(logo) {
     }
   }, 0);
 
-  return `<div class=\"logo-card-wrapper\" id=\"${cardId}\">${cardContent}</div>`;
+  return `<div class="logo-card-wrapper" id="${cardId}" data-cnpj="${companyCNPJ}">${cardContent}</div>`;
 }
 
 
 
 // Renderiza todos os logos
-async function loadLogos() {
+export async function loadLogos() {
     const container = document.getElementById('logo-container');
+    if (!container) return; // Se o container não existe, não faz nada
+
     container.innerHTML = '';
     const logos = await loadLogosFromStorage();
 
@@ -231,7 +234,7 @@ function contratoAtivo(logo) {
 }
 
 // Popula categorias no select de filtro
-function populateFilterCategories() {
+export function populateFilterCategories() {
     categories.forEach(group => {
         const optgroup = document.createElement("optgroup");
         optgroup.label = group.label; 
@@ -249,7 +252,7 @@ function populateFilterCategories() {
 }
 
 // Atualiza os logos com base no filtro
-async function updateLogoDisplay() {
+export async function updateLogoDisplay() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const locationTerm = document.getElementById('location-input')?.value.toLowerCase() || '';
     const isUselocation = document.getElementById('use-location').checked;
@@ -331,12 +334,20 @@ debugger
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadLogos();
-    populateFilterCategories();
+    const container = document.getElementById('logo-container');
+    if (container) {
+        await loadLogos();
+        populateFilterCategories();
+    }
 
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', updateLogoDisplay);
-    categorySelect.addEventListener('change', updateLogoDisplay);
+    if (searchInput) {
+        searchInput.addEventListener('input', updateLogoDisplay);
+    }
+    
+    if (categorySelect) {
+        categorySelect.addEventListener('change', updateLogoDisplay);
+    }
         
     //Visibilidade botão Admin    
     const now = new Date();
@@ -351,9 +362,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mostrarAdmin = true //params.get(chave) === 'true';
   
     const adminBtn = document.getElementById('admin-btn');
-    adminBtn.style.display = 'none';
-
     if (adminBtn) {
+        adminBtn.style.display = 'none';
         if (mostrarAdmin) {
           adminBtn.style.display = 'inline-block'; 
         }
@@ -365,75 +375,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 // WhatsApp flutuante da BrandConnect
 const whatsappNumber = '5515996257159'; // Exemplo: 55 11 99999-9999
 const whatsappLink = document.querySelector('#whatsapp-float a');
-whatsappLink.href = `https://wa.me/${whatsappNumber}`;
-
-
-//Pesquisa ao selecionar minha localização
-const checkbox = document.getElementById('use-location');
-const citySpan = document.getElementById('detected-city');
-const locationInput = document.getElementById('location-input');
-
-checkbox.addEventListener('change', () => {
-  if (checkbox.checked) {
-    const cachedLocation = localStorage.getItem('userLocation');
-
-    if (cachedLocation) {
-      const cidadeUF = JSON.parse(cachedLocation);
-      citySpan.textContent = `${cidadeUF}`;
-      updateLogoDisplay();
-      return;
-    }
-
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const { latitude, longitude } = position.coords;
-
-          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-            headers: {
-              'User-Agent': 'BrandConnect/1.0 (contato@seudominio.com.br)',
-              'Referer': location.origin
-            }
-          })
-          .then(res => res.json())
-          .then(data => {
-            const addr = data.address;
-            const cidade = addr.city || addr.town || addr.village || addr.county || '';
-            const estadoCompleto = addr.state || '';
-            const uf = ufs.find(uf => uf.nome.toLowerCase() === estadoCompleto.toLowerCase())?.sigla || '';
-
-            const cidadeUF = `${cidade}${uf ? ' - ' + uf : ''}`;
-            citySpan.textContent = `${cidadeUF}`;
-
-            // Salva no localStorage
-            localStorage.setItem('userLocation', JSON.stringify(cidadeUF));
-
-            updateLogoDisplay();
-          })
-          .catch(() => {
-            citySpan.textContent = "Cidade: Erro ao localizar";
-            checkbox.checked = false;
-          });
-        },
-        () => {
-          citySpan.textContent = "Cidade: Permissão negada";
-          checkbox.checked = false;
-        }
-      );
-    } else {
-      alert("Geolocalização não suportada.");
-      checkbox.checked = false;
-    }
-  } else {
-    citySpan.textContent = "Localização não informada";
-    localStorage.removeItem('userLocation'); // Limpa o cache
-    updateLogoDisplay();
-  }
-});
+if (whatsappLink) {
+    whatsappLink.href = `https://wa.me/${whatsappNumber}`;
+}
 
 
 //Autocomplete - pesquisa por nome de cidade e/ou UF
-document.getElementById('location-input').addEventListener('input', updateLogoDisplay);
+const locationInputForAutocomplete = document.getElementById('location-input');
+if (locationInputForAutocomplete) {
+    locationInputForAutocomplete.addEventListener('input', updateLogoDisplay);
+}
 
 async function getUniqueCitiesFromLogos() {
     const logos = await loadLogosFromStorage();
@@ -456,58 +407,61 @@ async function getUniqueCitiesFromLogos() {
 const inputElement = document.getElementById("location-input");
 const suggestionsList = document.getElementById("suggestions-list");
 
-inputElement.addEventListener("input", async function () {
-    const searchTerm = this.value.toLowerCase().trim();
-    suggestionsList.innerHTML = "";
+if (inputElement && suggestionsList) {
+    inputElement.addEventListener("input", async function () {
+        const searchTerm = this.value.toLowerCase().trim();
+        suggestionsList.innerHTML = "";
 
-    if (searchTerm.length < 2) {
-        suggestionsList.style.display = "none";
-        return;
-    }
-
-    const rawCities = await getUniqueCitiesFromLogos();
-    const uniqueCityMap = new Map(); // chave: nome normalizado, valor: nome original
-
-    rawCities.forEach(city => {
-        const normalized = city.trim().toLowerCase();
-        if (!uniqueCityMap.has(normalized)) {
-            uniqueCityMap.set(normalized, city.trim());
+        if (searchTerm.length < 2) {
+            suggestionsList.style.display = "none";
+            return;
         }
-    });
 
-    const filteredCities = Array.from(uniqueCityMap.values()).filter(city =>
-        city.toLowerCase().includes(searchTerm)
-    );
+        const rawCities = await getUniqueCitiesFromLogos();
+        const uniqueCityMap = new Map(); // chave: nome normalizado, valor: nome original
 
-    // Evitar adicionar sugestões duplicadas visualmente
-    const added = new Set();
-
-    if (filteredCities.length > 0) {
-        filteredCities.forEach(city => {
-            if (!added.has(city)) {
-                added.add(city);
-
-                const suggestionItem = document.createElement("div");
-                suggestionItem.classList.add("suggestion-item");
-                suggestionItem.textContent = city;
-
-                suggestionItem.addEventListener("click", function () {
-                    inputElement.value = city;
-                    suggestionsList.innerHTML = "";
-                    suggestionsList.style.display = "none";
-                    updateLogoDisplay();
-                });
-
-                suggestionsList.appendChild(suggestionItem);
+        rawCities.forEach(city => {
+            const normalized = city.trim().toLowerCase();
+            if (!uniqueCityMap.has(normalized)) {
+                uniqueCityMap.set(normalized, city.trim());
             }
         });
-        suggestionsList.style.display = "block";
-    } else {
-        suggestionsList.style.display = "none";
-    }
 
-    removeDuplicateSuggestions();
-});
+        const filteredCities = Array.from(uniqueCityMap.values()).filter(city =>
+            city.toLowerCase().includes(searchTerm)
+        );
+
+        // Evitar adicionar sugestões duplicadas visualmente
+        const added = new Set();
+
+        if (filteredCities.length > 0) {
+            filteredCities.forEach(city => {
+                if (!added.has(city)) {
+                    added.add(city);
+
+                    const suggestionItem = document.createElement("div");
+                    suggestionItem.classList.add("suggestion-item");
+                    suggestionItem.textContent = city;
+
+                    suggestionItem.addEventListener("click", function () {
+                        inputElement.value = city;
+                        suggestionsList.innerHTML = "";
+                        suggestionsList.style.display = "none";
+                        updateLogoDisplay();
+                    });
+
+                    suggestionsList.appendChild(suggestionItem);
+                }
+            });
+            suggestionsList.style.display = "block";
+        } else {
+            suggestionsList.style.display = "none";
+        }
+
+        removeDuplicateSuggestions();
+    });
+}
+
 function removeDuplicateSuggestions() {
     const items = document.querySelectorAll(".suggestion-item");
     const seen = new Set();
@@ -524,23 +478,10 @@ function removeDuplicateSuggestions() {
 }
 
 document.addEventListener("click", function (event) {
-    if (event.target !== inputElement && 
+    if (inputElement && suggestionsList && event.target !== inputElement && 
         !suggestionsList.contains(event.target)) {
         suggestionsList.style.display = "none";
     }
-});
-
-//Limpar input Cidade e/ou UF
-const clearIcon = document.getElementById('clear-location');
-locationInput.addEventListener('input', () => {
-  clearIcon.style.display = locationInput.value ? 'block' : 'none';
-});
-
-clearIcon.addEventListener('click', () => {
-  locationInput.value = '';
-  clearIcon.style.display = 'none';
-  document.getElementById('suggestions-list').innerHTML = '';
-  updateLogoDisplay();
 });
 
 // Formulário preenchido pelo cliente

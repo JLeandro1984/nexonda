@@ -232,7 +232,7 @@ function renderLogos(list) {
         
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><img src="${imageSrc || 'placeholder.png'}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
+            <td><img src="${imageSrc || ''}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
             <td>${logo.clientName || 'N/A'}</td>
             <td>${logo.clientFantasyName || 'N/A'}</td>
             <td>${logo.clientCNPJ || 'N/A'}</td>
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             // Nenhum arquivo selecionado
             imageUrl.value = '';
-            logoPreview.src = 'placeholder.png';
+            logoPreview.src = '';
             logoPreview.style.display = 'none';
         }
     });
@@ -558,7 +558,7 @@ function aplicarMascaraTelefone(input, isCelular = false) {
 document.addEventListener('DOMContentLoaded', function () {
     const telefoneInput = document.getElementById('telephone');
     const celularInput = document.getElementById('cellphone');
-    const clientWhatsappInput = document.getElementById('client_whatsapp');
+    const clientWhatsappInput = document.getElementById('client-whatsapp');
 
     aplicarMascaraTelefone(telefoneInput);
     aplicarMascaraTelefone(celularInput, true);
@@ -750,7 +750,7 @@ function loadLogoForEdit(logo) {
         logoPreview.style.display = 'block';
         form.querySelector("#logo-image-url").value = logoImageUrl;
     } else {
-        logoPreview.src = 'placeholder.png';
+        logoPreview.src = '';
         logoPreview.style.display = 'none';
         form.querySelector("#logo-image-url").value = '';
     }

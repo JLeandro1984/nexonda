@@ -14,13 +14,44 @@
         "node_modules",
         ".git",
         "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ]
+        "firebase-debug.*.log"
+      ],
+      "runtime": "nodejs20"
     }
   ],
   "hosting": {
-    "public": "src", 
+    "public": "src",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/track-ad-event",
+        "function": "trackAdEvent"
+      },
+      {
+        "source": "/api/logInsight",
+        "function": "logInsight"
+      },
+      {
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "/public-logos",
+        "function": "publicLogos"
+      },
+      {
+        "source": "/public-premium-ads",
+        "function": "publicPremiumAds"
+      },
+      {
+        "source": "/public-contacts",
+        "function": "publicContacts"
+      }
+    ],
     "headers": [
       {
         "source": "/**",

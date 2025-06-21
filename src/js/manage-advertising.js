@@ -121,7 +121,7 @@ async function loadClientsFromFirestore() {
 if (adForm) {
     adForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-      
+      debugger;
         try {
             const formData = new FormData(adForm);
 

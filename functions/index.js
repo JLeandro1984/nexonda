@@ -17,12 +17,19 @@ const { OAuth2Client } = require('google-auth-library');
 
 admin.initializeApp();
 
-// Inicializa o cliente OAuth2 do Google
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// Lazy initialization for OAuth2Client
+let authClient;
+const getAuthClient = () => {
+    if (!authClient) {
+        authClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    }
+    return authClient;
+};
 
 // Função para validar o token do Google
 async function validateGoogleToken(token) {
     try {
+        const client = getAuthClient();
         // Verifica se é um token do Google
         const ticket = await client.verifyIdToken({
             idToken: token,
@@ -98,6 +105,7 @@ const authenticateMiddleware = (handler) => async (req, res) => {
     console.log('Token recebido:', token.substring(0, 20) + '...');
     
     try {
+      const client = getAuthClient();
       // Verifica o token usando o OAuth2Client
       const ticket = await client.verifyIdToken({
         idToken: token,
@@ -785,29 +793,39 @@ exports.publicPremiumAds = functions.https.onRequest({
 
   try {
     if (req.method === 'GET') {
-      // Obter data atual como string YYYY-MM-DD
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const todayStr = `${year}-${month}-${day}`;
+      const adsSnapshot = await premiumAdsCollection.get();
+      const logosSnapshot = await db.collection('logos').get();
+      
+      const logosMap = new Map();
+      logosSnapshot.forEach(doc => {
+        const logoData = doc.data();
+        if (logoData.clientCNPJ) {
+          logosMap.set(logoData.clientCNPJ, logoData);
+        }
+      });
 
-      const querySnapshot = await premiumAdsCollection.get();
-
-      // Filtrar anúncios com startDate <= hoje e endDate >= hoje
-      const ads = querySnapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(ad =>
-          ad.startDate &&
-          ad.endDate &&
-          ad.startDate <= todayStr &&
-          ad.endDate >= todayStr
-        );
+      const ads = adsSnapshot.docs
+        .map(doc => {
+          const adData = { id: doc.id, ...doc.data() };
+          const correspondingLogo = logosMap.get(adData.clientCNPJ);
+          
+          return {
+            ...correspondingLogo, // Adiciona dados do logo (como imageUrl, clientName, etc.)
+            ...adData // Mantém e sobrepõe com dados do anúncio (como title, mediaUrl)
+          };
+        })
+        .filter(ad => {
+            const now = new Date();
+            const startDate = new Date(ad.startDate);
+            const endDate = new Date(ad.endDate);
+            endDate.setHours(23, 59, 59, 999); // Garante que o dia todo seja incluído
+            return ad.isActive && startDate <= now && endDate >= now;
+        });
 
       return res.status(200).json(ads);
     }
 
-    if (req.method === 'POST' && req.path === '/track') {
+    if (req.method === 'POST' && req.path.endsWith('/track')) {
       const { adId, type } = req.body;
       if (!adId || !type) {
         return res.status(400).json({ error: 'ID do anúncio e tipo são obrigatórios' });
@@ -873,6 +891,7 @@ exports.authenticate = functions.https.onRequest({
         console.log('Token recebido:', token.substring(0, 20) + '...');
 
         try {
+            const client = getAuthClient();
             // Verifica o token usando o OAuth2Client
             const ticket = await client.verifyIdToken({
                 idToken: token,
@@ -1106,3 +1125,92 @@ exports.checkAuth = functions.https.onRequest({
         }
     });
 });
+
+// --- API para Insights (Cliques e Visitas) ---
+exports.logInsight = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10
+}, handleCors(async (req, res) => {
+  // Permitir acesso de qualquer origem para esta função pública
+  res.set('Access-Control-Allow-Origin', '*');
+
+  if (req.method === 'OPTIONS') {
+    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.set('Access-Control-Max-Age', '3600');
+    return res.status(204).send('');
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const db = admin.firestore();
+  const insightsCollection = db.collection('insights');
+  const { type, payload } = req.body;
+
+  if (!type || !payload) {
+    return res.status(400).json({ error: 'Tipo e payload são obrigatórios' });
+  }
+
+  try {
+    const insightData = {
+      type, // 'visit' ou 'click'
+      timestamp: new Date().toISOString(),
+      userAgent: req.get('User-Agent') || null,
+      ...payload
+    };
+
+    await insightsCollection.add(insightData);
+    return res.status(200).json({ success: true });
+
+  } catch (error) {
+    console.error('Erro ao registrar insight:', error);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+}));
+
+// --- API para rastrear eventos de anúncios (impressões e cliques) ---
+exports.trackAdEvent = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10
+}, handleCors(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { adId, eventType } = req.body; // eventType pode ser 'impression' ou 'click'
+
+  if (!adId || !eventType) {
+    return res.status(400).json({ error: 'adId e eventType são obrigatórios.' });
+  }
+
+  if (eventType !== 'impression' && eventType !== 'click') {
+    return res.status(400).json({ error: 'eventType inválido. Use "impression" ou "click".' });
+  }
+
+  const db = admin.firestore();
+  const adRef = db.collection('premiumAds').doc(adId);
+
+  try {
+    const fieldToIncrement = eventType === 'impression' ? 'impressions' : 'clicks';
+    
+    await adRef.update({
+      [fieldToIncrement]: admin.firestore.FieldValue.increment(1)
+    });
+
+    console.log(`Evento '${eventType}' registrado para o anúncio ${adId}`);
+    return res.status(200).json({ success: true, message: `Evento ${eventType} registrado.` });
+
+  } catch (error) {
+    console.error(`Erro ao registrar evento para o anúncio ${adId}:`, error);
+    if (error.code === 5) { // NOT_FOUND
+        return res.status(404).json({ success: false, error: 'Anúncio não encontrado.' });
+    }
+    return res.status(500).json({ success: false, error: 'Erro interno do servidor.' });
+  }
+}));

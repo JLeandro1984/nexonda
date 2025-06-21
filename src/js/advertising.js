@@ -26,6 +26,9 @@ async function loadPremiumAds() {
     // 3. Atualiza a referência dos anúncios atuais
     currentAds = activeAds;
 
+    // Rastreia as impressões dos anúncios carregados
+    trackImpressions(currentAds);
+
     // 4. Seção vazia (primeira carga ou sem anúncios)
     if (activeAds.length === 0) {
       hideAdsSection(sectionAds, adsContainer);
@@ -139,14 +142,14 @@ function filterActiveAds(ads) {
 function createCarouselItem(ad) {
   const adItem = document.createElement('div');
   adItem.className = 'premium-ad-item';
+  adItem.dataset.adDetails = encodeURIComponent(JSON.stringify(ad));
   
   adItem.innerHTML = `
     ${createMediaContent(ad)}
     <div class="premium-ad-content">
       <h3>${ad.title}</h3>
       <p title="${ad.description}">${truncateDescription(ad.description)}</p>
-      <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank" 
-         onclick="trackAdClick('${ad.id}'); return true;">
+      <a href="${ad.targetUrl}" class="premium-ad-link" target="_blank">
         Saiba mais
       </a>
     </div>
@@ -231,7 +234,7 @@ function scheduleNextUpdate() {
 // Funções para interação com a API
 async function getPremiumAdsFromFirebase() {
   try {
-    const response = await fetch('https://publicpremiumads-lnpdkkqg5q-uc.a.run.app');
+    const response = await fetch('/public-premium-ads');
     if (!response.ok) throw new Error('Erro ao carregar propagandas');
     return await response.json();
   } catch (error) {
@@ -240,33 +243,21 @@ async function getPremiumAdsFromFirebase() {
   }
 }
 
-async function trackAdClick(adId) {
-  try {
-    await fetch('https://publicpremiumads-lnpdkkqg5q-uc.a.run.app/track', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adId, type: 'click' })
-    });
-  } catch (error) {
-    console.error('Erro ao rastrear clique:', error);
-  }
-}
-
 // Funções do carrossel
 function addCarouselIndicators(carousel, container) {
-  const itemCount = carousel.children.length;
-  if (itemCount <= 1) return;
+  const items = carousel.querySelectorAll('.premium-ad-item');
+  if (items.length <= 1) return;
   
   const indicators = document.createElement('div');
   indicators.className = 'carousel-indicators';
   
-  for (let i = 0; i < itemCount; i++) {
+  for (let i = 0; i < items.length; i++) {
     const indicator = document.createElement('button');
     indicator.className = 'carousel-indicator' + (i === 0 ? ' active' : '');
     indicator.setAttribute('aria-label', `Ir para item ${i + 1}`);
     indicator.onclick = () => {
       carousel.scrollTo({
-        left: carousel.children[i].offsetLeft - 32,
+        left: items[i].offsetLeft - 32,
         behavior: 'smooth'
       });
     };
@@ -426,3 +417,16 @@ debugger
    
   }
 });
+
+// Função para rastrear impressões
+function trackImpressions(ads) {
+  if (!ads || ads.length === 0) return;
+
+  ads.forEach(ad => {
+    fetch('/track-ad-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adId: ad.id, eventType: 'impression' })
+    }).catch(error => console.error('Falha ao registrar impressão:', error));
+  });
+}
