@@ -5,6 +5,7 @@ const cors = require('cors')({
     'http://127.0.0.1:5500',
     'http://localhost:5500',
     'http://localhost:5000',
+    'http://localhost:5002',
     'https://brandconnect-50647.web.app',
     'https://brandconnect-50647.firebaseapp.com'
   ],
@@ -16,6 +17,68 @@ const fetch = require('node-fetch'); // Caso queira usar futuramente
 const { OAuth2Client } = require('google-auth-library');
 
 admin.initializeApp();
+
+const GEMINI_API_KEY = "AIzaSyCr2ZNU8qertO4ivtCdul4K7UvFfQJkuQA";
+
+// Função HTTP exposta para o frontend
+exports.askGemini = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== "POST") {
+      return res.status(405).send("Método não permitido");
+    }
+
+    const prompt = req.body.prompt;
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt é obrigatório." });
+    }
+
+    console.log('Recebido prompt:', prompt);
+
+    try {
+      const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      });
+
+      const result = await geminiResponse.json();
+      console.log('Resposta completa do Gemini API:', JSON.stringify(result, null, 2));
+
+      if (!geminiResponse.ok) {
+        console.error('Erro na API do Gemini:', result);
+        return res.status(500).json({ 
+          error: "Erro na API do Gemini", 
+          details: result.error || result 
+        });
+      }
+
+      const reply = result.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!reply || reply.trim() === '') {
+        console.error('Resposta vazia do Gemini:', result);
+        return res.status(500).json({ 
+          error: "Resposta vazia do Gemini",
+          details: result 
+        });
+      }
+
+      console.log('Resposta processada:', reply);
+      return res.status(200).json({ reply });
+    } catch (error) {
+      console.error("Erro ao chamar Gemini:", error);
+      return res.status(500).json({ 
+        error: "Erro interno ao chamar o Gemini.",
+        details: error.message 
+      });
+    }
+  });
+});
 
 // Lazy initialization for OAuth2Client
 let authClient;
@@ -1197,8 +1260,15 @@ exports.trackAdEvent = functions.https.onRequest({
   const adRef = db.collection('premiumAds').doc(adId);
 
   try {
+    // Primeiro, verifica se o documento existe
+    const adDoc = await adRef.get();
+    if (!adDoc.exists) {
+      return res.status(404).json({ success: false, error: 'Anúncio não encontrado.' });
+    }
+
     const fieldToIncrement = eventType === 'impression' ? 'impressions' : 'clicks';
     
+    // Usa increment com verificação de segurança
     await adRef.update({
       [fieldToIncrement]: admin.firestore.FieldValue.increment(1)
     });
@@ -1208,9 +1278,6 @@ exports.trackAdEvent = functions.https.onRequest({
 
   } catch (error) {
     console.error(`Erro ao registrar evento para o anúncio ${adId}:`, error);
-    if (error.code === 5) { // NOT_FOUND
-        return res.status(404).json({ success: false, error: 'Anúncio não encontrado.' });
-    }
     return res.status(500).json({ success: false, error: 'Erro interno do servidor.' });
   }
 }));

@@ -3,6 +3,7 @@ import { showAlert } from '../components/alert.js';
 import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 import { ufs } from './ufs.js';
 import { updateLogoDisplay } from './screen-brand.js';
+import './youtube-api.js';
 
 // Função para registrar visita única por sessão
 function trackVisit(city = null) {
@@ -15,7 +16,7 @@ function trackVisit(city = null) {
     payload.city = city;
   }
 
-  fetch('/api/logInsight', {
+  fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/logInsight', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'visit', payload: payload })
@@ -146,16 +147,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+  // CÓDIGO ANTI-SCROLL AQUI
+  let lastUserScrollTime = Date.now();
+  window.addEventListener('scroll', () => {
+    lastUserScrollTime = Date.now();
+  });
 
-// // Torna showAlert acessível em todo o escopo do script
-// window.showAlert = function(message) {
-//   const modal = document.getElementById("custom-alert");
-//   const messageBox = document.getElementById("alert-message");
-//   messageBox.textContent = message;
-//   modal.classList.remove("hidden");
+  const originalScrollTo = window.scrollTo;
+  window.scrollTo = function(options) {
+    if (Date.now() - lastUserScrollTime < 100 || 
+        (typeof options === 'object' && options.behavior !== 'smooth')) {
+      originalScrollTo.apply(window, arguments);
+    }
+  };
+});
 
-//   document.getElementById("close-alert-btn").onclick = () => {
-//     modal.classList.add("hidden");
-//   };
-// };
 

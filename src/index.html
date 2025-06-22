@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Galeria de Logos Corporativos</title>
+    <title>BrandConnect - Conectando marcas ao mundo</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>"
+    />
 
     <!-- CSS -->
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="stylesheet" href="./css/video-modal.css" />
     <link rel="stylesheet" href="./css/advertising.css" />
+    <link rel="stylesheet" href="./css/chatbot.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
@@ -217,16 +223,14 @@
       </div>
     </footer>
 
-    <!-- Botão do WhatsApp -->
-    <div
-      id="whatsapp-float"
-      class="whatsapp-float"
-      aria-label="Contato WhatsApp"
-    >
+    <!-- Container de Botões Flutuantes -->
+    <div class="floating-buttons-container">
       <a
         href="https://wa.me/55SEUNUMERO"
         target="_blank"
         rel="noopener noreferrer"
+        class="floating-btn whatsapp-float"
+        aria-label="Contato WhatsApp"
       >
         <i class="fab fa-whatsapp"></i>
       </a>
@@ -234,11 +238,12 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script src="./js/chatbot.js"></script>
     <script type="module" src="./js/screen-brand.js"></script>
     <script type="module" src="./js/main.js"></script>
     <script src="./js/click-tracker.js" defer></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <script type="module" src="./js/youtube-api.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script type="module" src="./js/advertising.js"></script>
   </body>
 </html>

@@ -14,13 +14,26 @@
       '.whatsapp-float',
       '#clear-location',
       '.close-btn',
-      '.carousel-control' // Ignorar controles de carrossel
+      '.carousel-control', // Ignorar controles de carrossel
+      '#search-input', // Ignorar input de pesquisa
+      '#location-input', // Ignorar input de localização
+      '.search-box', // Ignorar caixa de pesquisa
+      '.category-filter', // Ignorar filtro de categoria
+      '.suggestions-list', // Ignorar lista de sugestões
+      '.suggestion-item' // Ignorar itens de sugestão
   ].join(',');
 
   // Função principal
   function trackClick(event) {
       const target = event.target.closest(SELECTORS_TO_TRACK);
       if (!target || target.matches(EXCLUDE_SELECTOR)) return;
+
+      // Evita rastrear cliques em elementos de pesquisa
+      if (event.target.closest('.search-box') || 
+          event.target.closest('.category-filter') || 
+          event.target.closest('.suggestions-list')) {
+          return;
+      }
 
       let details = {};
       const logoData = target.closest('[data-logo]')?.dataset.logo;
@@ -35,11 +48,11 @@
           details = JSON.parse(decodeURIComponent(adData));
           // Se for um anúncio, também dispara o evento de clique para o contador
           if (details.id) {
-            fetch('/track-ad-event', {
+            fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/trackAdEvent', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ adId: details.id, eventType: 'click' })
-            }).catch(error => console.error('Falha ao registrar clique do anúncio:', error));
+            }).catch(error => console.warn('Falha ao registrar clique do anúncio:', error));
           }
         }
       } catch (e) {

@@ -36,7 +36,7 @@ const categorySelect = document.getElementById("category-select");
 // Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
-        const response = await fetch('/public-logos', {
+        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicLogos', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -147,10 +147,17 @@ function createLogoCard(logo) {
     const el = document.getElementById(cardId);
     if (el && websiteUrl) {
       el.onclick = function(e) {
+        // Evita conflitos com outros eventos de clique
         if (
           e.target.closest('.btn-container') ||
-          e.target.closest('.icon')
+          e.target.closest('.icon') ||
+          e.target.closest('.search-box') ||
+          e.target.closest('.category-filter') ||
+          e.target.closest('.suggestions-list')
         ) return;
+        
+        // Previne propagação do evento
+        e.stopPropagation();
         window.open(websiteUrl, '_blank');
       };
     }
@@ -265,8 +272,25 @@ export async function updateLogoDisplay() {
     const selectedCategory = categorySelect.value;
     const logos = await loadLogosFromStorage();
 
-    const normalizar = termo => (termo || "").trim().toLowerCase();
-    const separarPartes = termo => normalizar(termo).split(/[-\s]{1,}/).filter(Boolean);
+    const normalizar = termo => {
+        if (!termo) return "";
+        
+        // Remove acentos e caracteres especiais
+        const removeAcentos = (str) => {
+            return str.normalize('NFD')
+                     .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                     .replace(/[^\w\s-]/g, '') // Remove caracteres especiais exceto hífen
+                     .replace(/\s+/g, ' ') // Remove espaços múltiplos
+                     .trim();
+        };
+        
+        return removeAcentos(termo.trim().toLowerCase());
+    };
+
+      const separarPartes = termo => {
+        const [cidade, uf] = normalizar(termo).split(/\s*-\s*/);
+        return [cidade.trim(), uf?.trim()].filter(Boolean);
+      };
 
     const comparaComLogo = (partes, logo) => {
         if (!partes.length) return true;
@@ -310,7 +334,7 @@ export async function updateLogoDisplay() {
                 return false;
             }
         }
-debugger
+
         // Filtro por categoria (obrigatório se selecionado)
         const matchesCategory = !selectedCategory || logo.logoCategory === selectedCategory;
         if (!matchesCategory) return false;
@@ -342,11 +366,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        searchInput.addEventListener('input', updateLogoDisplay);
+        searchInput.addEventListener('input', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateLogoDisplay();
+        });
     }
     
     if (categorySelect) {
-        categorySelect.addEventListener('change', updateLogoDisplay);
+        categorySelect.addEventListener('change', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateLogoDisplay();
+        });
+    }
+    
+    // Adiciona evento para o checkbox de localização
+    const useLocationCheckbox = document.getElementById('use-location');
+    if (useLocationCheckbox) {
+        useLocationCheckbox.addEventListener('change', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            updateLogoDisplay();
+        });
     }
         
     //Visibilidade botão Admin    
@@ -383,16 +425,33 @@ if (whatsappLink) {
 //Autocomplete - pesquisa por nome de cidade e/ou UF
 const locationInputForAutocomplete = document.getElementById('location-input');
 if (locationInputForAutocomplete) {
-    locationInputForAutocomplete.addEventListener('input', updateLogoDisplay);
+    locationInputForAutocomplete.addEventListener('input', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        updateLogoDisplay();
+    });
 }
 
 async function getUniqueCitiesFromLogos() {
     const logos = await loadLogosFromStorage();
     const cityMap = new Map(); // Usamos Map para manter a ordem
 
+    // Função para normalizar texto (remover acentos)
+    const normalizarTexto = (str) => {
+        if (!str) return "";
+        return str.normalize('NFD')
+                 .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                 .replace(/[^\w\s-]/g, '') // Remove caracteres especiais exceto hífen
+                 .replace(/\s+/g, ' ') // Remove espaços múltiplos
+                 .trim()
+                 .toLowerCase();
+    };
+
     logos.forEach(logo => {
         if (logo.clientCity && logo.clientUf) {
-            const key = `${logo.clientCity.trim().toLowerCase()}-${logo.clientUf.trim().toLowerCase()}`;
+            const cityNormalized = normalizarTexto(logo.clientCity);
+            const ufNormalized = normalizarTexto(logo.clientUf);
+            const key = `${cityNormalized}-${ufNormalized}`;
             const displayValue = `${logo.clientCity.trim()} - ${logo.clientUf.trim()}`;
             
             if (!cityMap.has(key)) {
@@ -408,7 +467,10 @@ const inputElement = document.getElementById("location-input");
 const suggestionsList = document.getElementById("suggestions-list");
 
 if (inputElement && suggestionsList) {
-    inputElement.addEventListener("input", async function () {
+    inputElement.addEventListener("input", async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
         const searchTerm = this.value.toLowerCase().trim();
         suggestionsList.innerHTML = "";
 
@@ -417,19 +479,31 @@ if (inputElement && suggestionsList) {
             return;
         }
 
+        // Função para normalizar texto (remover acentos)
+        const normalizarTexto = (str) => {
+            if (!str) return "";
+            return str.normalize('NFD')
+                     .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                     .replace(/[^\w\s-]/g, '') // Remove caracteres especiais exceto hífen
+                     .replace(/\s+/g, ' ') // Remove espaços múltiplos
+                     .trim()
+                     .toLowerCase();
+        };
+
+        const searchTermNormalized = normalizarTexto(searchTerm);
         const rawCities = await getUniqueCitiesFromLogos();
         const uniqueCityMap = new Map(); // chave: nome normalizado, valor: nome original
 
         rawCities.forEach(city => {
-            const normalized = city.trim().toLowerCase();
+            const normalized = normalizarTexto(city);
             if (!uniqueCityMap.has(normalized)) {
                 uniqueCityMap.set(normalized, city.trim());
             }
         });
 
-        const filteredCities = Array.from(uniqueCityMap.values()).filter(city =>
-            city.toLowerCase().includes(searchTerm)
-        );
+        const filteredCities = Array.from(uniqueCityMap.entries())
+            .filter(([normalized, original]) => normalized.includes(searchTermNormalized))
+            .map(([normalized, original]) => original);
 
         // Evitar adicionar sugestões duplicadas visualmente
         const added = new Set();
@@ -444,9 +518,14 @@ if (inputElement && suggestionsList) {
                     suggestionItem.textContent = city;
 
                     suggestionItem.addEventListener("click", function () {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
                         inputElement.value = city;
                         suggestionsList.innerHTML = "";
                         suggestionsList.style.display = "none";
+                        
+                        // Atualiza a exibição dos logos após selecionar uma cidade
                         updateLogoDisplay();
                     });
 
@@ -481,6 +560,13 @@ document.addEventListener("click", function (event) {
     if (inputElement && suggestionsList && event.target !== inputElement && 
         !suggestionsList.contains(event.target)) {
         suggestionsList.style.display = "none";
+    }
+    
+    // Evita conflitos com outros eventos de clique
+    if (event.target.closest('.search-box') || 
+        event.target.closest('.category-filter') || 
+        event.target.closest('.suggestions-list')) {
+        return;
     }
 });
 
@@ -558,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function () {
               throw new Error('Por favor, preencha todos os campos obrigatórios.');
           }
 
-          const response = await fetch('https://publiccontacts-lnpdkkqg5q-uc.a.run.app', {
+          const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicContacts', {
               method: 'POST',
               headers,
               body: JSON.stringify(contactData)
@@ -779,9 +865,23 @@ function extractYouTubeId(url) {
 document.addEventListener('click', function(e) {
   const infoIcon = e.target.closest('.info-icon');
   if (infoIcon && infoIcon.dataset.logo) {
+    e.preventDefault();
     e.stopPropagation();
+    
+    // Evita conflitos com outros eventos de clique
+    if (e.target.closest('.search-box') || 
+        e.target.closest('.category-filter') || 
+        e.target.closest('.suggestions-list')) {
+        return;
+    }
+    
     const logo = JSON.parse(decodeURIComponent(infoIcon.dataset.logo));
     openLogoInfoModal(logo);
   }
 });
+
+//Evitar erro AdSense
+if (!window.adsbygoogle || !window.adsbygoogle.loaded) {
+  console.warn("AdSense bloqueado ou não carregado");
+}
 

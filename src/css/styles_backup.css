@@ -37,10 +37,6 @@ header nav {
   padding: 0;
 }
 
-a {
-  text-decoration: none !important;
-}
-
 nav {
   display: flex;
   align-items: center; /* alinha verticalmente */
@@ -797,7 +793,7 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0;
+  gap: 6px;
   z-index: 1000;
   animation: slideInFromRight 0.5s ease-out;
 }
@@ -838,6 +834,22 @@ footer {
 }
 
 /* WhatsApp específico */
+.whatsapp-float {
+  background-color: #25d366;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+  background-color: #128c7e;
+  transform: scale(1.1);
+}
+
+/* Transição suave para ocultação/exibição do WhatsApp */
+.whatsapp-float {
+  transition: all 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Chatbot específico */
 .chatbot-toggle {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
@@ -1115,7 +1127,7 @@ body.dark-mode #premium-ads {
     width: 50px;
     height: 50px;
     bottom: 20px;
-    /*right: 20px;*/
+    right: 20px;
     font-size: 25px;
     z-index: 1001;
   }
@@ -1771,7 +1783,7 @@ body.dark-mode #premium-ads {
     width: 50px;
     height: 50px;
     bottom: 20px;
-    /*right: 20px;*/
+    right: 20px;
     font-size: 25px;
     z-index: 1001;
   }
@@ -1782,34 +1794,17 @@ body.dark-mode #premium-ads {
   }
 }
 
-/* Regra consolidada e mais forte para o WhatsApp */
 .whatsapp-float {
-  background-color: #25d366 !important;
-  color: #fff !important;
   width: 50px;
   height: 50px;
   bottom: 20px;
-  /* right: 20px;*/
+  right: 20px;
   font-size: 25px;
   z-index: 1001;
-  transition: all 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.whatsapp-float:hover {
-  background-color: #128c7e !important;
-  transform: scale(1.1);
-}
-
-.whatsapp-float i {
-  color: #fff !important;
-}
-
-/* Garantir que o ícone do WhatsApp seja aplicado imediatamente */
-.floating-btn.whatsapp-float {
-  background-color: #25d366 !important;
-  color: #fff !important;
-}
-
-.floating-btn.whatsapp-float i {
-  color: #fff !important;
+.floating-buttons-container {
+  bottom: 10px;
+  right: 10px;
+  gap: 15px;
 }

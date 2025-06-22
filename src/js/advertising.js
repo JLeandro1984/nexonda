@@ -234,7 +234,7 @@ function scheduleNextUpdate() {
 // Funções para interação com a API
 async function getPremiumAdsFromFirebase() {
   try {
-    const response = await fetch('/public-premium-ads');
+    const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicPremiumAds');
     if (!response.ok) throw new Error('Erro ao carregar propagandas');
     return await response.json();
   } catch (error) {
@@ -362,11 +362,6 @@ window.reloadPremiumAds = async function() {
   await loadPremiumAds();
 };
 
-// Função para abrir player de YouTube
-// window.openYouTubePlayer = function(url) {
-//   window.open(url, '_blank');
-// };
-
 // Inicialização quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
   loadPremiumAds();
@@ -377,7 +372,8 @@ document.addEventListener('click', function (e) {
   const videoContainer = e.target.closest('[data-video-url]');
   if (videoContainer) {
     e.preventDefault();
-debugger
+    e.stopPropagation();
+    
     const videoUrl = videoContainer.dataset.videoUrl;
 
     // Detecta se é YouTube ou Firebase Storage MP4 ou outro vídeo suportado
@@ -423,10 +419,10 @@ function trackImpressions(ads) {
   if (!ads || ads.length === 0) return;
 
   ads.forEach(ad => {
-    fetch('/track-ad-event', {
+    fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/trackAdEvent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adId: ad.id, eventType: 'impression' })
-    }).catch(error => console.error('Falha ao registrar impressão:', error));
+    }).catch(error => console.warn('Falha ao registrar impressão:', error));
   });
 }
