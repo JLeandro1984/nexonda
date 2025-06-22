@@ -108,15 +108,23 @@ function createLogoCard(logo) {
   const websiteUrl = logo.clientWebsite || logo.websiteUrl || '';
 
   // Nome fantasia e CNPJ
-  const companyName = logo.clientFantasyName || logo.clientName || '';
-  const companyCNPJ = logo.clientCNPJ || '';
+  const companyName = logo.clientFantasyName || '';
+ /* const companyCNPJ = logo.clientCNPJ || '';*/
   const showTooltip = companyName.length > 22;
 
   // Monta botões sociais se houver URL
   let socialButtons = '';
   if (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl) {
     socialButtons = `<div class="btn-container" style="margin-top: 10px;">
-      ${whatsappUrl ? `<a class="whatsapp-btn" href="${whatsappUrl.startsWith('http') ? whatsappUrl : 'https://wa.me/' + whatsappUrl}" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>` : ''}
+   
+    ${whatsappUrl
+      ? `<a class="whatsapp-btn" href="${
+          whatsappUrl.startsWith('http')
+            ? whatsappUrl
+            : 'https://wa.me/' + whatsappUrl.replace(/\D/g, '') + '?text=' + encodeURIComponent('Olá! Estou entrando em contato através do BrandConnect.')
+        }" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>`
+      : ''}
+
       ${instagramUrl ? `<a class="instagram-btn" href="${instagramUrl}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ''}
       ${facebookUrl ? `<a class="facebook-btn" href="${facebookUrl}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>` : ''}
       ${youtubeUrl ? `<button class="video-btn" title="YouTube/Video" onclick="openYouTubePlayer('${youtubeUrl.replace(/'/g, "\\'")}')"><i class="fab fa-youtube"></i></button>` : ''}
@@ -163,7 +171,7 @@ function createLogoCard(logo) {
     }
   }, 0);
 
-  return `<div class="logo-card-wrapper" id="${cardId}" data-cnpj="${companyCNPJ}">${cardContent}</div>`;
+  return `<div class="logo-card-wrapper" id="${cardId}" data-fantasia="${companyName}">${cardContent}</div>`;
 }
 
 
@@ -205,14 +213,14 @@ export async function loadLogos() {
             return bLevel - aLevel; // Ordem decrescente
           }
       
-          return a.clientName.localeCompare(b.clientName); // Nome alfabético
+          return a.clientFantasyName.localeCompare(b.clientFantasyName); // Nome alfabético
         });
       } else {
         console.error("logos não é um array:", logos);
       }
      
     logos.forEach(logo => {
-        if (!contratoAtivo(logo)) return;
+       // if (!contratoAtivo(logo)) return;
         
         const logoElement = createLogoCard(logo);
       container.innerHTML += logoElement;      
@@ -224,7 +232,7 @@ export async function loadLogos() {
     }
 }
 
-function contratoAtivo(logo) {
+/*function contratoAtivo(logo) {
     const endDate = new Date(logo.endDate);
     const today = new Date();
 
@@ -238,7 +246,7 @@ function contratoAtivo(logo) {
     
 
     return true
-}
+}*/
 
 // Popula categorias no select de filtro
 export function populateFilterCategories() {
@@ -311,12 +319,25 @@ export async function updateLogoDisplay() {
     };
 
     const filteredLogos = logos.filter(logo => {
-        if (!contratoAtivo(logo)) return false;
-
+        //if (!contratoAtivo(logo)) return false;
       const termo = searchTerm?.toLowerCase();
       
-      // Filtro por nome ou nome fantasia (obrigatório se preenchido)
-      const matchesSearch = !termo || logo.clientName?.toLowerCase().includes(termo) || logo.clientFantasyName?.toLowerCase().includes(termo);
+        const isOpen = isOpenNow(logo.openingHours);
+        const statusText = isOpen ? 'aberto' : 'fechado';
+        
+        const matchesSearch =
+          !termo ||
+          logo.clientAddress?.toLowerCase().includes(termo) ||
+          logo.clientNeighborhood?.toLowerCase().includes(termo) ||
+          logo.clientCep?.toLowerCase().includes(termo) ||
+          logo.description?.toLowerCase().includes(termo) ||
+          logo.clientFantasyName?.toLowerCase().includes(termo) ||
+          logo.cellphone?.toLowerCase().includes(termo) ||
+          logo.clientWhatsapp?.toLowerCase().includes(termo) ||
+          logo.clientWebsite?.toLowerCase().includes(termo) ||
+          logo.telephone?.toLowerCase().includes(termo) ||
+          statusText.includes(termo); // <- aqui entra o "aberto" ou "fechado"
+      
       
         if (!matchesSearch) return false;
 
@@ -799,7 +820,7 @@ function getCategoryLabelByValue(value) {
 // Função para abrir modal de info
 window.openLogoInfoModal = function(logo) {
   // Monta dados principais
-  const nome = logo.clientFantasyName || logo.clientName || '';
+  const nome = logo.clientFantasyName || '';
   const categoria = getCategoryLabelByValue(logo.category || logo.logoCategory);
   const telefone = logo.telephone || logo.cellphone || '';
   let endereco = '';

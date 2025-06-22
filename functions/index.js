@@ -247,26 +247,72 @@ const getContext = (req) => {
 };
 
 // --- API pública para logos ---
+exports.publicLogos// --- API pública para logos ---
 exports.publicLogos = functions.https.onRequest({
   cors: true,
   maxInstances: 10
 }, handleCors(async (req, res) => {
-  // Configurar CORS headers explicitamente
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET');
-  res.set('Access-Control-Allow-Headers', 'Content-Type');
-
   const db = admin.firestore();
   const logosCollection = db.collection('logos');
 
   try {
     if (req.method === 'GET') {
       const querySnapshot = await logosCollection.get();
-      const logos = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || null
-      }));
+
+      // Filtra apenas logos com contrato ativo
+      const ativos = querySnapshot.docs.filter(doc => {
+        const data = doc.data();
+        const endDate = new Date(data.endDate);
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+        endDate.setHours(0, 0, 0, 0);
+
+        return (
+          data.contractActive === true &&
+          !isNaN(endDate.getTime()) &&
+          endDate >= today
+        );
+      });
+
+      const logos = ativos.map(doc => {
+        const data = doc.data();
+        const showAddress = data.showAddressActive === true;
+
+        return {
+          id: doc.id,
+          category: data.category || data.logoCategory || '',
+          description: data.description || data.logoDescription || '',
+          imageUrl: data.imageUrl || data.logoImageUrl || data.imagem || '',
+
+          clientFantasyName: data.clientFantasyName || '',
+
+          clientAddress: showAddress ? data.clientAddress || '' : '',
+          clientNumber: showAddress ? data.clientNumber || '' : '',
+          clientNeighborhood: showAddress ? data.clientNeighborhood || '' : '',
+          clientCity: showAddress ? data.clientCity || '' : '',
+          clientUf: showAddress ? data.clientUf || '' : '',
+          clientCep: showAddress ? data.clientCep || '' : '',
+
+          telephone: data.telephone || '',
+          cellphone: data.cellphone || '',
+          clientWhatsapp: data.clientWhatsapp || '',
+
+          clientInstagramUrl: data.clientInstagramUrl || '',
+          clientFacebookUrl: data.clientFacebookUrl || '',
+          clientWebsite: data.clientWebsite || '',
+          videoUrl: data.clientVideoUrl || data.videoUrl || '',
+
+          clientLat: showAddress ? data.clientLat || '' : '',
+          clientLng: showAddress ? data.clientLng || '' : '',
+
+          openingHours: data.openingHours || null,
+
+          planType: data.planType || '',
+          createdAt: data.createdAt?.toDate() || null
+        };
+      });
+
       return res.status(200).json(logos);
     }
 
@@ -276,6 +322,7 @@ exports.publicLogos = functions.https.onRequest({
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }));
+
 
 // --- API principal (logos) ---
 exports.api = functions.https.onRequest({
@@ -839,19 +886,18 @@ exports.publicContacts = functions.https.onRequest({
   }
 }));
 
-// --- API pública para propagandas ---
+
 // --- API pública para propagandas --- 
 exports.publicPremiumAds = functions.https.onRequest({
   cors: true,
   maxInstances: 10
 }, handleCors(async (req, res) => {
-  // Configurar CORS headers explicitamente
+  // CORS headers
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
   res.set('Access-Control-Max-Age', '3600');
 
-  // Responder imediatamente para requisições OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
     return res.status(204).send('');
   }
@@ -863,36 +909,55 @@ exports.publicPremiumAds = functions.https.onRequest({
     if (req.method === 'GET') {
       const adsSnapshot = await premiumAdsCollection.get();
       const logosSnapshot = await db.collection('logos').get();
-      
+
       const logosMap = new Map();
       logosSnapshot.forEach(doc => {
-        const logoData = doc.data();
-        if (logoData.clientCNPJ) {
-          logosMap.set(logoData.clientCNPJ, logoData);
+        const data = doc.data();
+        if (data.clientCNPJ) {
+          logosMap.set(data.clientCNPJ, data);
         }
       });
+
+      const now = new Date();
 
       const ads = adsSnapshot.docs
         .map(doc => {
           const adData = { id: doc.id, ...doc.data() };
-          const correspondingLogo = logosMap.get(adData.clientCNPJ);
-          
+          const logo = logosMap.get(adData.clientCNPJ) || {};
+
+          // Filtros: contrato ativo e datas válidas
+          const startDate = new Date(adData.startDate);
+          const endDate = new Date(adData.endDate);
+          endDate.setHours(23, 59, 59, 999);
+
+          const ativo = adData.isActive && startDate <= now && endDate >= now;
+
+          if (!ativo) return null;
+
           return {
-            ...correspondingLogo, // Adiciona dados do logo (como imageUrl, clientName, etc.)
-            ...adData // Mantém e sobrepõe com dados do anúncio (como title, mediaUrl)
+            id: adData.id,
+            title: adData.title || '',
+            description: adData.description || '',
+            mediaType: adData.mediaType || '',
+            mediaUrl: adData.mediaUrl || '',
+            targetUrl: adData.targetUrl || '',
+            startDate: adData.startDate,
+            endDate: adData.endDate,
+
+            // Dados do logo (apenas os essenciais)
+            imageUrl: logo.imageUrl || logo.logoImageUrl || logo.imagem || '',
+            clientFantasyName: logo.clientFantasyName || '',
+            category: logo.category || logo.logoCategory || '',
+            clientCity: logo.clientCity || '',
+            clientUf: logo.clientUf || '',
           };
         })
-        .filter(ad => {
-            const now = new Date();
-            const startDate = new Date(ad.startDate);
-            const endDate = new Date(ad.endDate);
-            endDate.setHours(23, 59, 59, 999); // Garante que o dia todo seja incluído
-            return ad.isActive && startDate <= now && endDate >= now;
-        });
+        .filter(Boolean); // remove os nulos
 
       return res.status(200).json(ads);
     }
 
+    // Rota para rastreamento de cliques/impressões
     if (req.method === 'POST' && req.path.endsWith('/track')) {
       const { adId, type } = req.body;
       if (!adId || !type) {
@@ -926,6 +991,7 @@ exports.publicPremiumAds = functions.https.onRequest({
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }));
+
 
 
 // --- API de autenticação ---
@@ -1222,12 +1288,31 @@ exports.logInsight = functions.https.onRequest({
   }
 
   try {
-    const insightData = {
+    let insightData = {
       type, // 'visit' ou 'click'
       timestamp: new Date().toISOString(),
       userAgent: req.get('User-Agent') || null,
       ...payload
     };
+
+    // Se for clique e tiver clientFantasyName, buscar o CNPJ no backend
+    if (type === 'click' && payload.clientFantasyName) {
+      const logosSnapshot = await db.collection('logos')
+        .where('clientFantasyName', '==', payload.clientFantasyName)
+        .limit(1)
+        .get();
+      if (!logosSnapshot.empty) {
+        const logoData = logosSnapshot.docs[0].data();
+        if (logoData.clientCNPJ) {
+          insightData.clientCNPJ = logoData.clientCNPJ;
+        }
+      }
+      // Remove clientCNPJ do payload se vier do front-end (por segurança)
+      if (insightData.clientCNPJ && payload.clientCNPJ) {
+        delete insightData.clientCNPJ;
+        insightData.clientCNPJ = logoData.clientCNPJ;
+      }
+    }
 
     await insightsCollection.add(insightData);
     return res.status(200).json({ success: true });

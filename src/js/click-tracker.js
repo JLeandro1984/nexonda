@@ -73,12 +73,13 @@
         // localStorage.removeItem('userLocation');
       }
 
+      const clientFantasyName = details.clientFantasyName || details.clientName || details.title || clientName || null;
+      
       const clickEvent = {
           elementId: target.id || null,
           elementClasses: target.className || null,
           elementType: target.tagName.toLowerCase(),
-          clientName: clientName || details.clientFantasyName || details.clientName || details.title,
-          clientCNPJ: cnpj || details.clientCNPJ || null,
+          clientFantasyName: clientFantasyName,
           city: city,
           timestamp: new Date().toISOString(),
           details: details // Envia o objeto completo para contexto
