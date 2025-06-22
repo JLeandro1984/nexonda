@@ -247,7 +247,6 @@ const getContext = (req) => {
 };
 
 // --- API pública para logos ---
-exports.publicLogos// --- API pública para logos ---
 exports.publicLogos = functions.https.onRequest({
   cors: true,
   maxInstances: 10
@@ -284,9 +283,9 @@ exports.publicLogos = functions.https.onRequest({
           category: data.category || data.logoCategory || '',
           description: data.description || data.logoDescription || '',
           imageUrl: data.imageUrl || data.logoImageUrl || data.imagem || '',
-
+          clientName: data.clientName || '',
           clientFantasyName: data.clientFantasyName || '',
-
+          showAddress: showAddress,
           clientAddress: showAddress ? data.clientAddress || '' : '',
           clientNumber: showAddress ? data.clientNumber || '' : '',
           clientNeighborhood: showAddress ? data.clientNeighborhood || '' : '',
@@ -887,7 +886,7 @@ exports.publicContacts = functions.https.onRequest({
 }));
 
 
-// --- API pública para propagandas --- 
+// --- API pública para propagandas ---
 exports.publicPremiumAds = functions.https.onRequest({
   cors: true,
   maxInstances: 10
@@ -898,6 +897,7 @@ exports.publicPremiumAds = functions.https.onRequest({
   res.set('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
   res.set('Access-Control-Max-Age', '3600');
 
+  // Preflight
   if (req.method === 'OPTIONS') {
     return res.status(204).send('');
   }
@@ -910,6 +910,7 @@ exports.publicPremiumAds = functions.https.onRequest({
       const adsSnapshot = await premiumAdsCollection.get();
       const logosSnapshot = await db.collection('logos').get();
 
+      // Mapeia CNPJs para dados de logotipo
       const logosMap = new Map();
       logosSnapshot.forEach(doc => {
         const data = doc.data();
@@ -918,22 +919,27 @@ exports.publicPremiumAds = functions.https.onRequest({
         }
       });
 
-      const now = new Date();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // normaliza a data de hoje para comparação
 
       const ads = adsSnapshot.docs
         .map(doc => {
           const adData = { id: doc.id, ...doc.data() };
           const logo = logosMap.get(adData.clientCNPJ) || {};
 
-          // Filtros: contrato ativo e datas válidas
+          // Validação: isActive e datas válidas
+          if (!adData.isActive || !adData.startDate || !adData.endDate) {
+            return null;
+          }
+
           const startDate = new Date(adData.startDate);
           const endDate = new Date(adData.endDate);
-          endDate.setHours(23, 59, 59, 999);
+          endDate.setHours(23, 59, 59, 999); // garante cobertura até o fim do dia
 
-          const ativo = adData.isActive && startDate <= now && endDate >= now;
-
+          const ativo = startDate <= today && endDate >= today;
           if (!ativo) return null;
 
+          // Monta o objeto final do anúncio
           return {
             id: adData.id,
             title: adData.title || '',
@@ -944,48 +950,47 @@ exports.publicPremiumAds = functions.https.onRequest({
             startDate: adData.startDate,
             endDate: adData.endDate,
 
-            // Dados do logo (apenas os essenciais)
+            // Dados do logo (essenciais)
             imageUrl: logo.imageUrl || logo.logoImageUrl || logo.imagem || '',
             clientFantasyName: logo.clientFantasyName || '',
+            clientName: logo.clientName || '',
             category: logo.category || logo.logoCategory || '',
             clientCity: logo.clientCity || '',
             clientUf: logo.clientUf || '',
           };
         })
-        .filter(Boolean); // remove os nulos
+        .filter(Boolean); // remove nulos (anúncios inativos ou com datas inválidas)
 
       return res.status(200).json(ads);
     }
-
-    // Rota para rastreamento de cliques/impressões
     if (req.method === 'POST' && req.path.endsWith('/track')) {
-      const { adId, type } = req.body;
-      if (!adId || !type) {
-        return res.status(400).json({ error: 'ID do anúncio e tipo são obrigatórios' });
-      }
+      return (async () => {
+        const { adId, type } = req.body;
+        if (!adId || !type) {
+          return res.status(400).json({ error: 'ID do anúncio e tipo são obrigatórios' });
+        }
 
-      const docRef = premiumAdsCollection.doc(adId);
-      const doc = await docRef.get();
+        const docRef = premiumAdsCollection.doc(adId);
+        const doc = await docRef.get();
 
-      if (!doc.exists) {
-        return res.status(404).json({ error: 'Anúncio não encontrado' });
-      }
+        if (!doc.exists) {
+          return res.status(404).json({ error: 'Anúncio não encontrado' });
+        }
 
-      if (type === 'click') {
-        await docRef.update({
-          clicks: admin.firestore.FieldValue.increment(1)
-        });
-      } else if (type === 'impression') {
-        await docRef.update({
-          impressions: admin.firestore.FieldValue.increment(1)
-        });
-      }
+        if (type === 'click') {
+          await docRef.update({
+            clicks: admin.firestore.FieldValue.increment(1)
+          });
+        } else if (type === 'impression') {
+          await docRef.update({
+            impressions: admin.firestore.FieldValue.increment(1)
+          });
+        }
 
-      return res.status(200).json({ message: 'Evento registrado com sucesso' });
+        return res.status(200).json({ message: 'Evento registrado com sucesso' });
+      })();
     }
-
     return res.status(405).json({ error: 'Método não permitido' });
-
   } catch (error) {
     console.error('Erro na API pública de propagandas:', error);
     return res.status(500).json({ error: 'Erro interno do servidor' });

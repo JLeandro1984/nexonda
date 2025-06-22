@@ -123,9 +123,7 @@ function filterActiveAds(ads) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
-  return ads.filter(ad => {
-    if (!ad.isActive) return false;
-    
+  return ads.filter(ad => {        
     try {
       const startDate = ad.startDate ? new Date(ad.startDate) : null;
       const endDate = ad.endDate ? new Date(ad.endDate) : null;

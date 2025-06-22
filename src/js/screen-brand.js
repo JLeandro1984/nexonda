@@ -133,6 +133,9 @@ function createLogoCard(logo) {
 
   // Card HTML
   const cardId = `logo-card-${Math.random().toString(36).substr(2, 9)}`;
+  // Exibe o ícone de info apenas se o plano não for 'basico'
+  const showInfoIcon = (logo.planType || '').toLowerCase() !== 'basico';
+  const infoIconHtml = showInfoIcon ? `<span class="icon info-icon small-info-icon" title="Para mais informações clique aqui." data-logo="${encodeURIComponent(JSON.stringify(logo))}"><i class="fas fa-info-circle"></i></span>` : '';
   const cardContent = `
     <div class="logo-card">
       <div class="logo-img-container">
@@ -140,9 +143,7 @@ function createLogoCard(logo) {
       </div>
       <div class="logo-card-body">
         <div class="logo-info-row">
-          <span class="icon info-icon small-info-icon" title="Para mais informações clique aqui." data-logo="${encodeURIComponent(JSON.stringify(logo))}">
-            <i class="fas fa-info-circle"></i>
-          </span>
+          ${infoIconHtml}
           <span class="status-label ${statusColor}" style="margin-left: 6px; font-size: 0.95em;">${statusText}</span>
         </div>
         <div class="company-name"${showTooltip ? ` title="${companyName}"` : ''}>${companyName}</div>
@@ -833,10 +834,16 @@ window.openLogoInfoModal = function(logo) {
     siteHtml = `<div class='modal-info-row'><span class='modal-info-label'>Site:</span> <span class='modal-info-value'><a href='${site}' target='_blank' rel='noopener noreferrer'>${site.replace(/^https?:\/\//, '')}</a></span></div>`;
   }
 
+  // Exibir endereço e mapa apenas se showAddress for true
+  let addressHtml = '';
   let mapHtml = '';
-  if (logo.clientLat && logo.clientLng) {
-    mapHtml = `<div class='modal-map'><iframe width='100%' height='220' style='border:0' loading='lazy' allowfullscreen referrerpolicy='no-referrer-when-downgrade' src='https://www.google.com/maps?q=${logo.clientLat},${logo.clientLng}&hl=pt&z=16&output=embed'></iframe></div>`;
+  if (logo.showAddress) {
+    addressHtml = `<div class='modal-info-row'><span class='modal-info-label'>Endereço:</span> <span class='modal-info-value'>${endereco || '-'}</span></div>`;
+    if (logo.clientLat && logo.clientLng) {
+      mapHtml = `<div class='modal-map'><iframe width='100%' height='220' style='border:0' loading='lazy' allowfullscreen referrerpolicy='no-referrer-when-downgrade' src='https://www.google.com/maps?q=${logo.clientLat},${logo.clientLng}&hl=pt&z=16&output=embed'></iframe></div>`;
+    }
   }
+
   let hoursHtml = renderOpeningHours(logo.openingHours);
   const modalHtml = `
     <div class='logo-info-modal-overlay' onclick='closeLogoInfoModal(event)'></div>
@@ -846,7 +853,7 @@ window.openLogoInfoModal = function(logo) {
         <h2 class='modal-company-name'>${nome}</h2>
         <div class='modal-info-row'><span class='modal-info-label'>Categoria:</span> <span class='modal-info-value'>${categoria || '-'}</span></div>
         <div class='modal-info-row'><span class='modal-info-label'>Telefone:</span> <span class='modal-info-value'>${telefone || '-'}</span></div>
-        <div class='modal-info-row'><span class='modal-info-label'>Endereço:</span> <span class='modal-info-value'>${endereco || '-'}</span></div>
+        ${addressHtml}
         ${siteHtml}
       </div>
       ${mapHtml}
