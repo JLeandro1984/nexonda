@@ -254,11 +254,27 @@ Ou simplesmente digite sua pergunta! 😊`
   async callGemini(userMessage) {
     const prompt = this.buildPrompt(userMessage);
     
-    // Detecta se está em ambiente local ou produção
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const GEMINI_ENDPOINT = isLocal 
-      ? 'http://localhost:5001/brandconnect-50647/us-central1/askGemini'
-      : 'https://us-central1-brandconnect-50647.cloudfunctions.net/askGemini';
+    // Função para detectar o endpoint correto
+    const getGeminiEndpoint = () => {
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      const protocol = window.location.protocol;
+      
+      // Se estiver no GitHub Pages, usar produção
+      if (hostname === 'jleandro1984.github.io') {
+        return 'https://us-central1-brandconnect-50647.cloudfunctions.net/askGemini';
+      }
+      
+      // Se estiver em localhost com qualquer porta, usar local
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:5001/brandconnect-50647/us-central1/askGemini';
+      }
+      
+      // Para outros domínios, usar produção
+      return 'https://us-central1-brandconnect-50647.cloudfunctions.net/askGemini';
+    };
+    
+    const GEMINI_ENDPOINT = getGeminiEndpoint();
     
     try {
       const response = await fetch(GEMINI_ENDPOINT, {

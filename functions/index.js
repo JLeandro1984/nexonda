@@ -5,9 +5,14 @@ const cors = require('cors')({
     'http://127.0.0.1:5500',
     'http://localhost:5500',
     'http://localhost:5000',
+    'http://localhost:5001',
     'http://localhost:5002',
+    'http://localhost:5003',
+    'http://localhost:3000',
+    'http://localhost:8080',
     'https://brandconnect-50647.web.app',
-    'https://brandconnect-50647.firebaseapp.com'
+    'https://brandconnect-50647.firebaseapp.com',
+    'https://jleandro1984.github.io'
   ],
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   credentials: true,
