@@ -246,6 +246,42 @@ const getContext = (req) => {
   };
 };
 
+// --- API para obter total de visitantes da galeria ---
+exports.getGalleryStats = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10
+}, handleCors(async (req, res) => {
+  const db = admin.firestore();
+  
+  try {
+    if (req.method === 'GET') {
+      // Buscar total de visitas únicas
+      const insightsSnapshot = await db.collection('insights')
+        .where('type', '==', 'visit')
+        .get();
+      
+      const totalVisitors = insightsSnapshot.size;
+      
+      // Buscar total de cliques/interações
+      const clicksSnapshot = await db.collection('insights')
+        .where('type', '==', 'click')
+        .get();
+      
+      const totalClicks = clicksSnapshot.size;
+      
+      return res.status(200).json({
+        totalVisitors,
+        totalClicks
+      });
+    }
+    
+    return res.status(405).json({ error: 'Método não permitido' });
+  } catch (error) {
+    console.error('Erro ao buscar estatísticas da galeria:', error);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+}));
+
 // --- API pública para logos ---
 exports.publicLogos = functions.https.onRequest({
   cors: true,
@@ -253,6 +289,7 @@ exports.publicLogos = functions.https.onRequest({
 }, handleCors(async (req, res) => {
   const db = admin.firestore();
   const logosCollection = db.collection('logos');
+  const insightsCollection = db.collection('insights');
 
   try {
     if (req.method === 'GET') {
@@ -274,9 +311,25 @@ exports.publicLogos = functions.https.onRequest({
         );
       });
 
+      // Buscar cliques/interações para cada logo
+      const clicksSnapshot = await insightsCollection
+        .where('type', '==', 'click')
+        .get();
+      
+      // Criar mapa de cliques por clientFantasyName
+      const clicksMap = new Map();
+      clicksSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.clientFantasyName) {
+          clicksMap.set(data.clientFantasyName, (clicksMap.get(data.clientFantasyName) || 0) + 1);
+        }
+      });
+
       const logos = ativos.map(doc => {
         const data = doc.data();
         const showAddress = data.showAddressActive === true;
+        const clientFantasyName = data.clientFantasyName || '';
+        const clicks = clicksMap.get(clientFantasyName) || 0;
 
         return {
           id: doc.id,
@@ -284,7 +337,7 @@ exports.publicLogos = functions.https.onRequest({
           description: data.description || data.logoDescription || '',
           imageUrl: data.imageUrl || data.logoImageUrl || data.imagem || '',
           clientName: data.clientName || '',
-          clientFantasyName: data.clientFantasyName || '',
+          clientFantasyName: clientFantasyName,
           showAddress: showAddress,
           clientAddress: showAddress ? data.clientAddress || '' : '',
           clientNumber: showAddress ? data.clientNumber || '' : '',
@@ -308,7 +361,8 @@ exports.publicLogos = functions.https.onRequest({
           openingHours: data.openingHours || null,
 
           planType: data.planType || '',
-          createdAt: data.createdAt?.toDate() || null
+          createdAt: data.createdAt?.toDate() || null,
+          clicks: clicks
         };
       });
 
@@ -321,7 +375,6 @@ exports.publicLogos = functions.https.onRequest({
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }));
-
 
 // --- API principal (logos) ---
 exports.api = functions.https.onRequest({
@@ -949,6 +1002,8 @@ exports.publicPremiumAds = functions.https.onRequest({
             targetUrl: adData.targetUrl || '',
             startDate: adData.startDate,
             endDate: adData.endDate,
+            clicks: adData.clicks || 0,
+            impressions: adData.impressions || 0,
 
             // Dados do logo (essenciais)
             imageUrl: logo.imageUrl || logo.logoImageUrl || logo.imagem || '',
@@ -1373,6 +1428,49 @@ exports.trackAdEvent = functions.https.onRequest({
 
   } catch (error) {
     console.error(`Erro ao registrar evento para o anúncio ${adId}:`, error);
+    return res.status(500).json({ success: false, error: 'Erro interno do servidor.' });
+  }
+}));
+
+// --- API para rastrear cliques nos logos ---
+exports.trackLogoClick = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10
+}, handleCors(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { clientFantasyName } = req.body;
+
+  if (!clientFantasyName) {
+    return res.status(400).json({ error: 'clientFantasyName é obrigatório.' });
+  }
+
+  const db = admin.firestore();
+  const insightsCollection = db.collection('insights');
+
+  try {
+    // Registra o clique diretamente (igual à propaganda)
+    await insightsCollection.add({
+      type: 'click',
+      clientFantasyName: clientFantasyName,
+      timestamp: new Date().toISOString(),
+      userAgent: req.get('User-Agent') || null
+    });
+
+    console.log(`Clique registrado para o logo: ${clientFantasyName}`);
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Clique registrado com sucesso.'
+    });
+
+  } catch (error) {
+    console.error(`Erro ao registrar clique para o logo ${clientFantasyName}:`, error);
     return res.status(500).json({ success: false, error: 'Erro interno do servidor.' });
   }
 }));

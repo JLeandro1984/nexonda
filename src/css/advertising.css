@@ -204,3 +204,8 @@
     font-size: 1.5rem;
   }
 }
+
+.youtube-video-container,
+div[data-video-url] {
+  position: relative;
+}

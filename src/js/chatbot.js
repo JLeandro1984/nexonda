@@ -1,3 +1,4 @@
+import { categories } from './categories.js';
 // Chatbot com integração Gemini IA
 class Chatbot {
   constructor() {
@@ -8,10 +9,12 @@ class Chatbot {
   }
 
   init() {
+    console.log('Inicializando chatbot...');
     this.createChatbotHTML();
     this.bindEvents();
     this.addWelcomeMessage();
     this.loadContextData();
+    console.log('Chatbot inicializado!');
   }
 
   async loadContextData() {
@@ -40,7 +43,6 @@ class Chatbot {
         <button class="floating-btn chatbot-toggle" id="chatbot-toggle" title="Chat com IA" type="button">
           <i class="fas fa-comments"></i>
         </button>
-        
         <div class="chatbot-window" id="chatbot-window">
           <div class="chatbot-header">
             <h3>🤖 Assistente BrandConnect</h3>
@@ -48,9 +50,7 @@ class Chatbot {
               <i class="fas fa-times"></i>
             </button>
           </div>
-          
           <div class="chatbot-messages" id="chatbot-messages"></div>
-          
           <div class="chatbot-input-container">
             <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Digite sua pergunta..." maxlength="500">
             <button class="chatbot-send-btn" id="chatbot-send">
@@ -61,11 +61,14 @@ class Chatbot {
       </div>
     `;
 
+    // Insere dentro do container de botões flutuantes, se existir
     const floatingContainer = document.querySelector('.floating-buttons-container');
     if (floatingContainer) {
       floatingContainer.insertAdjacentHTML('afterbegin', chatbotHTML);
+      console.log('Chatbot HTML criado dentro do floating-buttons-container');
     } else {
       document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+      console.log('Chatbot HTML criado no body');
     }
   }
 
@@ -105,6 +108,9 @@ class Chatbot {
   openChat() {
     const window = document.getElementById('chatbot-window');
     const toggle = document.getElementById('chatbot-toggle');
+    
+    console.log('Abrindo chat - toggle encontrado:', !!toggle);
+    
     window.classList.add('active');
     toggle.classList.add('minimize');
     this.isOpen = true;
@@ -248,10 +254,10 @@ class Chatbot {
   }
 
   buildPrompt(userMessage) {
-    const resumoEmpresas = this.logos?.slice(0, 10).map(e => `• ${e.clientName} (${e.city} - ${e.uf}) - ${e.category}`).join('\n') || 'Sem dados no momento';
+    const resumoEmpresas = this.logos?.slice(0, 10).map(e => `• ${e.clientFantasyName} (${e.clientCity} - ${e.clientUf}) - ${this.getCategoryLabelByValue(e.logoCategory)}`).join('\n') || 'Sem dados no momento';
     const resumoAnuncios = this.ads?.slice(0, 5).map(a => `• ${a.title} - ${a.mediaType} (${a.clientName})`).join('\n') || 'Sem anúncios ativos.';
 
-    return `Você é JL, o assistente virtual do BrandConnect 🤖 — uma plataforma moderna e amigável que conecta consumidores e empresas por meio de uma galeria interativa de logotipos.
+    return `Você é BrainTalk, o assistente virtual do BrandConnect 🤖 — uma plataforma moderna e amigável que conecta consumidores e empresas por meio de uma galeria interativa de logotipos.
 
 Sua missão é acolher, entender e surpreender o usuário com respostas diretas, claras e personalizadas. Use uma linguagem empática, acessível e sempre profissional, como um consultor digital de confiança. Responda de forma leve, com vocabulário simples (sem jargões técnicos), mas com autoridade e simpatia. Use emojis com moderação para deixar a conversa mais próxima e humana 😊.
 
@@ -294,12 +300,28 @@ Sua missão é acolher, entender e surpreender o usuário com respostas diretas,
 📩 MENSAGEM DO USUÁRIO:
 "${userMessage}"
 
-Agora responda como JL, o assistente virtual do BrandConnect. Seja gentil, útil e direto ao ponto. Apresente sugestões práticas, links úteis e, quando possível, surpreenda com valor agregado.`;
+Agora responda como BrainTalk, o assistente virtual do BrandConnect. Seja gentil, útil e direto ao ponto. Apresente sugestões práticas, links úteis e, quando possível, surpreenda com valor agregado.`;
+  }
+
+  // Função para buscar o label da categoria a partir do valor usando o objeto categories
+  getCategoryLabelByValue(value) {
+    for (const group of categories) {
+      if (group.value === value) return group.label;
+      const found = group.options && group.options.find(opt => opt.value === value);
+      if (found) return found.label;
+    }
+    return value;
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new Chatbot();
+  console.log('DOM carregado, criando chatbot...');
+  try {
+    new Chatbot();
+    console.log('Chatbot criado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao criar chatbot:', error);
+  }
 });
 
 window.Chatbot = Chatbot;

@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = 'click_events';
-  const ENDPOINT = '/api/logInsight';
+  const ENDPOINT = 'https://us-central1-brandconnect-50647.cloudfunctions.net/logInsight';
   const MAX_EVENTS = 10;
   const TTL_MS = 2 * 60 * 1000; // 2 minutos
 
@@ -44,6 +44,14 @@
       try {
         if (logoData) {
           details = JSON.parse(decodeURIComponent(logoData));
+          // Se for um logo, também dispara o evento de clique para o contador
+          if (details.clientFantasyName) {
+            fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/trackLogoClick', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ clientFantasyName: details.clientFantasyName })
+            }).catch(error => console.warn('Falha ao registrar clique do logo:', error));
+          }
         } else if (adData) {
           details = JSON.parse(decodeURIComponent(adData));
           // Se for um anúncio, também dispara o evento de clique para o contador
@@ -93,6 +101,9 @@
       let events = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
       events.push(event);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+      
+      // Para enviar cliques imediatamente, descomente a linha abaixo:
+      // window.flushClicks();
   }
 
   function getStoredEvents() {

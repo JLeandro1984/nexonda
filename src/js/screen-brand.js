@@ -94,6 +94,35 @@ function isOpenNow(openingHours) {
   return false;
 }
 
+// Carrega estatísticas da galeria
+async function loadGalleryStats() {
+  try {
+    const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/getGalleryStats');
+    if (!response.ok) {
+      throw new Error('Erro ao carregar estatísticas');
+    }
+    const stats = await response.json();
+    
+    const visitorsElement = document.getElementById('total-visitors');
+    if (visitorsElement) {
+      // Se não há visitantes, mostra um valor padrão
+      const visitorCount = stats.totalVisitors || 0;
+      if (visitorCount === 0) {
+        visitorsElement.textContent = '1.000+';
+      } else {
+        visitorsElement.textContent = visitorCount.toLocaleString('pt-BR');
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas da galeria:', error);
+    // Em caso de erro, mostra um valor padrão
+    const visitorsElement = document.getElementById('total-visitors');
+    if (visitorsElement) {
+      visitorsElement.textContent = '1.000+';
+    }
+  }
+}
+
 function createLogoCard(logo) {
   // status: true = aberto, false = fechado
   const isOpen = isOpenNow(logo.openingHours);
@@ -111,6 +140,14 @@ function createLogoCard(logo) {
   const companyName = logo.clientFantasyName || '';
  /* const companyCNPJ = logo.clientCNPJ || '';*/
   const showTooltip = companyName.length > 22;
+
+  // Informações de insights (cliques/interações)
+  const clicks = logo.clicks || 0;
+  
+  // Debug: verificar se os cliques estão chegando
+  if (clicks > 0) {
+    console.log(`Logo ${logo.clientFantasyName} tem ${clicks} cliques`);
+  }
 
   // Monta botões sociais se houver URL
   let socialButtons = '';
@@ -140,6 +177,7 @@ function createLogoCard(logo) {
     <div class="logo-card">
       <div class="logo-img-container">
         <img src="${logo.imageUrl || logo.imagem || ''}" alt="Logo da ${companyName}" class="logo-img" crossorigin="anonymous" />
+        ${clicks > 0 ? `<div class="logo-views-overlay"><i class="far fa-eye"></i> ${clicks}</div>` : ''}
       </div>
       <div class="logo-card-body">
         <div class="logo-info-row">
@@ -184,6 +222,9 @@ export async function loadLogos() {
 
     container.innerHTML = '';
     const logos = await loadLogosFromStorage();
+    
+    // Carrega estatísticas da galeria
+    await loadGalleryStats();
 
     //Dar preferencia na ordenação para premio-plus, premium e basico
     if (Array.isArray(logos)) {
@@ -332,6 +373,7 @@ export async function updateLogoDisplay() {
           logo.clientNeighborhood?.toLowerCase().includes(termo) ||
           logo.clientCep?.toLowerCase().includes(termo) ||
           logo.description?.toLowerCase().includes(termo) ||
+          logo.clientName?.toLowerCase().includes(termo) ||
           logo.clientFantasyName?.toLowerCase().includes(termo) ||
           logo.cellphone?.toLowerCase().includes(termo) ||
           logo.clientWhatsapp?.toLowerCase().includes(termo) ||
@@ -822,7 +864,7 @@ function getCategoryLabelByValue(value) {
 window.openLogoInfoModal = function(logo) {
   // Monta dados principais
   const nome = logo.clientFantasyName || '';
-  const categoria = getCategoryLabelByValue(logo.category || logo.logoCategory);
+  const categoria = getCategoryLabelByValue(logo.logoCategory);
   const telefone = logo.telephone || logo.cellphone || '';
   let endereco = '';
   if (logo.clientAddress) {

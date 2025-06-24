@@ -225,7 +225,7 @@ function renderLogos(list) {
         const status = logo.contractActive ? 'Ativo' : 'Inativo';
         const statusClass = logo.contractActive ? 'active' : 'inactive';
         const dataContrato = logo.contractActive ? `${formattedStartDate} a ${formattedEndDate}` : "Sem contrato";
-        const categoria = getCategoryLabelByValue(logo.category) || 'Não definida';
+        const categoria = getCategoryLabelByValue(logo.logoCategory) || 'Não definida';
         const valorContrato = logo.contractValue ? logo.contractValue : '0,00';
             
         const imageSrc = logo.imageUrl || logo.imagem || '';
@@ -663,7 +663,7 @@ function loadLogoForEdit(logo) {
     form.querySelector("#client-whatsapp").value = logo.clientWhatsapp || '';
     
     // Categoria e descrição
-    form.querySelector("#logo-category").value = logo.category || logo.logoCategory || '';
+    form.querySelector("#logo-category").value = logo.logoCategory || '';
     form.querySelector("#logo-description").value = logo.description || logo.logoDescription || '';
     
     // Contrato
@@ -790,7 +790,7 @@ function applyFilters() {
         const matchesCity = (logo.clientCity || "").toLowerCase().includes(searchTerm);
         const matchesUF = (logo.clientUf || "").toLowerCase().includes(searchTerm);
         const matchesPlanType = (logo.planType || "").toLowerCase().includes(searchTerm);
-        const matchesCategory = category === "" || logo.category === category;
+        const matchesCategory = category === "" || logo.logoCategory === category;
         
         return (matchesPlanType || matchesName || matchesFantasyName || matchesCNPJ || matchesCity || matchesUF) && matchesCategory;
     });
