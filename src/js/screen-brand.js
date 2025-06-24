@@ -1,5 +1,6 @@
 import { categories } from './categories.js';
 import { ufs } from './ufs.js';
+import { formatarNumeroAbreviado } from './utils.js';
 import { showAlert } from '../components/alert.js';
 
 // Constants
@@ -102,15 +103,14 @@ async function loadGalleryStats() {
       throw new Error('Erro ao carregar estatísticas');
     }
     const stats = await response.json();
-    
+    debugger
     const visitorsElement = document.getElementById('total-visitors');
     if (visitorsElement) {
       // Se não há visitantes, mostra um valor padrão
       const visitorCount = stats.totalVisitors || 0;
-      if (visitorCount === 0) {
-        visitorsElement.textContent = '1.000+';
-      } else {
-        visitorsElement.textContent = visitorCount.toLocaleString('pt-BR');
+      if (visitorCount >= 1000) {
+        visitorsElement.textContent = formatarNumeroAbreviado(visitorCount);
+        document.getElementById('id-visitors-summary').classList.remove('d-none');
       }
     }
   } catch (error) {
@@ -142,12 +142,9 @@ function createLogoCard(logo) {
   const showTooltip = companyName.length > 22;
 
   // Informações de insights (cliques/interações)
-  const clicks = logo.clicks || 0;
-  
-  // Debug: verificar se os cliques estão chegando
-  if (clicks > 0) {
-    console.log(`Logo ${logo.clientFantasyName} tem ${clicks} cliques`);
-  }
+  // obs: NÃO APRESENTAR CLIQUES NO LOGO POR ENQUANTO - Analisar situação
+  //const elementClicks = `${logo.clicks > 100 ? `<div class="logo-views-overlay d-none"><i class="far fa-eye"></i> ${formatarNumeroAbreviado(logo.clicks)}</div>` : ''}` 
+  const elementClicks = ""; 
 
   // Monta botões sociais se houver URL
   let socialButtons = '';
@@ -177,7 +174,7 @@ function createLogoCard(logo) {
     <div class="logo-card">
       <div class="logo-img-container">
         <img src="${logo.imageUrl || logo.imagem || ''}" alt="Logo da ${companyName}" class="logo-img" crossorigin="anonymous" />
-        ${clicks > 0 ? `<div class="logo-views-overlay"><i class="far fa-eye"></i> ${clicks}</div>` : ''}
+        ${elementClicks}
       </div>
       <div class="logo-card-body">
         <div class="logo-info-row">
@@ -954,4 +951,3 @@ document.addEventListener('click', function(e) {
 if (!window.adsbygoogle || !window.adsbygoogle.loaded) {
   console.warn("AdSense bloqueado ou não carregado");
 }
-

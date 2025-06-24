@@ -1,4 +1,5 @@
 import { showAlert } from '../components/alert.js';
+import { formatarNumeroAbreviado } from './utils.js';
 
 // Variáveis globais
 let carouselInterval = null;
@@ -168,7 +169,7 @@ function createMediaContent(ad) {
 function createVideoContent(ad) {
   if (ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) {
     const videoId = getYouTubeVideoId(ad.mediaUrl);
-    const viewsOverlay = ad.clicks ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${ad.clicks}</div>` : '';
+    const viewsOverlay = ad?.clicks >= 10000 ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${formatarNumeroAbreviado(155555)}</div>` : '';
     return `
       <div class="youtube-video-container" data-video-url="${ad.mediaUrl}">
         <img src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg" alt="${ad.title}">
@@ -181,7 +182,7 @@ function createVideoContent(ad) {
   }
   // 🔁 Gera automaticamente um poster com base no vídeo do Cloudinary
   const posterUrl = ad.mediaUrl.replace('/upload/', '/upload/so_1/').replace('.mp4', '.jpg');
-  const viewsOverlay = ad.clicks ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${ad.clicks}</div>` : '';
+  const viewsOverlay = ad.clicks >= 10000 ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${formatarNumeroAbreviado(ad.clicks)}</div>` : '';
 
   return `
     <div data-video-url="${ad.mediaUrl}">
