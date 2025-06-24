@@ -103,7 +103,7 @@ async function loadGalleryStats() {
       throw new Error('Erro ao carregar estatísticas');
     }
     const stats = await response.json();
-    debugger
+    
     const visitorsElement = document.getElementById('total-visitors');
     if (visitorsElement) {
       // Se não há visitantes, mostra um valor padrão
