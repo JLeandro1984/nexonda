@@ -304,6 +304,190 @@ export function populateFilterCategories() {
     });
 }
 
+// Custom Category Select (dropdown com busca embutida)
+const customCategoryContainer = document.getElementById('custom-category-select');
+let customCategoryValue = '';
+
+function renderCustomCategorySelect() {
+  if (!customCategoryContainer) return;
+  // Remove qualquer dropdown anterior
+  customCategoryContainer.innerHTML = '';
+
+  // Estrutura base
+  const wrapper = document.createElement('div');
+  wrapper.className = 'custom-select-wrapper';
+  wrapper.style.position = 'relative';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'custom-select-input';
+  input.placeholder = 'Pesquisar categoria...';
+  input.autocomplete = 'off';
+  input.readOnly = true;
+  input.style.cursor = 'pointer';
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'custom-select-dropdown';
+  dropdown.style.display = 'none';
+  dropdown.style.position = 'absolute';
+  dropdown.style.top = '100%';
+  dropdown.style.left = '0';
+  dropdown.style.width = '100%';
+  dropdown.style.background = '#fff';
+  dropdown.style.border = '1px solid #ccc';
+  dropdown.style.zIndex = '1000';
+  dropdown.style.maxHeight = '220px';
+  dropdown.style.overflowY = 'auto';
+  dropdown.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+
+  // Campo de busca dentro do dropdown
+  const search = document.createElement('input');
+  search.type = 'text';
+  search.className = 'custom-select-search';
+  search.placeholder = 'Digite para filtrar...';
+  search.style.width = '96%';
+  search.style.margin = '8px 2% 8px 2%';
+  search.style.padding = '4px';
+  search.style.fontSize = '1em';
+  search.style.border = '1px solid #eee';
+  search.style.borderRadius = '4px';
+
+  // Opção "Todas as Categorias"
+  const allOption = document.createElement('div');
+  allOption.className = 'custom-select-option';
+  allOption.textContent = 'Todas as Categorias';
+  allOption.dataset.value = '';
+  allOption.tabIndex = 0;
+  allOption.style.padding = '8px 12px';
+  allOption.style.cursor = 'pointer';
+  allOption.style.fontWeight = 'bold';
+  allOption.addEventListener('click', () => {
+    customCategoryValue = '';
+    input.value = 'Todas as Categorias';
+    dropdown.style.display = 'none';
+    updateLogoDisplay();
+  });
+
+  // Monta as opções agrupadas
+  const optionsFragment = document.createDocumentFragment();
+  optionsFragment.appendChild(allOption);
+
+  categories.forEach(group => {
+    const groupLabel = document.createElement('div');
+    groupLabel.textContent = group.label;
+    groupLabel.style.fontWeight = 'bold';
+    groupLabel.style.padding = '6px 12px 2px 12px';
+    groupLabel.style.color = '#888';
+    optionsFragment.appendChild(groupLabel);
+    group.options.forEach(option => {
+      const opt = document.createElement('div');
+      opt.className = 'custom-select-option';
+      opt.textContent = option.label;
+      opt.dataset.value = option.value;
+      opt.tabIndex = 0;
+      opt.style.padding = '8px 12px';
+      opt.style.cursor = 'pointer';
+      opt.addEventListener('click', () => {
+        customCategoryValue = option.value;
+        input.value = option.label;
+        dropdown.style.display = 'none';
+        updateLogoDisplay();
+      });
+      optionsFragment.appendChild(opt);
+    });
+  });
+
+  dropdown.appendChild(search);
+  dropdown.appendChild(optionsFragment);
+
+  // Mostra/oculta dropdown
+  input.addEventListener('click', () => {
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    search.value = '';
+    filterOptions('');
+    setTimeout(() => search.focus(), 100);
+  });
+
+  // Fecha dropdown ao clicar fora
+  document.addEventListener('click', function handleClickOutside(e) {
+    if (!wrapper.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Filtra opções
+  function filterOptions(term) {
+    // Função para normalizar texto (remover acentos e lowercase)
+    function normalizarTexto(str) {
+      return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // CORRETO: Remover apenas acentos
+        .toLowerCase();
+    }
+    const termNorm = normalizarTexto(term.trim());
+    const options = dropdown.querySelectorAll('.custom-select-option');
+    options.forEach(opt => {
+      if (opt === allOption) return; // sempre mostra "Todas as Categorias"
+      const labelNorm = normalizarTexto(opt.textContent);
+      opt.style.display = labelNorm.includes(termNorm) ? '' : 'none';
+    });
+    // Esconde grupos se nenhum filho visível
+    const groupLabels = dropdown.querySelectorAll('div');
+    let lastWasGroup = false;
+    groupLabels.forEach(el => {
+      if (el.className === 'custom-select-option') {
+        lastWasGroup = false;
+      } else if (el !== search && el !== allOption) {
+        // é um group label
+        // se o próximo visível for um option, mostra, senão esconde
+        let next = el.nextSibling;
+        let hasVisible = false;
+        while (next && next.className === 'custom-select-option') {
+          if (next.style.display !== 'none') { hasVisible = true; break; }
+          next = next.nextSibling;
+        }
+        el.style.display = hasVisible ? '' : 'none';
+      }
+    });
+  }
+  search.addEventListener('input', function () {
+    filterOptions(this.value);
+  });
+
+  // Navegação por teclado
+  dropdown.addEventListener('keydown', function(e) {
+    const focusable = Array.from(dropdown.querySelectorAll('.custom-select-option')).filter(opt => opt.style.display !== 'none');
+    const idx = focusable.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const next = focusable[idx + 1] || focusable[0];
+      next && next.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prev = focusable[idx - 1] || focusable[focusable.length - 1];
+      prev && prev.focus();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      document.activeElement.click();
+    } else if (e.key === 'Escape') {
+      dropdown.style.display = 'none';
+      input.blur();
+    }
+  });
+
+  wrapper.appendChild(input);
+  wrapper.appendChild(dropdown);
+  customCategoryContainer.appendChild(wrapper);
+
+  // Inicializa valor
+  input.value = 'Todas as Categorias';
+}
+
+// Atualiza o filtro de categoria para usar o valor do custom select
+function getSelectedCategory() {
+  return customCategoryValue;
+}
+
 // Atualiza os logos com base no filtro
 export async function updateLogoDisplay() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
@@ -315,7 +499,7 @@ export async function updateLogoDisplay() {
         cityeUselocation = document.getElementById('detected-city').textContent;
     }
 
-    const selectedCategory = categorySelect.value;
+    const selectedCategory = getSelectedCategory();
     const logos = await loadLogosFromStorage();
 
     const normalizar = termo => {
@@ -396,7 +580,7 @@ export async function updateLogoDisplay() {
         }
 
         // Filtro por categoria (obrigatório se selecionado)
-        const matchesCategory = !selectedCategory || logo.logoCategory === selectedCategory;
+        const matchesCategory = !selectedCategory || logo.category === selectedCategory;
         if (!matchesCategory) return false;
       
         return true;
@@ -421,7 +605,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const container = document.getElementById('logo-container');
     if (container) {
         await loadLogos();
-        populateFilterCategories();
+        renderCustomCategorySelect();
     }
 
     const searchInput = document.getElementById('search-input');
@@ -831,6 +1015,7 @@ function renderOpeningHours(openingHours) {
 
 // Função para buscar o label da categoria a partir do valor usando o objeto categories
 function getCategoryLabelByValue(value) {
+  debugger
   for (const group of categories) {
     if (group.value === value) return group.label;
     const found = group.options && group.options.find(opt => opt.value === value);
@@ -843,7 +1028,7 @@ function getCategoryLabelByValue(value) {
 window.openLogoInfoModal = function(logo) {
   // Monta dados principais
   const nome = logo.clientFantasyName || '';
-  const categoria = getCategoryLabelByValue(logo.logoCategory);
+  const categoria = getCategoryLabelByValue(logo.category);
   const telefone = logo.telephone || logo.cellphone || '';
   let endereco = '';
   if (logo.clientAddress) {
@@ -932,4 +1117,30 @@ document.addEventListener('click', function(e) {
 //Evitar erro AdSense
 if (!window.adsbygoogle || !window.adsbygoogle.loaded) {
   console.warn("AdSense bloqueado ou não carregado");
+}
+
+// Filtro de categorias por texto digitado
+const categorySearchInput = document.getElementById('category-search-input');
+if (categorySearchInput && categorySelect) {
+  categorySearchInput.addEventListener('input', function () {
+    const searchTerm = this.value.trim().toLowerCase();
+    // Para cada optgroup
+    Array.from(categorySelect.children).forEach(optgroup => {
+      if (optgroup.tagName === 'OPTGROUP') {
+        let hasVisible = false;
+        Array.from(optgroup.children).forEach(option => {
+          const label = option.textContent.toLowerCase();
+          const match = label.includes(searchTerm);
+          option.style.display = match ? '' : 'none';
+          if (match) hasVisible = true;
+        });
+        // Esconde optgroup se nenhum filho visível
+        optgroup.style.display = hasVisible ? '' : 'none';
+      } else if (optgroup.tagName === 'OPTION') {
+        // Para o option "Todas as Categorias"
+        const label = optgroup.textContent.toLowerCase();
+        optgroup.style.display = label.includes(searchTerm) ? '' : 'none';
+      }
+    });
+  });
 }

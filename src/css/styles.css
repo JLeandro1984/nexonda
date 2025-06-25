@@ -1715,3 +1715,87 @@ body.dark-mode #premium-ads {
     width: 100%;
   }
 }
+
+/* Custom Category Select Styles */
+.custom-select-wrapper {
+  width: 100%;
+  min-width: 180px;
+  font-family: inherit;
+}
+.custom-select-input,
+.custom-select-search {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  background: #fff;
+  box-sizing: border-box;
+  height: 48px;
+}
+.custom-select-input:focus,
+.custom-select-search:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+body.dark-mode .custom-select-input,
+body.dark-mode .custom-select-search {
+  background-color: #2d2d2d !important;
+  color: #e1e1e1 !important;
+  border-color: #444 !important;
+}
+.custom-select-dropdown {
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: -1px;
+}
+.custom-select-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.custom-select-option:hover,
+.custom-select-option:focus {
+  background: #f0f0f0;
+  outline: none;
+}
+.custom-select-search {
+  width: 96%;
+  margin: 8px 2% 8px 2%;
+  padding: 4px;
+  font-size: 1em;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+body.dark-mode .custom-select-wrapper,
+body.dark-mode .custom-select-input,
+body.dark-mode .custom-select-dropdown,
+body.dark-mode .custom-select-search {
+  background-color: #2d2d2d !important;
+  color: #e1e1e1 !important;
+  border-color: #444 !important;
+}
+body.dark-mode .custom-select-dropdown {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+body.dark-mode .custom-select-option {
+  background: #2d2d2d !important;
+  color: #e1e1e1 !important;
+}
+body.dark-mode .custom-select-option:hover,
+body.dark-mode .custom-select-option:focus {
+  background: #33334a !important;
+  color: #fff !important;
+}
+body.dark-mode .custom-select-search::placeholder {
+  color: #aaa !important;
+}
