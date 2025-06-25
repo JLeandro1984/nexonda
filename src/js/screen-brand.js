@@ -259,11 +259,15 @@ export async function loadLogos() {
         const logoElement = createLogoCard(logo);
       container.innerHTML += logoElement;      
     });
-
+  
+  document.getElementById('use-location').checked = false;
+  document.getElementById('detected-city').textContent = '';
+  
     // Após renderizar, aplicar cor de fundo nos logos
-    if (window.ColorThief) {
+   // if (window.ColorThief) {
      // document.querySelectorAll('.logo-img').forEach(applyLogoBgColor);
-    }
+    //}
+    
 }
 
 /*function contratoAtivo(logo) {
@@ -306,7 +310,7 @@ export async function updateLogoDisplay() {
     const locationTerm = document.getElementById('location-input')?.value.toLowerCase() || '';
     const isUselocation = document.getElementById('use-location').checked;
     let cityeUselocation = "";
-
+  debugger;
     if (isUselocation) {
         cityeUselocation = document.getElementById('detected-city').textContent;
     }
