@@ -147,8 +147,16 @@ class Chatbot {
   addWelcomeMessage() {
     const welcomeMessage = {
       type: 'bot',
-      text: `Olá! 👋 Sou o assistente virtual do BrandConnect. Como posso ajudá-lo hoje?\n\n💡 Algumas sugestões:\n• "Quero anunciar no BrandConnect, como funciona?"\n• "Quais são os estabelecimentos com entrega em São Paulo?"\n• "O site é gratuito? Como funciona o plano premium?"\n• "Buscar por salão de beleza perto do centro"\n\nOu simplesmente digite sua pergunta! 😊`
-    };
+      text: `Olá! 👋 Sou o BrainTalk assistente virtual do BrandConnect — uma plataforma que conecta você a empresas e serviços de forma rápida, interativa e inteligente. 🚀
+
+      💡 Você pode me perguntar, por exemplo:
+      • "Quero anunciar no BrandConnect, como funciona?"
+      • "Quais empresas fazem entregas em São Paulo?"
+      • "O site é gratuito? Como funciona o plano premium?"
+      • "Buscar salão de beleza perto do centro"
+      • "Quais os destaques do dia?"
+      
+      É só digitar sua dúvida ou interesse e eu te ajudo! 😊`};
     this.addMessage(welcomeMessage);
   }
 
@@ -158,6 +166,23 @@ class Chatbot {
     this.scrollToBottom();
   }
 
+  // Função para formatar a resposta da IA com listas, links, negrito, etc.
+  formatBotMessage(text) {
+    // Links automáticos
+    text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    // Negrito **texto**
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Listas com • ou -
+    text = text.replace(/(^|\n)[•\-] (.+)/g, '$1<li>$2</li>');
+    // Transformar blocos de <li> em <ul>
+    text = text.replace(/(<li>.*?<\/li>\s*)+/gs, match => `<ul>${match.replace(/\n/g, '')}</ul>`);
+    // Quebras de linha
+    text = text.replace(/\n/g, '<br>');
+    // Emojis grandes no início
+    text = text.replace(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu, '<span style="font-size:1.2em;">$1</span>');
+    return text;
+  }
+
   renderMessage(message) {
     const messagesContainer = document.getElementById('chatbot-messages');
     const messageDiv = document.createElement('div');
@@ -165,7 +190,11 @@ class Chatbot {
 
     const bubble = document.createElement('div');
     bubble.className = `message-bubble ${message.type}`;
-    bubble.textContent = message.text;
+    if (message.type === 'bot') {
+      bubble.innerHTML = this.formatBotMessage(message.text);
+    } else {
+      bubble.textContent = message.text;
+    }
 
     messageDiv.appendChild(bubble);
     messagesContainer.appendChild(messageDiv);
