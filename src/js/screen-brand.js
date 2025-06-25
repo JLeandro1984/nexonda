@@ -106,20 +106,15 @@ async function loadGalleryStats() {
     
     const visitorsElement = document.getElementById('total-visitors');
     if (visitorsElement) {
-      // Se não há visitantes, mostra um valor padrão
+      // count visita - Se não há visitantes, mostra um valor padrão
       const visitorCount = stats.totalVisitors || 0;
-      if (visitorCount >= 1000) {
+      if (visitorCount > 1000) {
         visitorsElement.textContent = formatarNumeroAbreviado(visitorCount);
         document.getElementById('id-visitors-summary').classList.remove('d-none');
       }
     }
   } catch (error) {
     console.error('Erro ao carregar estatísticas da galeria:', error);
-    // Em caso de erro, mostra um valor padrão
-    const visitorsElement = document.getElementById('total-visitors');
-    if (visitorsElement) {
-      visitorsElement.textContent = '1.000+';
-    }
   }
 }
 
@@ -452,34 +447,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
         
-    //Visibilidade botão Admin    
-    const now = new Date();
-    const d = now.getDate();       
-    const m = now.getMonth() + 1;       
-    const parteUm = d + m;   
-    const parteDois = String(now.getFullYear()).slice(-2); 
-  
-    const chave  = `mostrarAdmin${parteUm}${parteDois}`; 
-  
-    const params = new URLSearchParams(window.location.search);
-    const mostrarAdmin = true //params.get(chave) === 'true';
-  
-    const adminBtn = document.getElementById('admin-btn');
-    if (adminBtn) {
-        adminBtn.style.display = 'none';
-        if (mostrarAdmin) {
-          adminBtn.style.display = 'inline-block'; 
-        }
-    }
-
 });
 
  
 // WhatsApp flutuante da BrandConnect
-const whatsappNumber = '5515996257159'; // Exemplo: 55 11 99999-9999
-const whatsappLink = document.querySelector('#whatsapp-float a');
+const whatsappNumber = '5515996257159'; // Exemplo: 55 + DDD + número
+const whatsappMessage = 'Olá, gostaria de mais informações sobre a BrandConnect! 😊';
+const whatsappLink = document.querySelector('.whatsapp-float');
+
 if (whatsappLink) {
-    whatsappLink.href = `https://wa.me/${whatsappNumber}`;
+  const encodedMessage = encodeURIComponent(whatsappMessage);
+  whatsappLink.href = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
 }
 
 

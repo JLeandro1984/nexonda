@@ -188,7 +188,7 @@ function createVideoContent(ad) {
   const posterUrl = ad.mediaUrl.replace('/upload/', '/upload/so_1/').replace('.mp4', '.jpg');
   
   //bloquer view "clicks" por enquanto, depois apresentar  >=100
-  //const viewsOverlay = ad.clicks === 100 ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${formatarNumeroAbreviado(ad.clicks)}</div>` : '';
+  //const viewsOverlay = ad.clicks >= 100 ? `<div class="ad-views-overlay"><i class='far fa-eye'></i> ${formatarNumeroAbreviado(ad.clicks)}</div>` : '';
   const viewsOverlay = "";
 
   return `
