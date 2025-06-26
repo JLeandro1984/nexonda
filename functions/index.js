@@ -246,6 +246,64 @@ const getContext = (req) => {
   };
 };
 
+
+// Inicio - Função para gerar Firebase Custom Token para usar no Storge
+async function generateFirebaseCustomToken(uid) {
+  try {
+    const customToken = await admin.auth().createCustomToken(uid);
+    return customToken;
+  } catch (error) {
+    console.error("Erro criando custom token Firebase:", error);
+    throw error;
+  }
+}
+
+// Nova função HTTP para login com token Google e gerar Custom Token Firebase
+exports.firebaseCustomToken = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10
+}, handleCors(async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).send("Método não permitido");
+  }
+
+  const idToken = req.body.idToken;
+  if (!idToken) {
+    return res.status(400).json({ error: "idToken é obrigatório no body" });
+  }
+
+  try {
+    // Verifica e decodifica o token Google
+    const client = getAuthClient();
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+
+    // Verifica se usuário está autorizado no Firestore (sua coleção authorizedEmail)
+    const authorizedEmailCollection = admin.firestore().collection('authorizedEmail');
+    const userDoc = await authorizedEmailCollection.where('email', '==', payload.email).get();
+
+    if (userDoc.empty) {
+      return res.status(401).json({ error: 'Usuário não autorizado' });
+    }
+
+    // Usa o email como UID Firebase para simplificar (ou outro identificador único seu)
+    const uid = payload.email;
+
+    // Cria Custom Token Firebase
+    const customToken = await generateFirebaseCustomToken(uid);
+
+    return res.status(200).json({ customToken });
+  } catch (error) {
+    console.error("Erro no endpoint firebaseCustomToken:", error);
+    return res.status(401).json({ error: "Token inválido ou erro interno" });
+  }
+}));
+//Fim function
+
+
 // --- API para obter total de visitantes da galeria ---
 exports.getGalleryStats = functions.https.onRequest({
   cors: true,
@@ -281,6 +339,7 @@ exports.getGalleryStats = functions.https.onRequest({
     return res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }));
+
 
 // --- API pública para logos ---
 exports.publicLogos = functions.https.onRequest({

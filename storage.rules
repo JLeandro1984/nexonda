@@ -5,10 +5,48 @@ service firebase.storage {
     // Permite leitura pública de arquivos de logotipo
     match /logos/{userId}/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // Permite upload sem autenticação, mas com validação de tipo de arquivo
+      allow write, delete: if 
+        // Verifica se é uma imagem válida
+        request.resource.contentType.matches('image/.*') &&
+        // Verifica se o tamanho é menor que 10MB
+        request.resource.size < 10 * 1024 * 1024 &&
+        // Verifica se o nome do arquivo é válido
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp)$');
     }
 
-    // Bloqueia tudo fora da pasta "logos"
+    // Permite upload para pasta pública (fallback)
+    match /logos/public/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if 
+        request.resource.contentType.matches('image/.*') &&
+        request.resource.size < 10 * 1024 * 1024 &&
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp)$');
+    }
+
+    // Permite leitura pública de arquivos de propaganda
+    match /ads/{userId}/{allPaths=**} {
+      allow read: if true;
+      // Permite upload sem autenticação, mas com validação de tipo de arquivo
+      allow write, delete: if 
+        // Verifica se é uma imagem ou vídeo válido
+        (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*')) &&
+        // Verifica se o tamanho é menor que 50MB (vídeos podem ser maiores)
+        request.resource.size < 50 * 1024 * 1024 &&
+        // Verifica se o nome do arquivo é válido
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv)$');
+    }
+
+    // Permite upload para pasta pública de ads (fallback)
+    match /ads/public/{allPaths=**} {
+      allow read: if true;
+      allow write, delete: if 
+        (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*')) &&
+        request.resource.size < 50 * 1024 * 1024 &&
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv)$');
+    }
+
+    // Bloqueia tudo fora das pastas "logos" e "ads"
     match /{allPaths=**} {
       allow read, write: if false;
     }

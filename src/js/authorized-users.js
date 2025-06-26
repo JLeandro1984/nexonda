@@ -1,7 +1,19 @@
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-import { app } from './firebase-config.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js';
 import { showAlert } from '../components/alert.js';
 
+// Configuração do Firebase (mesma do firebase-upload.js)
+const firebaseConfig = {
+  apiKey: "AIzaSyDRw0prhCxJ1i1D2volCP94oiZQCGG-FeA",
+  authDomain: "brandconnect-50647.firebaseapp.com",
+  projectId: "brandconnect-50647",
+  storageBucket: "brandconnect-50647.firebasestorage.app",
+  messagingSenderId: "1014308588575",
+  appId: "1:1014308588575:web:bb942ac00418060605192a"
+};
+
+// Inicializa o app
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 let currentUser = null;
 

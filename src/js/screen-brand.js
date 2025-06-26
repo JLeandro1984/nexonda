@@ -168,7 +168,7 @@ function createLogoCard(logo) {
   const cardContent = `
     <div class="logo-card">
       <div class="logo-img-container">
-        <img src="${logo.imageUrl || logo.imagem || ''}" alt="Logo da ${companyName}" class="logo-img" crossorigin="anonymous" />
+        <img src="${logo.imageUrl || ''}" alt="Logo da ${companyName}" class="logo-img" />
         ${elementClicks}
       </div>
       <div class="logo-card-body">

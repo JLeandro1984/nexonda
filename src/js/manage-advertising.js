@@ -1,6 +1,6 @@
 import { premiumAdsApi, logosApi } from './api.js';
 import { showAlert } from '../components/alert.js';
-import {uploadToCloudinaryByType, deleteFromCloudinaryByToken, showMediaPreview} from './cloudinary-utils.js';
+import { uploadToFirebaseStorage, deleteFromFirebaseStorage, showMediaPreview } from './firebase-upload.js';
 
 // Elementos DOM
 const adForm = document.getElementById("ad-form");
@@ -26,6 +26,7 @@ let ads = [];
 // Inicializa a aplicação
 async function init() {
     try {
+        console.log('Iniciando carregamento de propagandas...');
 
         // Verifica se os elementos necessários existem
         if (!adForm || !adsGrid) {
@@ -36,27 +37,43 @@ async function init() {
             return;
         }
         
+        // Verifica se há token de autenticação
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('Token de autenticação não encontrado');
+            showAlert('Você não está autenticado. Faça login novamente.', 'error');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        console.log('Token encontrado, fazendo requisição para API de propagandas...');
+        
         try {
-
             const response = await premiumAdsApi.getAll();
             console.log('Resposta recebida da API:', response);
             
             // Garante que ads seja um array
             ads = Array.isArray(response) ? response : [];            
-            // if (ads.length > 0) {
-            //     renderAds(ads);
-          // }
-          
+            console.log('Propagandas carregadas:', ads.length);
+            
             renderAds();
             populateClientSelect();
             
+            console.log('Inicialização de propagandas concluída com sucesso');
+            
         } catch (error) {
             console.error('Erro ao carregar propagandas:', error);
-            showAlert('Erro ao carregar anúncios. Por favor, tente novamente.', 'error');
+            
+            if (error.message && error.message.includes('autenticação')) {
+                showAlert('Erro de autenticação. Faça login novamente.', 'error');
+                window.location.href = 'login.html';
+            } else {
+                showAlert('Erro ao carregar anúncios: ' + (error.message || 'Erro desconhecido'), 'error');
+            }
         }      
     } catch (error) {
         console.error('Erro na inicialização:', error);
-        showAlert('Erro ao inicializar a aplicação. Por favor, recarregue a página.', 'error');
+        showAlert('Erro ao inicializar a aplicação: ' + (error.message || 'Erro desconhecido'), 'error');
     }
 }
   
@@ -184,6 +201,25 @@ if (adImageInput) {
     });
 }
 
+// Upload de imagem/vídeo para Firebase Storage
+if (mediaInput) {
+    mediaInput.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const type = mediaTypeSelect.value;
+        try {
+            // Faz upload para Firebase Storage
+            const { url, fullPath } = await uploadToFirebaseStorage(file, "ads");
+            if (mediaUrlInput) mediaUrlInput.value = url;
+            // Salva o caminho completo para possível exclusão futura
+            mediaInput.dataset.storagePath = fullPath;
+            showMediaPreview(previewContainer, url, type);
+        } catch (error) {
+            showAlert('Erro ao fazer upload da mídia: ' + error.message, 'error');
+        }
+    });
+}
+
 // Funções globais para edição e exclusão
 window.editAd = function(adId) {
     const ad = ads.find(a => a.id === adId);
@@ -226,13 +262,20 @@ window.deleteAd = async function (adId) {
 };
 
 function renderAds() {
+    console.log('Renderizando propagandas...');
+    
     const adsGrid = document.getElementById('premium-ads-list');
-    if (!adsGrid) return;
+    if (!adsGrid) {
+        console.error('Elemento premium-ads-list não encontrado');
+        return;
+    }
 
     const searchTerm = (adSearchInput.value || '').toLowerCase();
     const statusFilter = adFilterStatus.value;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    console.log('Filtros aplicados:', { searchTerm, statusFilter, totalAds: ads.length });
 
     // Filtro - usando a variável 'ads' em vez de 'adsList'
     const filtered = ads.filter(ad => {
@@ -260,17 +303,30 @@ function renderAds() {
         }
     });
 
+    console.log('Propagandas filtradas:', filtered.length);
+
     // Renderização
     adsGrid.innerHTML = '';
     if (filtered.length === 0) {
-        adsGrid.innerHTML = '<div class="no-ads">Nenhuma propaganda encontrada.</div>';
+        console.log('Nenhuma propaganda encontrada para exibir');
+        adsGrid.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-ad" style="font-size: 48px; margin-bottom: 20px; color: #ccc;"></i>
+                <h3>Nenhuma propaganda encontrada</h3>
+                <p>Adicione sua primeira propaganda usando o formulário acima.</p>
+            </div>
+        `;
         return;
     }
+
+    console.log('Criando cards para', filtered.length, 'propagandas');
 
     filtered.forEach(ad => {
         const card = createAdElement(ad); // Usando createAdElement em vez de createAdCard
         adsGrid.appendChild(card);
     });
+    
+    console.log('Propagandas renderizadas com sucesso');
 }
 
 function createAdElement(ad) {
@@ -477,16 +533,16 @@ document.addEventListener("DOMContentLoaded", function () {
     loadingEl.style.display = "block";
 
     if (currentDeleteToken) {
-      await deleteFromCloudinaryByToken(currentDeleteToken);
+      await deleteFromFirebaseStorage(currentDeleteToken);
       currentDeleteToken = null;
       mediaUrlInput.value = "";
       previewContainer.innerHTML = "";
     }
 
     try {
-      const { url, deleteToken } = await uploadToCloudinaryByType(file, type);
+      const { url, fullPath } = await uploadToFirebaseStorage(file, "ads");
       mediaUrlInput.value = url;
-      currentDeleteToken = deleteToken;
+      currentDeleteToken = fullPath;
 
       if (url) showMediaPreview(previewContainer, url, type);
     } catch (err) {

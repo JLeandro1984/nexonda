@@ -4,10 +4,13 @@ const API_BASE_URL = 'https://us-central1-brandconnect-50647.cloudfunctions.net'
 // Função para obter o token de autenticação
 async function getAuthToken() {
     try {
+        console.log('Obtendo token de autenticação...');
+        
         // Obtém o token do localStorage
         const token = localStorage.getItem('authToken');
         
         if (!token) {
+            console.error('Token não encontrado no localStorage');
             throw new Error('Usuário não autenticado');
         }
 
@@ -26,8 +29,8 @@ async function apiRequest(endpoint, options = {}) {
             throw new Error('Endpoint é obrigatório');
         }
         
+        console.log(`Fazendo requisição para: ${endpoint}`);
         const token = await getAuthToken();
-        console.log('Token obtido do localStorage:', token.substring(0, 20) + '...'); // Debug
 
         // Usando o mesmo formato de headers que funciona na verificação de autenticação
         const headers = {
@@ -42,6 +45,8 @@ async function apiRequest(endpoint, options = {}) {
             url = `${API_BASE_URL}/${endpoint}`;
         }
 
+        console.log('URL da requisição:', url);
+
         const requestOptions = {
             method: options.method || 'GET',
             headers: headers,
@@ -53,7 +58,14 @@ async function apiRequest(endpoint, options = {}) {
             requestOptions.body = options.body;
         }
 
+        console.log('Opções da requisição:', {
+            method: requestOptions.method,
+            hasBody: !!requestOptions.body,
+            headers: Object.keys(headers)
+        });
+
         const response = await fetch(url, requestOptions);
+        console.log('Resposta recebida:', response.status, response.statusText);
 
         // Se for erro 401, verifica se é realmente um erro de autenticação
         if (response.status === 401) {
@@ -64,6 +76,7 @@ async function apiRequest(endpoint, options = {}) {
 
         if (!response.ok) {
             const error = await response.json();
+            console.error('Erro na resposta:', error);
             throw new Error(error.error || 'Erro na requisição');
         }
 

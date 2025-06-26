@@ -1,6 +1,6 @@
 import i18n from './lang.js';
 import { showAlert } from '../components/alert.js';
-import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
 import { ufs } from './ufs.js';
 import { updateLogoDisplay } from './screen-brand.js';
 import './youtube-api.js';

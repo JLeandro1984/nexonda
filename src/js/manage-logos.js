@@ -1,9 +1,9 @@
+import { loginFirebaseCustomToken } from './auth.js';
 import { logosApi } from './api.js';
 import { categories } from './categories.js';
 import { ufs } from './ufs.js';
 import { showAlert } from '../components/alert.js';
-import {uploadToCloudinaryByType, deleteFromCloudinaryByToken, showMediaPreview} from './cloudinary-utils.js';
-
+import { uploadToFirebaseStorage, deleteFromFirebaseStorage, showMediaPreview, logout, onAuthChanged } from './firebase-upload.js';
 
 // Elementos DOM
 const logoForm = document.getElementById("logo-form");
@@ -25,6 +25,7 @@ let emailUser = "";
 
 let editingIndex = null;
 let editingDeleteToken = null;
+let editingStoragePath = null;
 let logos = [];
 let isNavigating = false;
 
@@ -71,6 +72,8 @@ async function checkAuth() {
     authState.isChecking = true;
 
     try {
+        console.log('Verificando autenticação...');
+        
         // Verifica se há um token na URL (caso venha do redirecionamento do Google)
         const urlParams = new URLSearchParams(window.location.search);
         const tokenFromUrl = urlParams.get('token');
@@ -83,13 +86,12 @@ async function checkAuth() {
         }
 
         const token = localStorage.getItem('authToken');
-        console.log('Verificando autenticação. Token:', token ? 'Presente' : 'Ausente');
+        console.log('Token no localStorage:', token ? 'Presente' : 'Ausente');
         
         if (!token) {
             console.log('Token não encontrado no localStorage');
-           // authState.isAuthenticated = false;            
-            window.location.href = 'login.html';
-            //return false;
+            authState.isAuthenticated = false;            
+            return false;
         }
 
         console.log('Enviando requisição para verificar token...');
@@ -101,7 +103,7 @@ async function checkAuth() {
             }
         });
 
-        console.log('Resposta recebida:', response.status);
+        console.log('Resposta da verificação:', response.status);
         if (!response.ok) {
             console.log('Token inválido, removendo do localStorage');
             localStorage.removeItem('authToken');
@@ -110,7 +112,7 @@ async function checkAuth() {
         }
 
         const data = await response.json();
-        console.log('Resposta da verificação:', data);
+        console.log('Dados da verificação:', data);
 
         if (data.authorized) {
             // Decodifica o token e salva o nome do usuário
@@ -119,11 +121,13 @@ async function checkAuth() {
                 localStorage.setItem('userName', decodedToken.name);
                 localStorage.setItem('userEmail', decodedToken.email);
                 emailUser = decodedToken.email;
+                console.log('Usuário autenticado:', decodedToken.name);
             }
             authState.isAuthenticated = true;
             return true;
         }
         
+        console.log('Usuário não autorizado');
         authState.isAuthenticated = false;
         return false;
     } catch (error) {
@@ -138,46 +142,84 @@ async function checkAuth() {
 
 // Função para gerenciar a navegação
 async function handleNavigation() {
-    if (isNavigating) return;
-    isNavigating = true;
+  if (isNavigating) return;
+  isNavigating = true;
 
-    try {
-        const isAuthenticated = await checkAuth();
-        console.log('Está autenticado:', isAuthenticated);
+  try {
+    console.log('Iniciando verificação de autenticação...');
+    const isAuthenticated = await checkAuth();
+    console.log('Está autenticado:', isAuthenticated);
 
-        if (!isAuthenticated) {
-            console.log('Usuário não autenticado');
-            showAlert('Erro de autenticação. Por favor, faça login novamente.', 'error');
-            return;
-        }
-
-        // Se estiver autenticado, inicializa a página
-        console.log('Usuário autenticado, inicializando página');
-        await init();
-    } catch (error) {
-        console.error('Erro no handleNavigation:', error);
-        showAlert('Erro ao carregar a página. Por favor, tente novamente.', 'error');
-    } finally {
-        isNavigating = false;
+    if (!isAuthenticated) {
+      console.log('Usuário não autenticado, redirecionando para login');
+      showAlert('Erro de autenticação. Por favor, faça login novamente.', 'error');
+      return;
     }
+
+    // Aqui pegue o token externo (o mesmo que valida em checkAuth)
+    const token = localStorage.getItem('authToken');
+    console.log('Token obtido do localStorage, fazendo login Firebase...');
+    
+    // Faça o login Firebase com custom token
+    await loginFirebaseCustomToken(token);
+    console.log('Usuário autenticado no Firebase com sucesso');
+
+    // Agora inicializa a página, com Firebase Auth ativo
+    await init();
+
+  } catch (error) {
+    console.error('Erro no handleNavigation:', error);
+    
+    if (error.message && error.message.includes('autenticação')) {
+      showAlert('Erro de autenticação. Faça login novamente.', 'error');
+      window.location.href = 'login.html';
+    } else {
+      showAlert('Erro ao carregar a página: ' + (error.message || 'Erro desconhecido'), 'error');
+    }
+  } finally {
+    isNavigating = false;
+  }
 }
 
 // Inicializa a aplicação
 async function init() {
     try {
+        console.log('Iniciando carregamento de logotipos...');
+        
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.error('Token de autenticação não encontrado');
+            showAlert('Você não está autenticado. Faça login novamente.', 'error');
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        console.log('Token encontrado, fazendo requisição para API...');
         logos = await logosApi.getAll();
+        console.log('Logotipos carregados:', logos.length);
+        
         renderLogos(logos);
         populateCategories();
         populateFilterCategories();
         applyFilters();
+        
+        console.log('Inicialização concluída com sucesso');
     } catch (error) {
         console.error('Erro na inicialização:', error);
-        showAlert('Erro ao carregar os logotipos. Por favor, tente novamente.', 'error');
+        
+        if (error.message && error.message.includes('autenticação')) {
+            showAlert('Erro de autenticação. Faça login novamente.', 'error');
+            window.location.href = 'login.html';
+        } else {
+            showAlert('Erro ao carregar os logotipos: ' + (error.message || 'Erro desconhecido'), 'error');
+        }
     }
 }
 
 // Renderiza os logos em uma tabela
 function renderLogos(list) {
+    console.log('Renderizando logotipos:', list?.length || 0);
+    
     if (!logosGrid) {
         console.error('Elemento logos-grid não encontrado');
         return;
@@ -186,9 +228,18 @@ function renderLogos(list) {
     logosGrid.innerHTML = "";
 
     if (!Array.isArray(list) || list.length === 0) {
-        logosGrid.innerHTML = "<p>Nenhum logotipo encontrado.</p>";
+        console.log('Nenhum logotipo encontrado para exibir');
+        logosGrid.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 20px; color: #ccc;"></i>
+                <h3>Nenhum logotipo encontrado</h3>
+                <p>Adicione seu primeiro logotipo usando o formulário acima.</p>
+            </div>
+        `;
         return;
     }
+
+    console.log('Criando tabela com', list.length, 'logotipos');
 
     // Cria a tabela
     const table = document.createElement('table');
@@ -215,8 +266,11 @@ function renderLogos(list) {
     // Corpo da tabela
     const tbody = document.createElement('tbody');
     
-    list.forEach((logo) => {
-        if (!logo) return; // Pula logos inválidos
+    list.forEach((logo, index) => {
+        if (!logo) {
+            console.warn('Logo inválido encontrado no índice:', index);
+            return; // Pula logos inválidos
+        }
        
         const startDate = logo.startDate ? new Date(logo.startDate) : null;
         const endDate = logo.endDate ? new Date(logo.endDate) : null;
@@ -252,34 +306,11 @@ function renderLogos(list) {
         `;
         tbody.appendChild(row);
     });
-   
-       // Inicializa totalContractValue como 0
-        let totalContractValue = 0;
-
-        // Itera pela lista para somar os valores dos contratos
-        list.forEach(logo => {
-            const contractValue = !logo.contractValue || !contratoAtivo(logo) ? 0 : parseFloat(logo.contractValue?.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;            
-            if (!isNaN(contractValue)) {
-                totalContractValue += contractValue;
-            }
-        });
-        
-        // Adiciona uma linha com o total geral da coluna "Valor Contrato"
-        const totalRow = document.createElement('tr');
-        totalRow.innerHTML = `
-            <td colspan="8" class="lbl-valor-contrato">Total Geral:</td>
-            <td id="table-valor-contrato">${totalContractValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-            <td></td>
-        `;
-    tbody.appendChild(totalRow);
-
+    
     table.appendChild(tbody);
     logosGrid.appendChild(table);
-
-    // Adiciona mensagem se não houver logos
-    if (tbody.children.length === 0) {
-        logosGrid.innerHTML = "<p>Nenhum logotipo encontrado.</p>";
-    }
+    
+    console.log('Tabela de logotipos renderizada com sucesso');
 }
    
 function contratoAtivo(logo) {
@@ -334,23 +365,23 @@ logoForm.addEventListener("submit", async (e) => {
         //ex:  if (!logoData.contractValue) delete logoData.contractValue;
         
         const file = logoImageInput.files[0];
-                
+        debugger;  
        if (file) {
-            // Se estiver editando e houver uma imagem anterior com deleteToken, exclui do Cloudinary
-            if (editingIndex && editingDeleteToken) {
+            // Se estiver editando e houver uma imagem anterior, exclui do Firebase Storage
+            if (editingIndex && editingStoragePath) {
                 try {                                       
-                    await deleteFromCloudinaryByToken(editingDeleteToken);
+                    await deleteFromFirebaseStorage(editingStoragePath);
                 } catch (error) {
                     console.error("Não foi possível excluir imagem anterior:", error);
                 }
             }
 
             try {
-                // Faz upload da nova imagem (tipo: "image")
-                const { url: newUrl, deleteToken: newToken } = await uploadToCloudinaryByType(file, "image");
-
+                // Faz upload da nova imagem para Firebase Storage
+                const { url: newUrl, fullPath } = await uploadToFirebaseStorage(file, "logos");
+                
                 logoData.imageUrl = newUrl;
-                logoData.deleteToken = newToken;
+                logoData.storagePath = fullPath;
             } catch (err) {
                 showAlert("Erro ao fazer upload da nova imagem: " + err.message + " Por favor, tente novamente.", "error");
                 return; 
@@ -377,6 +408,7 @@ logoForm.addEventListener("submit", async (e) => {
         logoForm.querySelector("#logo-preview_img").style.display = 'none';
         editingIndex = null;
         editingDeleteToken = null;
+        editingStoragePath = null;
         saveBtn.classList.remove('update');
 
     } catch (error) {
@@ -469,14 +501,18 @@ window.deleteLogo = function (logoId, logoName = 'este logotipo') {
       try {
         const logo = logos.find(l => l.id === logoId);
         const deleteToken = logo?.deleteToken || null;
+        const storagePath = logo?.storagePath || null;
 
         // Remove do Firestore
         await logosApi.delete(logoId);
 
-        // Tenta remover do Cloudinary, se houver token válido
-        if (deleteToken) {
-              //só exclui se o token for válido, ou seja, se estiver dentro do prazo de 1 hora
-            await deleteLogoFromCloudinary(deleteToken);          
+        // Tenta remover do Firebase Storage, se houver path válido
+        if (storagePath) {
+            try {
+                await deleteFromFirebaseStorage(storagePath);
+            } catch (error) {
+                console.error("Erro ao deletar do Firebase Storage:", error);
+            }
         }
 
         // Atualiza a lista e re-renderiza
@@ -720,29 +756,9 @@ function loadLogoForEdit(logo) {
             }
         });
     }
-   
-    
-//    else {
-//             // Fallback para versões antigas (compatibilidade)
-//             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-//             days.forEach(day => {
-//                 const closedField = `${day}Closed`;
-//                 if (logo[closedField] !== undefined) {
-//                 const closedEl = form.querySelector(`#${day}-closed`);
-//                 closedEl.checked = logo[closedField] === 'on';
-
-//                 // Aplica o 'disabled' nesse caso também
-//                 const timeInputs = form.querySelectorAll(`[id^="${day}-"][type="time"]`);
-//                 timeInputs.forEach(input => {
-//                     input.disabled = closedEl.checked;
-//                 });
-//                 }
-//             });
-//         }
-
-    
+       
     // Imagem do logo
-    editingDeleteToken = logo.deleteToken;
+    editingStoragePath = logo?.storagePath;
     const logoPreview = form.querySelector("#logo-preview_img");
     const logoImageUrl = logo.imageUrl;
     if (logoImageUrl) {
@@ -827,32 +843,16 @@ function populateFilterCategories() {
     });
 }
 
-// Função para calcular data final baseada na data inicial e meses
+// Função para calcular data de término baseada na data de início e meses do contrato
 function calculateEndDate() {
-    if (!startDateInput.value || !contractMonthsSelect.value) return;
+    const startDate = startDateInput.value;
+    const months = contractMonthsSelect.value;
     
-    const startDate = new Date(startDateInput.value);
-    const monthsToAdd = parseInt(contractMonthsSelect.value);
-    
-    let endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + monthsToAdd);
-    
-    // Ajuste para o último dia do mês se o dia original não existir no novo mês
-    if (startDate.getDate() !== endDate.getDate()) {
-        endDate.setDate(0);
+    if (startDate && months) {
+        const endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + parseInt(months));
+        endDateInput.value = endDate.toISOString().split('T')[0];
     }
-    
-    const year = endDate.getFullYear();
-    const month = String(endDate.getMonth() + 1).padStart(2, '0');
-    const day = String(endDate.getDate()).padStart(2, '0');
-    
-    endDateInput.value = `${year}-${month}-${day}`;
-}
-
-function extractFirebasePathFromUrl(url) {
-  const decodedUrl = decodeURIComponent(url);
-  const matches = decodedUrl.match(/\/o\/(.*?)\?alt/);
-  return matches ? matches[1] : null;
 }
 
 document.getElementById("cancel-delete").addEventListener("click", () => {
@@ -1132,4 +1132,22 @@ async function obterCoordenadasGoogle() {
     document.getElementById('client-uf').addEventListener('blur', obterCoordenadasGoogle);
     document.getElementById('client-number').addEventListener('blur', obterCoordenadasGoogle);
     document.getElementById('client-city').addEventListener('blur', obterCoordenadasGoogle);
+ 
+// Inicialização da página quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM carregado, iniciando aplicação...');
+    
+    // Verifica se estamos na página correta
+    if (window.location.pathname.includes('manage-logos.html')) {
+        console.log('Página manage-logos detectada, iniciando navegação...');
+        handleNavigation();
+    }
+});
+
+// Função para extrair o path do Firebase Storage da URL
+function extractFirebasePathFromUrl(url) {
+  const decodedUrl = decodeURIComponent(url);
+  const matches = decodedUrl.match(/\/o\/(.*?)\?alt/);
+  return matches ? matches[1] : null;
+}
  
