@@ -52,7 +52,7 @@ async function checkAuth() {
             return false;
         }
 
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authenticate', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authenticate', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -98,7 +98,7 @@ async function handleLogout() {
     try {
         const token = localStorage.getItem('authToken');
         if (token) {
-            await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/logout', {
+            await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/logout', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

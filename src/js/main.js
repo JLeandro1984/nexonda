@@ -16,7 +16,7 @@ function trackVisit(city = null) {
     payload.city = city;
   }
 
-  fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/logInsight', {
+  fetch('https://us-central1-nexonda-281084.cloudfunctions.net/logInsight', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'visit', payload: payload })
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               const { latitude, longitude } = position.coords;
 
               fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-                headers: { 'User-Agent': 'BrandConnect/1.0' }
+                headers: { 'User-Agent': 'Nexonda/1.0' }
               })
               .then(res => res.json())
               .then(data => {

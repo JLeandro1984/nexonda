@@ -37,7 +37,7 @@ const categorySelect = document.getElementById("category-select");
 // Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicLogos', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
@@ -98,7 +98,7 @@ function isOpenNow(openingHours) {
 // Carrega estatísticas da galeria
 async function loadGalleryStats() {
   try {
-    const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/getGalleryStats');
+    const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/getGalleryStats');
     if (!response.ok) {
       throw new Error('Erro ao carregar estatísticas');
     }
@@ -150,7 +150,7 @@ function createLogoCard(logo) {
       ? `<a class="whatsapp-btn" href="${
           whatsappUrl.startsWith('http')
             ? whatsappUrl
-            : 'https://wa.me/' + whatsappUrl.replace(/\D/g, '') + '?text=' + encodeURIComponent('Olá! Estou entrando em contato através do BrandConnect.')
+            : 'https://wa.me/' + whatsappUrl.replace(/\D/g, '') + '?text=' + encodeURIComponent('Olá! Estou entrando em contato através do Nexonda.')
         }" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>`
       : ''}
 
@@ -638,9 +638,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
  
-// WhatsApp flutuante da BrandConnect
+// WhatsApp flutuante da Nexonda
 const whatsappNumber = '5515996257159'; // Exemplo: 55 + DDD + número
-const whatsappMessage = 'Olá, gostaria de mais informações sobre a BrandConnect! 😊';
+const whatsappMessage = 'Olá, gostaria de mais informações sobre a Nexonda! 😊';
 const whatsappLink = document.querySelector('.whatsapp-float');
 
 if (whatsappLink) {
@@ -871,7 +871,7 @@ document.addEventListener('DOMContentLoaded', function () {
               throw new Error('Por favor, preencha todos os campos obrigatórios.');
           }
 
-          const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicContacts', {
+          const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicContacts', {
               method: 'POST',
               headers,
               body: JSON.stringify(contactData)

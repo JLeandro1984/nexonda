@@ -1,5 +1,5 @@
 // Configuração base da API
-const API_BASE_URL = 'https://us-central1-brandconnect-50647.cloudfunctions.net';
+const API_BASE_URL = 'https://us-central1-nexonda-281084.cloudfunctions.net';
 
 // Função para obter o token de autenticação
 async function getAuthToken() {

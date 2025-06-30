@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = 'click_events';
-  const ENDPOINT = 'https://us-central1-brandconnect-50647.cloudfunctions.net/logInsight';
+  const ENDPOINT = 'https://us-central1-nexonda-281084.cloudfunctions.net/logInsight';
   const MAX_EVENTS = 10;
   const TTL_MS = 2 * 60 * 1000; // 2 minutos
 
@@ -46,7 +46,7 @@
           details = JSON.parse(decodeURIComponent(logoData));
           // Se for um logo, também dispara o evento de clique para o contador
           if (details.clientFantasyName) {
-            fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/trackLogoClick', {
+            fetch('https://us-central1-nexonda-281084.cloudfunctions.net/trackLogoClick', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ clientFantasyName: details.clientFantasyName })
@@ -56,7 +56,7 @@
           details = JSON.parse(decodeURIComponent(adData));
           // Se for um anúncio, também dispara o evento de clique para o contador
           if (details.id) {
-            fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/trackAdEvent', {
+            fetch('https://us-central1-nexonda-281084.cloudfunctions.net/trackAdEvent', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ adId: details.id, eventType: 'click' })

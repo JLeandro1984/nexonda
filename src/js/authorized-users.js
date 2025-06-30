@@ -3,14 +3,14 @@ import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/
 import { showAlert } from '../components/alert.js';
 
 // Configuração do Firebase (mesma do firebase-upload.js)
-const firebaseConfig = {
-  apiKey: "AIzaSyDRw0prhCxJ1i1D2volCP94oiZQCGG-FeA",
-  authDomain: "brandconnect-50647.firebaseapp.com",
-  projectId: "brandconnect-50647",
-  storageBucket: "brandconnect-50647.firebasestorage.app",
-  messagingSenderId: "1014308588575",
-  appId: "1:1014308588575:web:bb942ac00418060605192a"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyC1qppTJiumA9bFlCLDpDWdOADjr-GBuUY",
+    authDomain: "nexonda-281084.firebaseapp.com",
+    projectId: "nexonda-281084",
+    storageBucket: "nexonda-281084.firebasestorage.app",
+    messagingSenderId: "1002258958685",
+    appId: "1:1002258958685:web:aac80c40220d8fabfa00b4"
+  };
 
 // Inicializa o app
 const app = initializeApp(firebaseConfig);
@@ -29,7 +29,7 @@ async function getAuthToken() {
 async function loadUsers() {
     try {
         const token = await getAuthToken();
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authorizedUsers', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authorizedUsers', {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -77,7 +77,7 @@ async function handleAddUser(event) {
 
     try {
         const token = await getAuthToken();
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authorizedUsers', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authorizedUsers', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -109,7 +109,7 @@ async function handleDeleteUser(event) {
 
     try {
         const token = await getAuthToken();
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authorizedUsers', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authorizedUsers', {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUser = user;
             try {
                 const token = await getAuthToken();
-                const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authorizedUsers', {
+                const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authorizedUsers', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'

@@ -10,8 +10,8 @@ const cors = require('cors')({
     'http://localhost:5003',
     'http://localhost:3000',
     'http://localhost:8080',
-    'https://brandconnect-50647.web.app',
-    'https://brandconnect-50647.firebaseapp.com',
+    'https://nexonda-281084.web.app',
+    'https://nexonda-281084.firebaseapp.com',
     'https://jleandro1984.github.io'
   ],
   methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],

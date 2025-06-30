@@ -20,8 +20,8 @@ class Chatbot {
   async loadContextData() {
     try {
       const [logosRes, adsRes] = await Promise.all([
-        fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicLogos'),
-        fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/publicPremiumAds')
+        fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos'),
+        fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicPremiumAds')
       ]);
 
       const [logos, ads] = await Promise.all([logosRes.json(), adsRes.json()]);
@@ -45,7 +45,7 @@ class Chatbot {
         </button>
         <div class="chatbot-window" id="chatbot-window">
           <div class="chatbot-header">
-            <h3>🤖 Assistente BrandConnect</h3>
+            <h3>🤖 Assistente Nexonda</h3>
             <button class="close-btn" id="chatbot-close">
               <i class="fas fa-times"></i>
             </button>
@@ -147,10 +147,10 @@ class Chatbot {
   addWelcomeMessage() {
     const welcomeMessage = {
       type: 'bot',
-      text: `Olá! 👋 Sou o BrainTalk assistente virtual do BrandConnect — uma plataforma que conecta você a empresas e serviços de forma rápida, interativa e inteligente. 🚀
+      text: `Olá! 👋 Sou o NexTalk assistente virtual do Nexona — uma plataforma que conecta você a empresas e serviços de forma rápida, interativa e inteligente. 🚀
 
       💡 Você pode me perguntar, por exemplo:
-      • "Quero anunciar no BrandConnect, como funciona?"
+      • "Quero anunciar no Nexona, como funciona?"
       • "Quais empresas fazem entregas em São Paulo?"
       • "O site é gratuito? Como funciona o plano premium?"
       • "Buscar salão de beleza perto do centro"
@@ -262,9 +262,9 @@ class Chatbot {
     const prompt = this.buildPrompt(userMessage);
     const getGeminiEndpoint = () => {
       const hostname = window.location.hostname;
-      if (hostname === 'jleandro1984.github.io') return 'https://us-central1-brandconnect-50647.cloudfunctions.net/askGemini';
-      if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:5001/brandconnect-50647/us-central1/askGemini';
-      return 'https://us-central1-brandconnect-50647.cloudfunctions.net/askGemini';
+      if (hostname === 'jleandro1984.github.io') return 'https://us-central1-nexonda-281084.cloudfunctions.net/askGemini';
+      if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:5001/nexonda-281084/us-central1/askGemini';
+      return 'https://us-central1-nexonda-281084.cloudfunctions.net/askGemini';
     };
 
     const GEMINI_ENDPOINT = getGeminiEndpoint();
@@ -286,11 +286,11 @@ class Chatbot {
     const resumoEmpresas = this.logos?.slice(0, 10).map(e => `• ${e.clientFantasyName} (${e.clientCity} - ${e.clientUf}) - ${this.getCategoryLabelByValue(e.logoCategory)}`).join('\n') || 'Sem dados no momento';
     const resumoAnuncios = this.ads?.slice(0, 5).map(a => `• ${a.title} - ${a.mediaType} (${a.clientName})`).join('\n') || 'Sem anúncios ativos.';
 
-    return `Você é BrainTalk, o assistente virtual do BrandConnect 🤖 — uma plataforma moderna e amigável que conecta consumidores e empresas por meio de uma galeria interativa de logotipos.
+    return `Você é NexTalk, o assistente virtual do Nexonda 🤖 — uma plataforma moderna e amigável que conecta consumidores e empresas por meio de uma galeria interativa de logotipos.
 
 Sua missão é acolher, entender e surpreender o usuário com respostas diretas, claras e personalizadas. Use uma linguagem empática, acessível e sempre profissional, como um consultor digital de confiança. Responda de forma leve, com vocabulário simples (sem jargões técnicos), mas com autoridade e simpatia. Use emojis com moderação para deixar a conversa mais próxima e humana 😊.
 
-🎯 OBJETIVO DO BRANDCONNECT:
+🎯 OBJETIVO DO NEXONDA:
 - Facilitar a descoberta de empresas incríveis por meio de uma galeria visual de logotipos.
 - Usuários podem buscar empresas por categoria, localização ou nome.
 - Empresas podem anunciar seus serviços por meio de três planos: **Básico**, **Premium** e **Premium-Plus**.
@@ -307,9 +307,9 @@ Sua missão é acolher, entender e surpreender o usuário com respostas diretas,
 🎥 RESUMO DE PROPAGANDAS (exibindo até 5):\n${resumoAnuncios}
 
 🔗 LINKS IMPORTANTES:
-- 🌐 Site: https://brandconnect-50647.web.app
-- 📄 Política de Privacidade: https://brandconnect-50647.web.app/pages/privacy-policy.html
-- 📧 Contato por e-mail: jlbrandconnect@gmail.com
+- 🌐 Site: https://nexonda-281084.web.app
+- 📄 Política de Privacidade: https://nexonda-281084.web.app/pages/privacy-policy.html
+- 📧 Contato por e-mail: contato@nexonda.com.br
 - 💬 WhatsApp: (15) 99625-7159
 - 📝 Formulário de orçamento: vá até o rodapé ou clique em "Contato" no menu principal
 
@@ -329,7 +329,7 @@ Sua missão é acolher, entender e surpreender o usuário com respostas diretas,
 📩 MENSAGEM DO USUÁRIO:
 "${userMessage}"
 
-Agora responda como BrainTalk, o assistente virtual do BrandConnect. Seja gentil, útil e direto ao ponto. Apresente sugestões práticas, links úteis e, quando possível, surpreenda com valor agregado.`;
+Agora responda como BrainTalk, o assistente virtual do Nexonda. Seja gentil, útil e direto ao ponto. Apresente sugestões práticas, links úteis e, quando possível, surpreenda com valor agregado.`;
   }
 
   // Função para buscar o label da categoria a partir do valor usando o objeto categories

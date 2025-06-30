@@ -91,7 +91,7 @@ async function handleGoogleLogin() {
         }
 
         // Verifica a autorização com o token recebido
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authenticate', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authenticate', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${result.token}`,
@@ -152,7 +152,7 @@ async function checkAuth() {
     if (!token) return false;
 
     try {
-        const response = await fetch('https://us-central1-brandconnect-50647.cloudfunctions.net/authenticate', {
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/authenticate', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
