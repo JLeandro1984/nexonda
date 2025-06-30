@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "brandconnect-50647"
-  }
+    "default": "nexonda-281084",
+    "nexonda": "nexonda-281084"
+  },
+  "targets": {},
+  "etags": {}
 }

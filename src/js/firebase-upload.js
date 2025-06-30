@@ -5,12 +5,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "http
 
 // Configuração do Firebase (substitua pelos dados reais do seu projeto)
    const firebaseConfig = {
-    apiKey: "AIzaSyDRw0prhCxJ1i1D2volCP94oiZQCGG-FeA",
-    authDomain: "brandconnect-50647.firebaseapp.com",
-    projectId: "brandconnect-50647",
-    storageBucket: "brandconnect-50647.firebasestorage.app",
-    messagingSenderId: "1014308588575",
-    appId: "1:1014308588575:web:bb942ac00418060605192a"
+    apiKey: "AIzaSyC1qppTJiumA9bFlCLDpDWdOADjr-GBuUY",
+    authDomain: "nexonda-281084.firebaseapp.com",
+    projectId: "nexonda-281084",
+    storageBucket: "nexonda-281084.firebasestorage.app",
+    messagingSenderId: "1002258958685",
+    appId: "1:1002258958685:web:aac80c40220d8fabfa00b4"
   };
 
 // Inicializa o app
