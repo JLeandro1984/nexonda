@@ -38,39 +38,45 @@ async function init() {
         }
         
         // Verifica se há token de autenticação
-        const token = localStorage.getItem('authToken');
+        // Busca o token no localStorage primeiro, depois no sessionStorage
+        let token = localStorage.getItem('authToken');
+        if (!token) {
+            token = sessionStorage.getItem('authToken');
+            if (token) {
+                console.log('Token encontrado no sessionStorage, movendo para localStorage');
+                localStorage.setItem('authToken', token);
+                sessionStorage.removeItem('authToken');
+            }
+        }
+        
         if (!token) {
             console.error('Token de autenticação não encontrado');
             showAlert('Você não está autenticado. Faça login novamente.', 'error');
-            window.location.href = 'login.html';
+            window.location.href = '../pages/login.html';
             return;
         }
         
         console.log('Token encontrado, fazendo requisição para API de propagandas...');
         
         try {
-            let response = [];
-            try {
-                response = await premiumAdsApi.getAll();
-                if (!Array.isArray(response)) {
-                    response = [];
-                }
-            } catch (error) {
-                // Se o erro for 404 ou similar, trata como lista vazia
-                console.warn('Nenhuma propaganda encontrada ou erro ao buscar:', error);
-                response = [];
-            }
+            const response = await premiumAdsApi.getAll();
+            console.log('Resposta recebida da API:', response);
+            
             // Garante que ads seja um array
-            ads = response;
+            ads = Array.isArray(response) ? response : [];            
             console.log('Propagandas carregadas:', ads.length);
+            
             renderAds();
             populateClientSelect();
+            
             console.log('Inicialização de propagandas concluída com sucesso');
+            
         } catch (error) {
             console.error('Erro ao carregar propagandas:', error);
+            
             if (error.message && error.message.includes('autenticação')) {
                 showAlert('Erro de autenticação. Faça login novamente.', 'error');
-                window.location.href = 'login.html';
+                window.location.href = '../pages/login.html';
             } else {
                 showAlert('Erro ao carregar anúncios: ' + (error.message || 'Erro desconhecido'), 'error');
             }

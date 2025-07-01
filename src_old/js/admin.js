@@ -1,10 +1,11 @@
 import { showAlert } from '../components/alert.js';
 
 // DOM Elements
-const userInfoSpan = document.getElementById('user-name');
+const userInfoSpan = document.getElementById('user-info');
 const logoutBtn = document.getElementById('logout-button');
-const manageLogosBtn = document.querySelector('[data-option="manage-logos"]');
-const settingsBtn = document.querySelector('[data-option="settings"]');
+const manageLogosBtn = document.getElementById('manage-logos-btn');
+const manageUsersBtn = document.getElementById('manage-users-btn');
+const manageAdvertisingBtn = document.getElementById('manage-advertising-btn');
 
 // Estado global de autenticação
 let authState = {
@@ -130,6 +131,70 @@ function handleSettings() {
     showAlert('Funcionalidade em desenvolvimento.', 'info');
 }
 
+// Função para carregar estatísticas do sistema
+async function loadSystemStats() {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        // Carregar estatísticas de usuários
+        const usersResponse = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/listAuthorizedUsers', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (usersResponse.ok) {
+            const usersData = await usersResponse.json();
+            document.getElementById('total-users').textContent = usersData.users ? usersData.users.length : 0;
+        }
+
+        // Carregar estatísticas de logos
+        const logosResponse = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (logosResponse.ok) {
+            const logosData = await logosResponse.json();
+            document.getElementById('total-logos').textContent = logosData.logos ? logosData.logos.length : 0;
+        }
+
+        // Carregar estatísticas de anúncios
+        const adsResponse = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/premiumAds', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (adsResponse.ok) {
+            const adsData = await adsResponse.json();
+            document.getElementById('total-ads').textContent = adsData.ads ? adsData.ads.length : 0;
+        }
+
+        // Carregar estatísticas de cliques (insights)
+        const insightsResponse = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/logInsight', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: 'stats',
+                payload: { action: 'getStats' }
+            })
+        });
+        
+        if (insightsResponse.ok) {
+            const insightsData = await insightsResponse.json();
+            document.getElementById('total-clicks').textContent = insightsData.totalClicks || 0;
+        }
+
+    } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error);
+    }
+}
+
 // Função para inicializar a interface do admin
 function initializeAdminInterface() {
     if (logoutBtn) {
@@ -138,9 +203,15 @@ function initializeAdminInterface() {
     if (manageLogosBtn) {
         manageLogosBtn.addEventListener('click', handleManageLogos);
     }
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', handleSettings);
+    if (manageUsersBtn) {
+        manageUsersBtn.addEventListener('click', () => navigateTo('admin/users.html'));
     }
+    if (manageAdvertisingBtn) {
+        manageAdvertisingBtn.addEventListener('click', () => navigateTo('manage-advertising.html'));
+    }
+    
+    // Carregar estatísticas do sistema
+    loadSystemStats();
 }
 
 // Função para gerenciar a navegação
@@ -185,7 +256,8 @@ async function handleNavigation() {
 function navigateTo(page) {
     const token = localStorage.getItem('authToken');
     if (token) {
-        // Navegação interna, sem uso de sessionStorage e sem abrir nova aba
+        // Salva o token em sessionStorage também para garantir que estará disponível na próxima página
+        sessionStorage.setItem('authToken', token);
         window.location.href = page;
     } else {
         window.location.href = 'login.html';
@@ -195,21 +267,18 @@ function navigateTo(page) {
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Página carregada, inicializando...');
+    
     // Adiciona eventos aos botões de navegação
-    const manageLogosBtn = document.querySelector('[data-option="manage-logos"]');
+    const manageLogosBtn = document.getElementById('manage-logos-btn');
     if (manageLogosBtn) {
-        manageLogosBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateTo('manage-logos.html');
-        });
+        manageLogosBtn.addEventListener('click', () => navigateTo('manage-logos.html'));
     }
+
     const manageAdvertisingBtn = document.getElementById('manage-advertising-btn');
     if (manageAdvertisingBtn) {
-        manageAdvertisingBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            navigateTo('manage-advertising.html');
-        });
+        manageAdvertisingBtn.addEventListener('click', () => navigateTo('manage-advertising.html'));
     }
+
     handleNavigation();
 });
 

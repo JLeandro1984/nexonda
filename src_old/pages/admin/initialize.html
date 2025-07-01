@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inicializar Admin - Nexonda</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      .google-btn {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+      .google-btn:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .google-btn img {
+        width: 18px;
+        height: 18px;
+      }
+      .user-info {
+        text-align: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h1 class="h4 text-center mb-4">Inicializar Primeiro Admin</h1>
+
+              <div id="userInfo" class="user-info" style="display: none">
+                <i class="bi bi-person-circle"></i>
+                <span id="userName"></span>
+              </div>
+
+              <div id="loading" class="text-center py-3" style="display: none">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Carregando...</span>
+                </div>
+              </div>
+
+              <div
+                id="error"
+                class="alert alert-danger mt-3"
+                style="display: none"
+              >
+                <!-- Mensagens de erro serão inseridas aqui -->
+              </div>
+
+              <div
+                id="success"
+                class="alert alert-success mt-3"
+                style="display: none"
+              >
+                <!-- Mensagens de sucesso serão inseridas aqui -->
+              </div>
+
+              <div id="loginSection" class="d-grid gap-2">
+                <button class="google-btn" onclick="handleGoogleLogin()">
+                  <img src="https://www.google.com/favicon.ico" alt="Google" />
+                  Entrar com Google
+                </button>
+              </div>
+
+              <div
+                id="adminSection"
+                class="d-grid gap-2 mt-3"
+                style="display: none"
+              >
+                <button class="btn btn-primary" onclick="initializeAdmin()">
+                  <i class="bi bi-person-plus"></i> Inicializar Admin
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Configuração do Google Sign-In
+      const clientId =
+        "1014308588575-k68riqpgl9l0isqm33iral0i9eu9u7pp.apps.googleusercontent.com";
+      const redirectUri = "http://localhost:5000/pages/auth-callback.html";
+      let messageListener = null;
+
+      // Função para decodificar o token JWT
+      function decodeJwt(token) {
+        try {
+          const base64Url = token.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split("")
+              .map(function (c) {
+                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+              })
+              .join("")
+          );
+          return JSON.parse(jsonPayload);
+        } catch (error) {
+          console.error("Erro ao decodificar token:", error);
+          return null;
+        }
+      }
+
+      // Função para exibir informações do usuário
+      function displayUserInfo(token) {
+        const decodedToken = decodeJwt(token);
+        if (decodedToken) {
+          const userName = decodedToken.name || decodedToken.email;
+          document.getElementById("userName").textContent = userName;
+          document.getElementById("userInfo").style.display = "block";
+        }
+      }
+
+      // Função para verificar se o usuário já é admin
+      async function checkIfAdmin(token) {
+        try {
+          const response = await fetch(
+            "https://us-central1-nexonda-281084.cloudfunctions.net/checkAuth",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            return false;
+          }
+
+          const data = await response.json();
+          return data.isAuthorized;
+        } catch (error) {
+          console.error("Erro ao verificar admin:", error);
+          return false;
+        }
+      }
+
+      // Função para iniciar o login com Google
+      function handleGoogleLogin() {
+        const nonce = Math.random().toString(36).substring(2, 15);
+        const scope = "email profile openid";
+        const responseType = "id_token";
+        const prompt = "select_account";
+
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+          redirectUri
+        )}&response_type=${responseType}&scope=${encodeURIComponent(
+          scope
+        )}&nonce=${nonce}&prompt=${prompt}`;
+
+        console.log("URL de autenticação:", authUrl);
+        console.log("URL de redirecionamento:", redirectUri);
+
+        // Remove o listener anterior se existir
+        if (messageListener) {
+          window.removeEventListener("message", messageListener);
+        }
+
+        // Cria um novo listener
+        messageListener = async function (event) {
+          // Ignora mensagens do React DevTools
+          if (event.data.source === "react-devtools-content-script") {
+            return;
+          }
+
+          // Verifica se a mensagem tem o token
+          if (event.data && event.data.token) {
+            console.log("Token recebido do Google");
+            const token = event.data.token;
+            localStorage.setItem("authToken", token);
+
+            // Verifica se o usuário já é admin
+            const isAdmin = await checkIfAdmin(token);
+
+            if (isAdmin) {
+              // Se já é admin, redireciona para o painel
+              window.location.href = "/pages/admin.html";
+            } else {
+              // Se não é admin, mostra o botão de inicialização
+              document.getElementById("loginSection").style.display = "none";
+              document.getElementById("adminSection").style.display = "block";
+              displayUserInfo(token);
+            }
+
+            // Remove o listener após receber o token
+            window.removeEventListener("message", messageListener);
+            messageListener = null;
+          }
+        };
+
+        // Adiciona o listener
+        window.addEventListener("message", messageListener);
+
+        // Abre a janela de autenticação do Google
+        window.open(authUrl, "Google Login", "width=500,height=600");
+      }
+
+      // Função para inicializar o admin
+      async function initializeAdmin() {
+        const loading = document.getElementById("loading");
+        const error = document.getElementById("error");
+        const success = document.getElementById("success");
+
+        try {
+          loading.style.display = "block";
+          error.style.display = "none";
+          success.style.display = "none";
+
+          const token = localStorage.getItem("authToken");
+          if (!token) {
+            throw new Error(
+              "Token não encontrado. Por favor, faça login novamente."
+            );
+          }
+
+          const response = await fetch(
+            "https://us-central1-nexonda-281084.cloudfunctions.net/initializeAdmin",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || "Erro ao inicializar admin");
+          }
+
+          success.textContent = data.message;
+          success.style.display = "block";
+
+          // Redireciona para o painel admin após 2 segundos
+          setTimeout(() => {
+            window.location.href = "/pages/admin.html";
+          }, 2000);
+        } catch (err) {
+          error.textContent = err.message;
+          error.style.display = "block";
+        } finally {
+          loading.style.display = "none";
+        }
+      }
+
+      // Verificar se já está logado ao carregar a página
+      document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("authToken");
+        if (token) {
+          const isAdmin = await checkIfAdmin(token);
+          if (isAdmin) {
+            window.location.href = "/pages/admin.html";
+          } else {
+            document.getElementById("loginSection").style.display = "none";
+            document.getElementById("adminSection").style.display = "block";
+            displayUserInfo(token);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

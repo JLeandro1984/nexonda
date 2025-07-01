@@ -1,0 +1,181 @@
+header nav {
+  display: flex;
+  justify-content: space-between; /* Isso vai alinhar a logo à esquerda e o user-info à direita */
+  align-items: start;
+  margin: 10px 0px 0px 0px;
+}
+
+.user-info {
+  padding: 0;
+}
+
+.container-contact {
+  max-width: 100%;
+  margin: 0 auto;
+  background: var(--background-color);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+#titulo-contato {
+  margin-top: 30px;
+}
+
+/* Títulos */
+h1,
+h2 {
+  color: var(--primary-color);
+  text-align: center;
+}
+
+/* Formulário */
+form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Campos de formulário */
+form input,
+form select,
+form textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  background-color: #fff;
+  width: 100%; /* Garantir que os campos ocupem 100% da largura */
+}
+
+/* Foco nos campos de formulário */
+form input:focus,
+form select:focus,
+form textarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* Botões */
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: auto; /* Ajuste de tamanho */
+  align-self: center;
+}
+
+button:hover {
+  background-color: #6e7379;
+}
+
+/* Container da tabela */
+.table-container {
+  overflow-x: auto;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+/* Tabela */
+table {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Cabeçalho da tabela */
+thead {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+thead th {
+  padding: 1rem;
+  text-align: left;
+}
+
+/* Linhas do corpo da tabela */
+tbody tr {
+  border-bottom: 1px solid var(--input-border);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f1ebecf6;
+}
+
+tbody td {
+  padding: 0.75rem 1rem;
+  color: var(--text-color);
+}
+
+/* Ações dos botões */
+.actions button {
+  margin-right: 0.5rem;
+  background-color: var(--accent-color);
+}
+
+.actions button.delete {
+  background-color: #d93025;
+}
+
+.actions button.delete:hover {
+  background-color: #b00020;
+}
+
+/* Controles de pesquisa e ordenação */
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#search-input {
+  padding: 0.5rem;
+  width: 60%;
+  max-width: 400px;
+}
+
+#sort-select {
+  padding: 0.5rem;
+  width: 35%;
+  max-width: 200px;
+}
+
+/* Responsividade para dispositivos móveis */
+@media (max-width: 768px) {
+  .table-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #search-input,
+  #sort-select {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  .container-contact {
+    padding: 1rem;
+  }
+
+  h1,
+  h2 {
+    font-size: 1.5rem;
+  }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autenticação - Nexonda</title>
+  </head>
+  <body>
+    <script>
+      // Função para extrair o token da URL
+      function getTokenFromUrl() {
+        try {
+          const hash = window.location.hash.substring(1);
+          console.log("Hash da URL:", hash);
+
+          const params = new URLSearchParams(hash);
+          const token = params.get("id_token");
+          console.log("Token extraído da URL:", token ? "Presente" : "Ausente");
+
+          if (!token) {
+            throw new Error("Token não encontrado na URL");
+          }
+
+          return token;
+        } catch (error) {
+          console.error("Erro ao extrair token:", error);
+          throw error;
+        }
+      }
+
+      // Função para enviar o token de volta para a página de origem
+      function sendTokenBack() {
+        try {
+          const token = getTokenFromUrl();
+          const targetOrigin = window.location.origin;
+
+          console.log("Origem atual:", window.location.origin);
+          console.log("Origem alvo:", targetOrigin);
+
+          if (!window.opener) {
+            throw new Error("Janela de origem não encontrada");
+          }
+
+          console.log("Enviando token para a página de origem");
+          window.opener.postMessage({ token: token }, targetOrigin);
+
+          // Aguarda um momento antes de fechar para garantir que a mensagem foi enviada
+          setTimeout(() => {
+            window.close();
+          }, 500);
+        } catch (error) {
+          console.error("Erro ao enviar token:", error);
+          document.body.innerHTML = `
+            <div style="color: red; padding: 20px;">
+              <h2>Erro na autenticação</h2>
+              <p>${error.message}</p>
+              <button onclick="window.close()">Fechar</button>
+            </div>
+          `;
+        }
+      }
+
+      // Executa quando a página carregar
+      window.onload = sendTokenBack;
+    </script>
+  </body>
+</html>

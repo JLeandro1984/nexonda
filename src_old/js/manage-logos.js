@@ -36,17 +36,6 @@ let authState = {
     user: null
 };
 
-console.log('manage-logos.html carregado');
-console.log('window.location.origin:', window.location.origin);
-console.log('window.location.href:', window.location.href);
-console.log('Token no localStorage:', localStorage.getItem('authToken') ? 'Presente' : 'Ausente');
-
-// Aviso se o domínio/porta não for igual ao esperado
-const expectedOrigin = 'http://localhost:5000'; // ajuste conforme seu ambiente
-if (window.location.origin !== expectedOrigin) {
-    console.warn('ATENÇÃO: O domínio/porta atual não é o mesmo do login! localStorage pode não ser compartilhado.');
-}
-
  // Preenche o select de UFs
  ufs.forEach(uf => {
     const option = document.createElement('option');
@@ -79,8 +68,12 @@ function decodeJwt(token) {
 
 // Função para verificar se o usuário está autenticado
 async function checkAuth() {
-    if (authState.isChecking) return authState.isAuthenticated;
+    if (authState.isChecking) {
+        console.log('Verificação de autenticação já em andamento, retornando estado atual:', authState.isAuthenticated);
+        return authState.isAuthenticated;
+    }
     authState.isChecking = true;
+    console.log('Iniciando verificação de autenticação...');
 
     try {
         console.log('Verificando autenticação...');
@@ -96,11 +89,24 @@ async function checkAuth() {
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        const token = localStorage.getItem('authToken');
+        // Busca o token no localStorage primeiro, depois no sessionStorage
+        let token = localStorage.getItem('authToken');
+        if (!token) {
+            token = sessionStorage.getItem('authToken');
+            if (token) {
+                console.log('Token encontrado no sessionStorage, movendo para localStorage');
+                localStorage.setItem('authToken', token);
+                sessionStorage.removeItem('authToken');
+            }
+        }
+        
         console.log('Token no localStorage:', token ? 'Presente' : 'Ausente');
+        if (token) {
+            console.log('Token encontrado, primeiros 20 caracteres:', token.substring(0, 20) + '...');
+        }
         
         if (!token) {
-            console.log('Token não encontrado no localStorage');
+            console.log('Token não encontrado no localStorage nem sessionStorage');
             authState.isAuthenticated = false;            
             return false;
         }
@@ -114,9 +120,10 @@ async function checkAuth() {
             }
         });
 
-        console.log('Resposta da verificação:', response.status);
+        console.log('Resposta da verificação:', response.status, response.statusText);
         if (!response.ok) {
             console.log('Token inválido, removendo do localStorage');
+            console.log('Detalhes do erro:', response.status, response.statusText);
             localStorage.removeItem('authToken');
             authState.isAuthenticated = false;
             return false;
@@ -153,8 +160,12 @@ async function checkAuth() {
 
 // Função para gerenciar a navegação
 async function handleNavigation() {
-  if (isNavigating) return;
+  if (isNavigating) {
+    console.log('Navegação já em andamento, ignorando...');
+    return;
+  }
   isNavigating = true;
+  console.log('Iniciando processo de navegação...');
 
   try {
     console.log('Iniciando verificação de autenticação...');
@@ -164,16 +175,30 @@ async function handleNavigation() {
     if (!isAuthenticated) {
       console.log('Usuário não autenticado, redirecionando para login');
       showAlert('Erro de autenticação. Por favor, faça login novamente.', 'error');
+      window.location.href = '../pages/login.html';
       return;
     }
 
     // Aqui pegue o token externo (o mesmo que valida em checkAuth)
-    const token = localStorage.getItem('authToken');
-    console.log('Token obtido do localStorage, fazendo login Firebase...');
+    let token = localStorage.getItem('authToken');
+    if (!token) {
+        token = sessionStorage.getItem('authToken');
+        if (token) {
+            console.log('Token encontrado no sessionStorage, movendo para localStorage');
+            localStorage.setItem('authToken', token);
+            sessionStorage.removeItem('authToken');
+        }
+    }
+    console.log('Token obtido, fazendo login Firebase...');
     
     // Faça o login Firebase com custom token
-    await loginFirebaseCustomToken(token);
-    console.log('Usuário autenticado no Firebase com sucesso');
+    try {
+        await loginFirebaseCustomToken(token);
+        console.log('Usuário autenticado no Firebase com sucesso');
+    } catch (error) {
+        console.error('Erro no login Firebase:', error);
+        // Continua mesmo com erro no Firebase, pois a autenticação principal já foi validada
+    }
 
     // Agora inicializa a página, com Firebase Auth ativo
     await init();
@@ -183,7 +208,7 @@ async function handleNavigation() {
     
     if (error.message && error.message.includes('autenticação')) {
       showAlert('Erro de autenticação. Faça login novamente.', 'error');
-      window.location.href = 'login.html';
+      window.location.href = '../pages/login.html';
     } else {
       showAlert('Erro ao carregar a página: ' + (error.message || 'Erro desconhecido'), 'error');
     }
@@ -196,55 +221,74 @@ async function handleNavigation() {
 async function init() {
     try {
         console.log('Iniciando carregamento de logotipos...');
-        const token = localStorage.getItem('authToken');
+        
+        // Busca o token no localStorage primeiro, depois no sessionStorage
+        let token = localStorage.getItem('authToken');
+        if (!token) {
+            token = sessionStorage.getItem('authToken');
+            if (token) {
+                console.log('Token encontrado no sessionStorage, movendo para localStorage');
+                localStorage.setItem('authToken', token);
+                sessionStorage.removeItem('authToken');
+            }
+        }
+        
         if (!token) {
             console.error('Token de autenticação não encontrado');
             showAlert('Você não está autenticado. Faça login novamente.', 'error');
-            window.location.href = 'login.html';
+            window.location.href = '../pages/login.html';
             return;
         }
-
-        // Tenta buscar os logos
-        let logosResponse = [];
+        
+        console.log('Token encontrado, fazendo requisição para API...');
         try {
-            logosResponse = await logosApi.getAll();
-            if (!Array.isArray(logosResponse)) {
-                logosResponse = [];
-            }
+            logos = await logosApi.getAll();
+            console.log('Logotipos carregados:', logos.length);
         } catch (error) {
-            // Se o erro for 404 ou similar, trata como lista vazia
-            console.warn('Nenhum logotipo encontrado ou erro ao buscar:', error);
-            logosResponse = [];
+            console.error('Erro ao carregar logotipos:', error);
+            throw error;
         }
-
-        logos = logosResponse;
-        console.log('Logotipos carregados:', logos.length);
-
+        
+        console.log('Renderizando logotipos...');
         renderLogos(logos);
+        console.log('Populando categorias...');
         populateCategories();
+        console.log('Populando filtros...');
         populateFilterCategories();
+        console.log('Aplicando filtros...');
         applyFilters();
-
+        
         console.log('Inicialização concluída com sucesso');
     } catch (error) {
         console.error('Erro na inicialização:', error);
-        showAlert('Erro ao carregar os logotipos: ' + (error.message || 'Erro desconhecido'), 'error');
+        
+        if (error.message && error.message.includes('autenticação')) {
+            showAlert('Erro de autenticação. Faça login novamente.', 'error');
+            window.location.href = '../pages/login.html';
+        } else {
+            showAlert('Erro ao carregar os logotipos: ' + (error.message || 'Erro desconhecido'), 'error');
+        }
     }
 }
 
 // Renderiza os logos em uma tabela
 function renderLogos(list) {
     console.log('Renderizando logotipos:', list?.length || 0);
+    console.log('Lista de logotipos:', list);
     
     if (!logosGrid) {
         console.error('Elemento logos-grid não encontrado');
         return;
     }
+    
+    console.log('Elemento logos-grid encontrado:', logosGrid);
 
     logosGrid.innerHTML = "";
 
     if (!Array.isArray(list) || list.length === 0) {
         console.log('Nenhum logotipo encontrado para exibir');
+        console.log('Tipo da lista:', typeof list);
+        console.log('É array?', Array.isArray(list));
         logosGrid.innerHTML = `
             <div style="text-align: center; padding: 40px; color: #666;">
                 <i class="fas fa-info-circle" style="font-size: 48px; margin-bottom: 20px; color: #ccc;"></i>
@@ -260,6 +304,7 @@ function renderLogos(list) {
     // Cria a tabela
     const table = document.createElement('table');
     table.className = 'logos-table';
+    console.log('Tabela criada:', table);
     
     // Cabeçalho da tabela
     const thead = document.createElement('thead');
@@ -324,7 +369,9 @@ function renderLogos(list) {
     });
     
     table.appendChild(tbody);
+    console.log('Tbody adicionado à tabela');
     logosGrid.appendChild(table);
+    console.log('Tabela adicionada ao logosGrid');
     
     console.log('Tabela de logotipos renderizada com sucesso');
 }
@@ -374,7 +421,13 @@ logoForm.addEventListener("submit", async (e) => {
         // Campos que não vêm do formulário diretamente:
         logoData.openingHours = obterHorarioFuncionamento();
              
-        if (!logoData.openingHours) return;
+        if (!logoData.openingHours) {
+            // Restaurar botão
+            saveBtn.disabled = false;
+            btnText.textContent = 'Salvar';
+            spinner.classList.add('hidden');
+            return;
+        }
 
         /* 🔽 LIMPEZA DOS CAMPOS OPCIONAIS */
         //ex: if (!logoData.contractMonths) delete logoData.contractMonths;
@@ -478,15 +531,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Funções auxiliares
 function getCategoryLabelByValue(value) {
+    console.log('Buscando categoria para valor:', value);
+    console.log('Categorias disponíveis:', categories);
+    
     for (const category of categories) {
         if (category.value === value) {
+            console.log('Categoria encontrada:', category.label);
             return category.label;
         }
         const subcategory = category.options.find(option => option.value === value);
         if (subcategory) {
+            console.log('Subcategoria encontrada:', subcategory.label);
             return subcategory.label;
         }
     }
+    console.log('Categoria não encontrada para valor:', value);
     return null;
 }
 
@@ -1084,10 +1143,10 @@ function validarCamposEndereco() {
 }
 
 //Geolocalização
-const API_KEY = 'AIzaSyATHcGkTrYUT5JwthjyPlRzXotvRfK8zCk'; 
+const API_KEY = 'AIzaSyC1qppTJiumA9bFlCLDpDWdOADjr-GBuUY'; // Substitua pela nova API Key do projeto Nexonda 
 async function obterCoordenadasGoogle() {
     if (!validarCamposEndereco()) return;
-    debugger
+    
     const endereco = [
       document.getElementById('client-address').value,
       document.getElementById('client-number').value,
@@ -1114,11 +1173,11 @@ async function obterCoordenadasGoogle() {
         document.getElementById('client-lng').value = lng;
       } else {
         console.error('Erro:', data.status);
-        showAlert('Endereço não encontrado.');
+        alert('Endereço não encontrado.');
       }
     } catch (error) {
       console.error('Erro ao buscar coordenadas:', error);
-      showAlert('Erro ao buscar coordenadas.');
+      alert('Erro ao buscar coordenadas.');
     }
   }
 
@@ -1152,11 +1211,14 @@ async function obterCoordenadasGoogle() {
 // Inicialização da página quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM carregado, iniciando aplicação...');
+    console.log('Path atual:', window.location.pathname);
     
     // Verifica se estamos na página correta
     if (window.location.pathname.includes('manage-logos.html')) {
         console.log('Página manage-logos detectada, iniciando navegação...');
         handleNavigation();
+    } else {
+        console.log('Página não é manage-logos, não iniciando navegação');
     }
 });
 

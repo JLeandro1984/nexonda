@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta de Cadastros</title>
+    <link rel="stylesheet" href="../css/styles.css" />
+    <script type="module" src="../components/user-menu.js" defer></script>
+    <link rel="stylesheet" href="../css/contact-form.css" />
+  </head>
+  <body>
+    <!-- Cabeçalho e navegação -->
+    <header>
+      <nav>
+        <div class="logo">
+          <img
+            src="../images/nexonda/logo_nexonda.png"
+            alt="Nexonda"
+            loading="lazy"
+          />
+        </div>
+
+        <div class="user-info">
+          <user-menu></user-menu>
+        </div>
+      </nav>
+    </header>
+    <div class="container-contact">
+      <!-- Título da página -->
+      <h1 id="titulo-contato">Contatos Cadastrados</h1>
+
+      <!-- Controles de pesquisa e ordenação -->
+      <div class="table-controls">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Pesquisar..."
+          aria-label="Pesquisar cadastros"
+        />
+        <select id="sort-select" aria-label="Ordenar cadastros">
+          <option value="Nome">Ordenar por Nome</option>
+          <option value="Email">Ordenar por Email</option>
+          <option value="Data de Cadastro">Ordenar por Data</option>
+        </select>
+      </div>
+
+      <!-- Tabela de cadastros -->
+      <div class="table-container">
+        <table id="cadastro-tabela">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Mensagem</th>
+              <th>Data de Cadastro</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Os dados serão inseridos aqui via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mensagem quando não há registros -->
+      <p id="sem-registros" class="info">Nenhum cadastro encontrado.</p>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../js/contact-form.js"></script>
+  </body>
+</html>

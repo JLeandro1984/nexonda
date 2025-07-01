@@ -37,7 +37,7 @@ async function handleGoogleLogin() {
 
         // Abre o popup de login do Google
         const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' +
-            'client_id=1002258958685-aot7kcicobv2tcusjv0rmt1g1v6ar6nv.apps.googleusercontent.com' +
+            'client_id=1014308588575-k68riqpgl9l0isqm33iral0i9eu9u7pp.apps.googleusercontent.com' +
             '&redirect_uri=' + encodeURIComponent(window.location.origin + '/pages/auth-callback.html') +
             '&response_type=id_token' +
             '&scope=' + encodeURIComponent('email profile openid') +

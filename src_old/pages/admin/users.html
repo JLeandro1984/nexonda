@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuários Autorizados - Nexonda</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    />
+    <style>
+      .user-card {
+        transition: all 0.3s ease;
+      }
+      .user-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .admin-badge {
+        background-color: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <a href="admin.html" class="btn btn-outline-secondary mb-2">
+            <i class="bi bi-arrow-left"></i> Voltar ao Painel
+          </a>
+          <h1 class="h3">Usuários Autorizados - Nexonda</h1>
+        </div>
+        <button class="btn btn-primary" onclick="refreshUsers()">
+          <i class="bi bi-arrow-clockwise"></i> Atualizar
+        </button>
+      </div>
+
+      <div id="usersList" class="row g-4">
+        <!-- Os cards dos usuários serão inseridos aqui -->
+      </div>
+
+      <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+
+      <div id="error" class="alert alert-danger mt-4" style="display: none">
+        <!-- Mensagens de erro serão inseridas aqui -->
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Função para formatar a data
+      function formatDate(date) {
+        if (!date) return "N/A";
+        return new Date(date).toLocaleString("pt-BR");
+      }
+
+      // Função para criar o card do usuário
+      function createUserCard(user) {
+        return `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card user-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">${user.email}</h5>
+                                ${
+                                  user.isAdmin
+                                    ? '<span class="admin-badge">Admin</span>'
+                                    : ""
+                                }
+                            </div>
+                            <p class="card-text text-muted small">
+                                <i class="bi bi-person-plus"></i> Adicionado por: ${
+                                  user.addedBy || "N/A"
+                                }<br>
+                                <i class="bi bi-clock"></i> Data: ${formatDate(
+                                  user.addedAt
+                                )}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Função para carregar os usuários
+      async function loadUsers() {
+        const loading = document.getElementById("loading");
+        const error = document.getElementById("error");
+        const usersList = document.getElementById("usersList");
+
+        try {
+          loading.style.display = "block";
+          error.style.display = "none";
+          usersList.innerHTML = "";
+
+          const token = localStorage.getItem("authToken");
+          if (!token) {
+            throw new Error(
+              "Token não encontrado. Por favor, faça login novamente."
+            );
+          }
+
+          const response = await fetch(
+            "https://us-central1-nexonda-281084.cloudfunctions.net/listAuthorizedUsers",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Erro ao carregar usuários");
+          }
+
+          const data = await response.json();
+
+          if (data.users.length === 0) {
+            usersList.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                Nenhum usuário autorizado encontrado.
+                            </div>
+                        </div>
+                    `;
+          } else {
+            usersList.innerHTML = data.users.map(createUserCard).join("");
+          }
+        } catch (err) {
+          error.textContent = err.message;
+          error.style.display = "block";
+        } finally {
+          loading.style.display = "none";
+        }
+      }
+
+      // Função para atualizar a lista
+      function refreshUsers() {
+        loadUsers();
+      }
+
+      // Carregar usuários quando a página carregar
+      document.addEventListener("DOMContentLoaded", loadUsers);
+    </script>
+  </body>
+</html>
