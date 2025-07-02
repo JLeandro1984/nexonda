@@ -17,25 +17,26 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-color);
-  padding-top: 30px;
+  padding: 0;
 }
 
 header {
   background-color: var(--primary-color);
-  padding: 0 1rem 1rem 2rem;
+  padding: 0;
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
 
-header nav {
+/* header nav {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   padding: 0;
-}
+} */
 
 a {
   text-decoration: none !important;
@@ -43,11 +44,12 @@ a {
 
 nav {
   display: flex;
-  align-items: center; /* alinha verticalmente */
-  justify-content: space-between; /* ou center, se quiser tudo no centro */
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: space-between;
   flex-wrap: wrap; /* garante que nada "vaze" em telas menores */
+  box-sizing: border-box;
+  padding: 0 10px;
 }
 
 .nav-links {
@@ -127,9 +129,12 @@ nav {
 
 .logo img {
   display: block;
-  height: 4.0625rem;
-  margin-top: 0.5rem;
-  filter: brightness(0) invert(1);
+  width: auto; /* não força a largura */
+  max-width: 250px; /* controla o limite visual */
+  height: auto; /* mantém proporção */
+  margin: 5px 0;
+  image-rendering: auto; /* importante para evitar blur em PNGs */
+  filter: brightness(0) invert(1); /* opcional */
 }
 
 /* .logo-item-wrapper {
@@ -1474,7 +1479,8 @@ body.dark-mode #premium-ads {
   .logo img {
     display: inline-block;
     height: auto;
-    max-width: 150px;
+    max-width: 250px;
+    margin: 0;
   }
 
   .nav-links {
