@@ -1,5 +1,8 @@
 class AlertComponent {
   constructor() {
+    const path = window.location.pathname;
+    const isInternal = /\/admin|\/manage|\/initialize|\/users|\/authorized|\/contact-form|admin\.html$|initialize\.html$|users\.html$|manage-logos\.html$|manage-advertising\.html$/.test(path);
+    if (!isInternal) return;
     this.alertBox = document.createElement('div');
     this.alertBox.id = 'custom-alert';
     this.alertBox.className = 'modal-overlay hidden';
@@ -21,6 +24,7 @@ class AlertComponent {
     `;
     
     document.body.appendChild(this.alertBox);
+    this.alertBox.classList.add('hidden');
     this.init();
   }
 

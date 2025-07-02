@@ -7,33 +7,6 @@ import { showAlert } from '../components/alert.js';
 const STORAGE_KEY = 'contactFormData';
 const categorySelect = document.getElementById("category-select");
 
-// Função para aplicar a cor predominante do logo como fundo do container
-//css logo-card ... opacity ... foi comentado
-
-//window.applyLogoBgColor = function(imgElement) {
-  // if (!window.ColorThief) return;
-  // const colorThief = new ColorThief();
-  // const card = imgElement.closest('.logo-card');
-  // const container = imgElement.closest('.logo-img-container');
-
-  // function setBg() {
-  //   try {
-  //     const color = colorThief.getColor(imgElement);
-  //     container.style.backgroundColor = `rgb(${color[0]},${color[1]},${color[2]})`;
-  //   } catch (e) {
-  //     container.style.backgroundColor = '#fff';
-  //   }
-  //   card.classList.add('visible');  // mostra o card só depois que a cor foi aplicada
-  // }
-
-  // if (imgElement.complete && imgElement.naturalHeight !== 0) {
-  //   requestAnimationFrame(setBg);
-  // } else {
-  //   imgElement.addEventListener('load', () => requestAnimationFrame(setBg), { once: true });
-  // }
-//};
-
-
 // Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
@@ -156,7 +129,7 @@ function createLogoCard(logo) {
 
       ${instagramUrl ? `<a class="instagram-btn" href="${instagramUrl}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ''}
       ${facebookUrl ? `<a class="facebook-btn" href="${facebookUrl}" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>` : ''}
-      ${youtubeUrl ? `<button class="video-btn" title="YouTube/Video" onclick="openYouTubePlayer('${youtubeUrl.replace(/'/g, "\\'")}')"><i class="fab fa-youtube"></i></button>` : ''}
+      ${youtubeUrl ? `<a class="youtube-btn" title="Assistir vídeo no YouTube" href="#" onclick="window.openYouTubePlayer('${youtubeUrl.replace(/'/g, "\\'")}');return false;"><i class="fab fa-youtube"></i></a>` : ''}
     </div>`;
   }
 

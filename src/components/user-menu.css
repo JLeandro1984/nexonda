@@ -5,8 +5,8 @@
 
 /* Estilo do ícone do avatar do usuário */
 .user-avatar {
-  width: 25px;
-  height: 25px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #007bff;
   color: white;
@@ -14,13 +14,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 /* Ícone dentro do avatar */
 .avatar-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   fill: white;
 }
 
@@ -93,4 +93,39 @@
 /* Ajustes no nome do usuário */
 .user-name-text {
   font-weight: bold;
+}
+
+/* Ajustar o botão de dark mode para 32x32px no header */
+.theme-toggle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.theme-toggle i {
+  font-size: 1.25rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle:hover {
+  background: #f1f1f1;
+}
+[data-theme="dark"] .theme-toggle:hover {
+  background: #232a36;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-left: auto;
 }

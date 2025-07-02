@@ -18,6 +18,14 @@
       href="./images/nexonda/favicon-16x16.png"
     />
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- CSS -->
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="stylesheet" href="./css/video-modal.css" />
@@ -38,19 +46,33 @@
     <link rel="stylesheet" href="./components/alert.css" />
   </head>
 
-  <body>
-    <header>
-      <nav>
-        <div class="logo">
-          <img src="./images/nexonda/logo_nexonda.svg" alt="Nexonda" />
+  <body id="index-page">
+    <!-- Header Moderno -->
+    <header class="modern-header">
+      <nav class="nav-container">
+        <div class="nav-brand">
+          <img
+            src="./images/nexonda/logo_nexonda.svg"
+            alt="Nexonda"
+            class="brand-logo"
+          />
         </div>
 
-        <div class="nav-links">
-          <a class="nav-menu" href="#gallery" data-lang="gallery">Galeria</a>
-          <a class="nav-menu" href="#about" data-lang="about">Sobre</a>
-          <a class="nav-menu" href="#contact" data-lang="contact">Contato</a>
+        <div class="nav-menu">
+          <a class="nav-link" href="#gallery" data-lang="gallery">
+            <i class="fas fa-images"></i>
+            <span>Galeria</span>
+          </a>
+          <a class="nav-link" href="#about" data-lang="about">
+            <i class="fas fa-info-circle"></i>
+            <span>Sobre</span>
+          </a>
+          <a class="nav-link" href="#contact" data-lang="contact">
+            <i class="fas fa-envelope"></i>
+            <span>Contato</span>
+          </a>
 
-          <!-- Seletor de Idiomas -->
+          <!-- Seletor de Idiomas (comentado) -->
           <!-- <div
             id="language-selector-container"
             class="language-selector d-none"
@@ -80,11 +102,22 @@
 
           <!-- Toggle Dark Mode -->
           <div class="dark-mode-toggle">
-            <button id="dark-mode-btn" aria-label="Alternar modo escuro">
+            <button
+              id="dark-mode-btn"
+              class="theme-toggle"
+              aria-label="Alternar modo escuro"
+            >
               <i class="fas fa-moon"></i>
             </button>
           </div>
         </div>
+
+        <!-- Menu Mobile -->
+        <button class="mobile-menu-toggle" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
 
         <!-- <div class="user-info d-none">
           <user-menu></user-menu>
@@ -92,104 +125,290 @@
       </nav>
     </header>
 
-    <main>
-      <section id="hero">
-        <h2 data-lang="hero-title">Descubra as Marcas que Lideram o Mercado</h2>
-        <p data-lang="hero-description">
-          Uma galeria interativa de logos corporativos que conecta você às
-          melhores empresas
-        </p>
+    <main class="main-content">
+      <!-- Hero Section Moderno -->
+      <section id="hero" class="hero-section">
+        <div class="hero-container">
+          <div class="hero-content">
+            <h1 class="hero-title" data-lang="hero-title">
+              Descubra as Marcas que Lideram o Mercado
+            </h1>
+            <p class="hero-description" data-lang="hero-description">
+              Uma galeria interativa de logos corporativos que conecta você às
+              melhores empresas
+            </p>
+            <div class="hero-actions">
+              <a href="#gallery" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Explorar Galeria
+              </a>
+              <a href="#contact" class="btn btn-secondary">
+                <i class="fas fa-plus"></i>
+                Adicionar Marca
+              </a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-cards">
+              <div class="floating-card card-1">
+                <i class="fas fa-building"></i>
+              </div>
+              <div class="floating-card card-2">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="floating-card card-3">
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOVA SEÇÃO DE VÍDEO DE PROPAGANDA -->
+      <section id="ads-video" class="ads-video-section premium-ad-experience">
+        <div class="ad-frame">
+          <div class="ad-media-container">
+            <video
+              id="adsRandomVideo"
+              autoplay
+              muted
+              preload="metadata"
+              playsinline
+            ></video>
+            <!-- <img src="..." alt="Propaganda" class="ad-img" /> -->
+            <!-- Remover botão de áudio -->
+            <!-- <button class="ad-btn ad-sound-btn" title="Ativar/Desativar som"> -->
+            <!--   <i class="fas fa-volume-up"></i> -->
+            <!-- </button> -->
+            <!-- Remover botão de próxima propaganda -->
+            <!-- <button class="ad-btn ad-next-btn" title="Próxima propaganda"> -->
+            <!--   <i class="fas fa-forward"></i> -->
+            <!-- </button> -->
+          </div>
+          <div class="ad-info-bar">
+            <div class="ad-info">
+              <span class="ad-title">Nome do Anunciante</span>
+              <span class="ad-slogan">Slogan ou chamada para ação</span>
+            </div>
+            <a href="#" class="ad-cta-btn">Saiba mais</a>
+          </div>
+        </div>
       </section>
 
       <!-- Seção de Propagandas Premium -->
-      <section id="premium-ads">
+      <section id="premium-ads" class="premium-section">
         <div class="container">
-          <h2 data-lang="premium-ads-title">Showroom de Destaques</h2>
+          <div class="section-header">
+            <h2 class="section-title" data-lang="premium-ads-title">
+              Showroom de Destaques
+            </h2>
+            <p class="section-subtitle">
+              As marcas mais visitadas da nossa galeria
+            </p>
+          </div>
           <div class="premium-ads-container">
             <!-- Carrossel de propagandas será carregado dinamicamente aqui -->
           </div>
         </div>
       </section>
 
-      <section id="search">
+      <!-- Seção de Busca Moderna -->
+      <section id="search" class="search-section">
         <div class="search-container">
-          <div class="search-box">
-            <input
-              type="text"
-              id="search-input"
-              data-lang-placeholder="search-by-name"
-              placeholder="Pesquisar por nome..."
-            />
-            <i class="fas fa-search"></i>
-          </div>
-          <div class="category-filter">
-            <div id="custom-category-select"></div>
+          <div class="search-header">
+            <h3 class="search-title">Encontre sua marca ideal</h3>
+            <p class="search-subtitle">
+              Filtre por nome, categoria ou localização
+            </p>
           </div>
 
-          <!-- Filtro por cidade/UF -->
-          <div class="search-box">
-            <input
-              type="text"
-              id="location-input"
-              placeholder="Buscar por cidade ou UF..."
-              autocomplete="off"
-            />
-            <i class="fas fa-map-marker-alt"></i>
-            <span id="clear-location" class="clear-icon" title="Limpar"
-              >&times;</span
-            >
-            <div id="suggestions-list" class="suggestions-list"></div>
-          </div>
+          <div class="search-grid">
+            <div class="search-box">
+              <div class="input-group">
+                <i class="fas fa-search input-icon"></i>
+                <input
+                  type="text"
+                  id="search-input"
+                  class="search-input"
+                  data-lang-placeholder="search-by-name"
+                  placeholder="Pesquisar por nome..."
+                />
+              </div>
+            </div>
 
-          <!-- Checkbox localização automática -->
-          <div class="location-toggle">
-            <label>
-              <input type="checkbox" id="use-location" />
-              Empresas da minha cidade
-            </label>
-            <span id="detected-city" class="city-info"
-              >Localização não informada</span
-            >
+            <div class="category-filter">
+              <div id="custom-category-select"></div>
+            </div>
+
+            <div class="search-box">
+              <div class="input-group">
+                <i class="fas fa-map-marker-alt input-icon"></i>
+                <input
+                  type="text"
+                  id="location-input"
+                  class="search-input"
+                  placeholder="Buscar por cidade ou UF..."
+                  autocomplete="off"
+                />
+                <span id="clear-location" class="clear-icon" title="Limpar">
+                  <i class="fas fa-times"></i>
+                </span>
+              </div>
+              <div id="suggestions-list" class="suggestions-list"></div>
+            </div>
+
+            <div class="location-toggle">
+              <label class="toggle-label">
+                <input type="checkbox" id="use-location" class="toggle-input" />
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">Empresas da minha cidade</span>
+              </label>
+              <span id="detected-city" class="city-info"
+                >Localização não informada</span
+              >
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="gallery">
-        <div
-          id="id-visitors-summary"
-          class="visitors-summary d-none"
-          style="font-size: 14px; color: #555; margin: 10px 20px"
-        >
-          👤 Você está entre os
-          <strong id="total-visitors">...</strong> exploradores que já passaram
-          por esta galeria!
-        </div>
+      <!-- Galeria Moderna -->
+      <section id="gallery" class="gallery-section">
         <div class="gallery-container" id="logo-container">
           <!-- Logos serão carregados dinamicamente aqui -->
         </div>
+
+        <div id="id-visitors-summary" class="visitors-summary d-none">
+          <div class="visitors-card">
+            <i class="fas fa-users"></i>
+            <span
+              >Você está entre os
+              <strong id="total-visitors">...</strong> exploradores que já
+              passaram por esta galeria!</span
+            >
+          </div>
+        </div>
       </section>
 
-      <section id="about">
-        <h2 data-lang="about-title">Sobre a Galeria</h2>
-        <p data-lang="about-description">
-          Nossa plataforma é o ponto de encontro entre grandes marcas e seu
-          público, oferecendo uma exposição visual de alto impacto que destaca
-          logos corporativos e fortalece conexões entre empresas e consumidores.
-        </p>
+      <!-- Seção Sobre Moderna -->
+      <section id="about" class="about-section">
+        <div class="container">
+          <div class="about-content">
+            <div class="about-text">
+              <h2 class="section-title" data-lang="about-title">
+                Sobre a Galeria
+              </h2>
+              <p class="section-description" data-lang="about-description">
+                Nossa plataforma é o ponto de encontro entre grandes marcas e
+                seu público, oferecendo uma exposição visual de alto impacto que
+                destaca logos corporativos e fortalece conexões entre empresas e
+                consumidores.
+              </p>
+              <div class="about-features">
+                <div class="feature-item">
+                  <i class="fas fa-eye"></i>
+                  <h4>Visibilidade</h4>
+                  <p>Exposição para milhares de visitantes</p>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-handshake"></i>
+                  <h4>Conectividade</h4>
+                  <p>Ligação direta com seu público</p>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-chart-bar"></i>
+                  <h4>Performance</h4>
+                  <p>Métricas detalhadas de engajamento</p>
+                </div>
+              </div>
+            </div>
+            <div class="about-visual">
+              <div class="stats-card">
+                <div class="stat-item">
+                  <span class="stat-number">1000+</span>
+                  <span class="stat-label">Marcas</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">50K+</span>
+                  <span class="stat-label">Visitantes</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">95%</span>
+                  <span class="stat-label">Satisfação</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section id="contact">
-        <h2 data-lang="contact-title">Entre em Contato</h2>
-        <p data-lang="contact-description">
-          Sua marca merece destaque! Apresente-a para novos públicos fazendo
-          parte da nossa galeria exclusiva. Entre em contato conosco!
-        </p>
-        <form id="contact-form">
-          <input type="text" placeholder="Nome" required />
-          <input type="email" placeholder="Email" required />
-          <textarea placeholder="Mensagem" required></textarea>
-          <button type="submit"><span data-lang="submit">Enviar</span></button>
-        </form>
+      <!-- Seção Contato Moderna -->
+      <section id="contact" class="contact-section">
+        <div class="container">
+          <div class="contact-content">
+            <div class="contact-info">
+              <h2 class="section-title" data-lang="contact-title">
+                Entre em Contato
+              </h2>
+              <p class="section-description" data-lang="contact-description">
+                Sua marca merece destaque! Apresente-a para novos públicos
+                fazendo parte da nossa galeria exclusiva.
+              </p>
+              <div class="contact-details">
+                <div class="contact-item">
+                  <i class="fas fa-envelope"></i>
+                  <div>
+                    <h4>Email</h4>
+                    <p>contato@nexonda.com</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-phone"></i>
+                  <div>
+                    <h4>Telefone</h4>
+                    <p>+55 (11) 99999-9999</p>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div>
+                    <h4>Localização</h4>
+                    <p>São Paulo, SP - Brasil</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form id="contact-form" class="contact-form">
+              <div class="form-group">
+                <input
+                  type="text"
+                  placeholder="Nome"
+                  required
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  class="form-input"
+                />
+              </div>
+              <div class="form-group">
+                <textarea
+                  placeholder="Mensagem"
+                  required
+                  class="form-textarea"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-paper-plane"></i>
+                <span data-lang="submit">Enviar Mensagem</span>
+              </button>
+            </form>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -210,19 +429,38 @@
         onclick="closeYouTubePlayer()"
         aria-label="Fechar vídeo"
       >
-        X
+        <i class="fas fa-times"></i>
       </button>
     </div>
 
-    <footer>
-      <p data-lang="footer-text">
-        &copy; 2025 Nexonda. Todos os direitos reservados. Nexonda - Conectando
-        marcas ao mundo.
-      </p>
-      <div class="footer-links">
-        <a href="./pages/privacy-policy.html" data-lang="privacy-policy"
-          >Política de Privacidade</a
-        >
+    <!-- Footer Moderno -->
+    <footer class="modern-footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img
+            src="./images/nexonda/logo_nexonda.svg"
+            alt="Nexonda"
+            class="footer-logo"
+          />
+          <p class="footer-tagline">Conectando marcas ao mundo</p>
+        </div>
+
+        <div class="footer-links">
+          <a
+            href="./pages/privacy-policy.html"
+            data-lang="privacy-policy"
+            class="footer-link"
+          >
+            <i class="fas fa-shield-alt"></i>
+            Política de Privacidade
+          </a>
+        </div>
+
+        <div class="footer-copyright">
+          <p data-lang="footer-text">
+            &copy; 2025 Nexonda. Todos os direitos reservados.
+          </p>
+        </div>
       </div>
     </footer>
 
@@ -248,5 +486,8 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <script type="module" src="./js/advertising.js"></script>
     <script type="module" src="./js/chatbot.js"></script>
+
+    <!-- Debug Script (remover em produção) -->
+    <script src="./js/debug.js"></script>
   </body>
 </html>

@@ -1079,6 +1079,7 @@ exports.publicPremiumAds = functions.https.onRequest({
               category: logo.category || logo.logoCategory || "",
               clientCity: logo.clientCity || "",
               clientUf: logo.clientUf || "",
+              planType: logo.planType || "",
             };
           })
           .filter(Boolean); // remove nulos (anúncios inativos ou com datas inválidas)

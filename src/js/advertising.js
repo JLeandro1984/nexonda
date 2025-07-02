@@ -6,6 +6,7 @@ let carouselInterval = null;
 let updateTimeout = null;
 const UPDATE_INTERVAL = 30000; // 30 segundos
 let currentAds = []; // Armazena os anúncios atuais
+window.currentAds = currentAds;
 
 // Função principal para carregar propagandas premium
 async function loadPremiumAds() {
@@ -26,6 +27,8 @@ async function loadPremiumAds() {
 
     // 3. Atualiza a referência dos anúncios atuais
     currentAds = activeAds;
+    window.currentAds = currentAds;
+    window.dispatchEvent(new Event('premiumAdsUpdated'));
 
     // Rastreia as impressões dos anúncios carregados
     trackImpressions(currentAds);

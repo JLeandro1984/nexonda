@@ -323,8 +323,31 @@ function renderLogos(list) {
         tbody.appendChild(row);
     });
     
+    // Totalizador do valor de contrato
+    const totalContrato = list.reduce((acc, logo) => {
+      let valor = 0;
+      if (logo.contractValue) {
+        // Aceita tanto número quanto string (com vírgula ou ponto)
+        valor = Number(String(logo.contractValue).replace(/\./g, '').replace(',', '.')) || 0;
+      }
+      return acc + valor;
+    }, 0);
+    const tfoot = document.createElement('tfoot');
+    tfoot.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: right; font-weight: 600; font-size: 1.08rem; color: var(--primary-color); background: #f6faff;">Total do Valor de Contrato:</td>
+        <td style="font-weight: bold; color: #2563eb; background: #f6faff;">R$ ${totalContrato.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="background: #f6faff;"></td>
+      </tr>
+    `;
+    table.appendChild(tfoot);
+
     table.appendChild(tbody);
-    logosGrid.appendChild(table);
+    
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'logos-table-responsive';
+    tableWrapper.appendChild(table);
+    logosGrid.appendChild(tableWrapper);
     
     console.log('Tabela de logotipos renderizada com sucesso');
 }
