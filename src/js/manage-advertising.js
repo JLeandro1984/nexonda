@@ -142,7 +142,19 @@ async function loadClientsFromFirestore() {
 if (adForm) {
     adForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-      debugger;
+        
+        // Validação adicional antes do envio
+        const selectedType = mediaTypeSelect.value;
+        const file = mediaInput.files[0];
+        
+        if (file) {
+            const validation = validateFileType(file, selectedType);
+            if (!validation.isValid) {
+                showAlert(validation.message, 'error');
+                return;
+            }
+        }
+        
         try {
             const formData = new FormData(adForm);
 
@@ -205,21 +217,82 @@ if (adImageInput) {
     });
 }
 
+// Função para validar tipo de arquivo
+function validateFileType(file, selectedType) {
+    const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const videoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/mkv', 'video/webm'];
+    
+    if (selectedType === 'image') {
+        if (!imageTypes.includes(file.type)) {
+            return {
+                isValid: false,
+                message: 'O arquivo selecionado não é uma imagem válida. Por favor, selecione um arquivo de imagem (JPG, PNG, GIF, WEBP).'
+            };
+        }
+    } else if (selectedType === 'video') {
+        if (!videoTypes.includes(file.type)) {
+            return {
+                isValid: false,
+                message: 'O arquivo selecionado não é um vídeo válido. Por favor, selecione um arquivo de vídeo (MP4, AVI, MOV, WMV, MKV, WEBM).'
+            };
+        }
+    }
+    
+    return { isValid: true };
+}
+
+// Validação quando o tipo de mídia é alterado
+if (mediaTypeSelect) {
+    mediaTypeSelect.addEventListener("change", (event) => {
+        const selectedType = event.target.value;
+        const file = mediaInput.files[0];
+        
+        if (file) {
+            const validation = validateFileType(file, selectedType);
+            if (!validation.isValid) {
+                showAlert(validation.message, 'error');
+                // Limpa o input de arquivo
+                mediaInput.value = '';
+                // Limpa o preview
+                if (previewContainer) previewContainer.innerHTML = '';
+                // Limpa a URL
+                if (mediaUrlInput) mediaUrlInput.value = '';
+            }
+        }
+    });
+}
+
 // Upload de imagem/vídeo para Firebase Storage
 if (mediaInput) {
     mediaInput.addEventListener("change", async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        const type = mediaTypeSelect.value;
+        
+        const selectedType = mediaTypeSelect.value;
+        
+        // Valida o tipo de arquivo
+        const validation = validateFileType(file, selectedType);
+        if (!validation.isValid) {
+            showAlert(validation.message, 'error');
+            // Limpa o input de arquivo
+            event.target.value = '';
+            // Limpa o preview
+            if (previewContainer) previewContainer.innerHTML = '';
+            return;
+        }
+        
         try {
             // Faz upload para Firebase Storage
             const { url, fullPath } = await uploadToFirebaseStorage(file, "ads");
             if (mediaUrlInput) mediaUrlInput.value = url;
             // Salva o caminho completo para possível exclusão futura
             mediaInput.dataset.storagePath = fullPath;
-            showMediaPreview(previewContainer, url, type);
+            showMediaPreview(previewContainer, url, selectedType);
+            showAlert('Arquivo enviado com sucesso!', 'success');
         } catch (error) {
             showAlert('Erro ao fazer upload da mídia: ' + error.message, 'error');
+            // Limpa o input em caso de erro
+            event.target.value = '';
         }
     });
 }

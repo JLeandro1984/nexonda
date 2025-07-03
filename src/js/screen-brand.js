@@ -114,9 +114,11 @@ function createLogoCard(logo) {
   //const elementClicks = `${logo.clicks > 100 ? `<div class="logo-views-overlay d-none"><i class="far fa-eye"></i> ${formatarNumeroAbreviado(logo.clicks)}</div>` : ''}` 
   const elementClicks = ""; 
 
-  // Monta botões sociais se houver URL
+  // Monta botões sociais se houver URL e não for plano básico
   let socialButtons = '';
-  if (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl) {
+  const isBasicPlan = (logo.planType || '').toLowerCase() === 'basico';
+  
+  if (!isBasicPlan && (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl)) {
     socialButtons = `<div class="btn-container" style="margin-top: 10px;">
    
     ${whatsappUrl

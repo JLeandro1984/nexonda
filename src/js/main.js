@@ -343,6 +343,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   images.forEach(img => imageObserver.observe(img));
+  
+  // Carrega os logotipos premium
+  loadPremiumLogos();
 });
 
 // ===== FUNCIONALIDADES EXISTENTES (MANTIDAS) =====
@@ -428,5 +431,72 @@ function setupAdsVideoPlayer() {
 }
 
 document.addEventListener('DOMContentLoaded', setupAdsVideoPlayer);
+
+// ===== PREMIUM LOGOS SECTION =====
+async function loadPremiumLogos() {
+  try {
+    const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao carregar logotipos');
+    }
+
+    const logos = await response.json();
+    const premiumLogos = Array.isArray(logos) ? logos.filter(logo => 
+      logo.planType === 'premium-plus' || logo.planType === 'premium'
+    ) : [];
+
+    // Ordena: primeiro premium-plus, depois premium
+    premiumLogos.sort((a, b) => {
+      if (a.planType === 'premium-plus' && b.planType !== 'premium-plus') return -1;
+      if (a.planType !== 'premium-plus' && b.planType === 'premium-plus') return 1;
+      return 0;
+    });
+
+    displayPremiumLogos(premiumLogos);
+  } catch (error) {
+    console.error('Erro ao carregar logotipos premium:', error);
+  }
+}
+
+function displayPremiumLogos(logos) {
+  const container = document.getElementById('premium-logos-grid');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  logos.forEach(logo => {
+    if (logo.imageUrl) {
+      const logoItem = document.createElement('div');
+      logoItem.className = 'premium-logo-item';
+      
+      const img = document.createElement('img');
+      img.src = logo.imageUrl;
+      img.alt = logo.clientFantasyName || 'Logo Premium';
+      img.loading = 'lazy';
+      
+      // Adiciona link para o website se disponível
+      if (logo.clientWebsite || logo.websiteUrl) {
+        const link = document.createElement('a');
+        link.href = logo.clientWebsite || logo.websiteUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.appendChild(img);
+        logoItem.appendChild(link);
+      } else {
+        logoItem.appendChild(img);
+      }
+      
+      container.appendChild(logoItem);
+    }
+  });
+}
+
+
 
 

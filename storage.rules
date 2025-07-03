@@ -31,10 +31,10 @@ service firebase.storage {
       allow write, delete: if 
         // Verifica se é uma imagem ou vídeo válido
         (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*')) &&
-        // Verifica se o tamanho é menor que 50MB (vídeos podem ser maiores)
-        request.resource.size < 50 * 1024 * 1024 &&
-        // Verifica se o nome do arquivo é válido
-        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv)$');
+        // Verifica se o tamanho é menor que 100MB (aumentado para vídeos maiores)
+        request.resource.size < 100 * 1024 * 1024 &&
+        // Verifica se o nome do arquivo é válido (mais flexível)
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv|mkv|webm)$');
     }
 
     // Permite upload para pasta pública de ads (fallback)
@@ -42,11 +42,16 @@ service firebase.storage {
       allow read: if true;
       allow write, delete: if 
         (request.resource.contentType.matches('image/.*') || request.resource.contentType.matches('video/.*')) &&
-        request.resource.size < 50 * 1024 * 1024 &&
-        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv)$');
+        request.resource.size < 100 * 1024 * 1024 &&
+        request.resource.name.matches('.*\\.(jpg|jpeg|png|gif|webp|mp4|avi|mov|wmv|mkv|webm)$');
     }
 
-    // Bloqueia tudo fora das pastas "logos" e "ads"
+    // Permite upload para pasta temporária (para testes)
+    match /temp/{allPaths=**} {
+      allow read, write, delete: if true;
+    }
+
+    // Bloqueia tudo fora das pastas "logos", "ads" e "temp"
     match /{allPaths=**} {
       allow read, write: if false;
     }
