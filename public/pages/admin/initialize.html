@@ -157,7 +157,8 @@
       // Configuração do Google Sign-In
       const clientId =
         "1014308588575-k68riqpgl9l0isqm33iral0i9eu9u7pp.apps.googleusercontent.com";
-      const redirectUri = "http://127.0.0.1:5500/src/page/auth-callback.html";
+      const redirectUri =
+        "http://127.0.0.1:5500/public/page/auth-callback.html";
       let messageListener = null;
 
       // Função para decodificar o token JWT
@@ -253,7 +254,7 @@
 
             if (isAdmin) {
               // Se já é admin, redireciona para o painel
-              window.location.href = "/src/page/admin/admin.html";
+              window.location.href = "/public/page/admin/admin.html";
             } else {
               // Se não é admin, mostra o botão de inicialização
               document.getElementById("loginSection").style.display = "none";
@@ -312,7 +313,7 @@
 
           // Redireciona para o painel admin após 2 segundos
           setTimeout(() => {
-            window.location.href = "/src/page/admin/admin.html";
+            window.location.href = "/public/page/admin/admin.html";
           }, 2000);
         } catch (err) {
           error.textContent = err.message;
@@ -328,7 +329,7 @@
         if (token) {
           const isAdmin = await checkIfAdmin(token);
           if (isAdmin) {
-            window.location.href = "/src/page/admin/admin.html";
+            window.location.href = "/public/page/admin/admin.html";
           } else {
             document.getElementById("loginSection").style.display = "none";
             document.getElementById("adminSection").style.display = "block";
