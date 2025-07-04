@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nexonda - Conectando marcas ao mundo</title>
+    <title>NEXONDA - Em Breve</title>
     <link rel="icon" href="./images/nexonda/favicon.ico" type="image/x-icon" />
     <link
       rel="icon"
@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -44,465 +44,605 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="./components/user-menu.js"></script>
     <link rel="stylesheet" href="./components/alert.css" />
+
+    <style>
+      /* Reset e configurações básicas */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-color: #1a5fb4;
+        --secondary-color: #2a7bff;
+        --accent-color: #00d4ff;
+        --text-light: #ffffff;
+        --text-dark: #1a1a1a;
+        --bg-dark: #0a0a0a;
+        --bg-gradient: linear-gradient(
+          135deg,
+          #1a5fb4 0%,
+          #2a7bff 50%,
+          #00d4ff 100%
+        );
+        --shadow-glow: 0 0 30px rgba(42, 123, 255, 0.3);
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-light);
+        overflow-x: hidden;
+        line-height: 1.6;
+      }
+
+      /* Container principal */
+      .launch-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        background: radial-gradient(
+          circle at center,
+          rgba(42, 123, 255, 0.1) 0%,
+          transparent 70%
+        );
+      }
+
+      /* Partículas de fundo */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        opacity: 0.6;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      /* Logo e conteúdo principal */
+      .main-content {
+        text-align: center;
+        z-index: 10;
+        position: relative;
+        padding: 2rem;
+        max-width: 800px;
+      }
+
+      .logo-container {
+        margin-bottom: 3rem;
+        position: relative;
+      }
+
+      .logo {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        background: var(--bg-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-glow);
+        animation: pulse 2s ease-in-out infinite;
+        position: relative;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        inset: -2px;
+        background: var(--bg-gradient);
+        border-radius: 50%;
+        z-index: -1;
+        animation: rotate 3s linear infinite;
+      }
+
+      .logo-text {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        font-family: "Playfair Display", serif;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Título principal */
+      .main-title {
+        font-family: "Playfair Display", serif;
+        font-size: clamp(2.5rem, 8vw, 4.5rem);
+        font-weight: 700;
+        background: var(--bg-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+        animation: slideInUp 1s ease-out;
+      }
+
+      .subtitle {
+        font-size: clamp(1.1rem, 3vw, 1.5rem);
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 2rem;
+        font-weight: 300;
+        animation: slideInUp 1s ease-out 0.2s both;
+      }
+
+      /* Contador regressivo */
+      .countdown {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 3rem 0;
+        animation: slideInUp 1s ease-out 0.4s both;
+      }
+
+      .countdown-item {
+        text-align: center;
+        min-width: 80px;
+      }
+
+      .countdown-number {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 700;
+        color: var(--accent-color);
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .countdown-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Botão de notificação */
+      .notify-btn {
+        background: var(--bg-gradient);
+        color: var(--text-light);
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        box-shadow: var(--shadow-glow);
+        margin: 2rem 0;
+        animation: slideInUp 1s ease-out 0.6s both;
+      }
+
+      .notify-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 40px rgba(42, 123, 255, 0.4);
+      }
+
+      .notify-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Formulário de email */
+      .email-form {
+        display: flex;
+        gap: 1rem;
+        max-width: 400px;
+        margin: 0 auto;
+        animation: slideInUp 1s ease-out 0.8s both;
+      }
+
+      .email-input {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: var(--transition-smooth);
+      }
+
+      .email-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .email-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .submit-btn {
+        padding: 1rem 2rem;
+        background: var(--accent-color);
+        color: var(--text-dark);
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+      }
+
+      .submit-btn:hover {
+        background: #00b8e6;
+        transform: translateY(-2px);
+      }
+
+      /* Redes sociais */
+      .social-links {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 3rem;
+        animation: slideInUp 1s ease-out 1s both;
+      }
+
+      .social-link {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        text-decoration: none;
+        transition: var(--transition-smooth);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .social-link:hover {
+        background: var(--bg-gradient);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow);
+      }
+
+      /* Footer */
+      .footer {
+        position: absolute;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        animation: fadeIn 1s ease-out 1.2s both;
+      }
+
+      /* Animações */
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Responsividade */
+      @media (max-width: 768px) {
+        .countdown {
+          gap: 1rem;
+        }
+
+        .countdown-item {
+          min-width: 60px;
+        }
+
+        .email-form {
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .main-content {
+          padding: 1rem;
+        }
+
+        .logo {
+          width: 100px;
+          height: 100px;
+        }
+
+        .logo-text {
+          font-size: 2rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .countdown {
+          gap: 0.5rem;
+        }
+
+        .countdown-item {
+          min-width: 50px;
+        }
+
+        .countdown-number {
+          font-size: 1.5rem;
+        }
+
+        .countdown-label {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* Estados de loading e sucesso */
+      .loading {
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .success-message {
+        color: #00ff88;
+        font-weight: 500;
+        margin-top: 1rem;
+        animation: slideInUp 0.5s ease-out;
+      }
+
+      .error-message {
+        color: #ff6b6b;
+        font-weight: 500;
+        margin-top: 1rem;
+        animation: slideInUp 0.5s ease-out;
+      }
+    </style>
   </head>
 
   <body id="index-page">
-    <!-- Header Moderno -->
-    <header class="modern-header">
-      <nav class="nav-container">
-        <div class="nav-brand">
-          <img
-            src="./images/nexonda/logo_nexonda.svg"
-            alt="Nexonda"
-            class="brand-logo"
-          />
-        </div>
+    <div class="launch-container">
+      <!-- Partículas de fundo -->
+      <div class="particles" id="particles"></div>
 
-        <div class="nav-menu">
-          <a class="nav-link" href="#gallery" data-lang="gallery">
-            <i class="fas fa-images"></i>
-            <span>Galeria</span>
-          </a>
-          <a class="nav-link" href="#about" data-lang="about">
-            <i class="fas fa-info-circle"></i>
-            <span>Sobre</span>
-          </a>
-          <a class="nav-link" href="#contact" data-lang="contact">
-            <i class="fas fa-envelope"></i>
-            <span>Contato</span>
-          </a>
-
-          <!-- Seletor de Idiomas (comentado) -->
-          <!-- <div
-            id="language-selector-container"
-            class="language-selector d-none"
-          >
-            <button id="language-button" class="language-button">
-              <img
-                id="current-flag"
-                src="./images/flags/br.png"
-                alt="Current Language"
-              />
-            </button>
-            <div class="language-options">
-              <div class="language-option" data-lang-code="pt-BR">
-                <img src="./images/flags/br.png" alt="Português" />
-                <span data-lang="language-portuguese">Português</span>
-              </div>
-              <div class="language-option" data-lang-code="en-US">
-                <img src="./images/flags/us.png" alt="English" />
-                <span data-lang="language-english">English</span>
-              </div>
-              <div class="language-option" data-lang-code="es-MX">
-                <img src="./images/flags/mx.png" alt="Español" />
-                <span data-lang="language-spanish">Español</span>
-              </div>
-            </div>
-          </div> -->
-
-          <!-- Toggle Dark Mode -->
-          <div class="dark-mode-toggle">
-            <button
-              id="dark-mode-btn"
-              class="theme-toggle"
-              aria-label="Alternar modo escuro"
-            >
-              <i class="fas fa-moon"></i>
-            </button>
+      <!-- Conteúdo principal -->
+      <div class="main-content">
+        <div class="logo-container">
+          <div class="logo">
+            <span class="logo-text">N</span>
           </div>
         </div>
 
-        <!-- Menu Mobile -->
-        <button class="mobile-menu-toggle" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
+        <h1 class="main-title">NEXONDA</h1>
+        <p class="subtitle">Transformando ideias em realidade digital</p>
+
+        <!-- Contador regressivo -->
+        <div class="countdown" id="countdown">
+          <div class="countdown-item">
+            <span class="countdown-number" id="days">00</span>
+            <span class="countdown-label">Dias</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-number" id="hours">00</span>
+            <span class="countdown-label">Horas</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-number" id="minutes">00</span>
+            <span class="countdown-label">Minutos</span>
+          </div>
+          <div class="countdown-item">
+            <span class="countdown-number" id="seconds">00</span>
+            <span class="countdown-label">Segundos</span>
+          </div>
+        </div>
+
+        <button class="notify-btn" onclick="toggleEmailForm()">
+          Notifique-me quando estiver pronto
         </button>
 
-        <!-- <div class="user-info d-none">
-          <user-menu></user-menu>
-        </div> -->
-      </nav>
-    </header>
-
-    <main class="main-content">
-      <!-- Hero Section Moderno -->
-      <section id="hero" class="hero-section">
-        <div class="hero-container">
-          <div class="hero-content">
-            <h1 class="hero-title" data-lang="hero-title">
-              Descubra as Marcas que Lideram o Mercado
-            </h1>
-            <p class="hero-description" data-lang="hero-description">
-              Uma galeria interativa de logos corporativos que conecta você às
-              melhores empresas
-            </p>
-            <div class="hero-actions">
-              <a href="#gallery" class="btn btn-primary">
-                <i class="fas fa-search"></i>
-                Explorar Galeria
-              </a>
-              <a href="#contact" class="btn btn-secondary">
-                <i class="fas fa-plus"></i>
-                Adicionar Marca
-              </a>
-            </div>
-          </div>
-          <div class="hero-visual">
-            <div class="hero-cards">
-              <div class="floating-card card-1">
-                <i class="fas fa-building"></i>
-              </div>
-              <div class="floating-card card-2">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <div class="floating-card card-3">
-                <i class="fas fa-star"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- NOVA SEÇÃO DE VÍDEO DE PROPAGANDA -->
-      <section id="ads-video" class="ads-video-section premium-ad-experience">
-        <div class="ad-frame">
-          <div class="ad-media-container">
-            <video
-              id="adsRandomVideo"
-              autoplay
-              muted
-              preload="metadata"
-              playsinline
-            ></video>
-            <!-- <img src="..." alt="Propaganda" class="ad-img" /> -->
-            <!-- Remover botão de áudio -->
-            <!-- <button class="ad-btn ad-sound-btn" title="Ativar/Desativar som"> -->
-            <!--   <i class="fas fa-volume-up"></i> -->
-            <!-- </button> -->
-            <!-- Remover botão de próxima propaganda -->
-            <!-- <button class="ad-btn ad-next-btn" title="Próxima propaganda"> -->
-            <!--   <i class="fas fa-forward"></i> -->
-            <!-- </button> -->
-          </div>
-          <div class="ad-info-bar">
-            <div class="ad-info">
-              <span class="ad-title">Nome do Anunciante</span>
-              <span class="ad-slogan">Slogan ou chamada para ação</span>
-            </div>
-            <a href="#" class="ad-cta-btn">Saiba mais</a>
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção de Logotipos Premium -->
-      <section id="premium-logos" class="premium-logos-section">
-        <div class="container">
-          <div class="section-header">
-            <h2 class="section-title">Marcas Premium</h2>
-            <p class="section-subtitle">
-              Conheça as empresas que fazem parte do nosso seleto grupo premium
-            </p>
-          </div>
-          <div class="premium-logos-container" id="premium-logos-grid">
-            <!-- Logotipos premium serão carregados dinamicamente aqui -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção de Propagandas Premium -->
-      <section id="premium-ads" class="premium-section">
-        <div class="container">
-          <div class="section-header">
-            <h2 class="section-title" data-lang="premium-ads-title">
-              Showroom de Destaques
-            </h2>
-            <p class="section-subtitle">
-              As marcas mais visitadas da nossa galeria
-            </p>
-          </div>
-          <div class="premium-ads-container">
-            <!-- Carrossel de propagandas será carregado dinamicamente aqui -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção de Busca Moderna -->
-      <section id="search" class="search-section">
-        <div class="search-container">
-          <div class="search-header">
-            <h3 class="search-title">Encontre sua marca ideal</h3>
-            <p class="search-subtitle">
-              Filtre por nome, categoria ou localização
-            </p>
-          </div>
-
-          <div class="search-grid">
-            <div class="search-box">
-              <div class="input-group">
-                <i class="fas fa-search input-icon"></i>
-                <input
-                  type="text"
-                  id="search-input"
-                  class="search-input"
-                  data-lang-placeholder="search-by-name"
-                  placeholder="Pesquisar por nome..."
-                />
-              </div>
-            </div>
-
-            <div class="category-filter">
-              <div id="custom-category-select"></div>
-            </div>
-
-            <div class="search-box">
-              <div class="input-group">
-                <i class="fas fa-map-marker-alt input-icon"></i>
-                <input
-                  type="text"
-                  id="location-input"
-                  class="search-input"
-                  placeholder="Buscar por cidade ou UF..."
-                  autocomplete="off"
-                />
-                <span id="clear-location" class="clear-icon" title="Limpar">
-                  <i class="fas fa-times"></i>
-                </span>
-              </div>
-              <div id="suggestions-list" class="suggestions-list"></div>
-            </div>
-
-            <div class="location-toggle">
-              <label class="toggle-label">
-                <input type="checkbox" id="use-location" class="toggle-input" />
-                <span class="toggle-slider"></span>
-                <span class="toggle-text">Empresas da minha cidade</span>
-              </label>
-              <span id="detected-city" class="city-info"
-                >Localização não informada</span
-              >
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Galeria Moderna -->
-      <section id="gallery" class="gallery-section">
-        <div class="gallery-container" id="logo-container">
-          <!-- Logos serão carregados dinamicamente aqui -->
-        </div>
-
-        <div id="id-visitors-summary" class="visitors-summary d-none">
-          <div class="visitors-card">
-            <i class="fas fa-users"></i>
-            <span
-              >Você está entre os
-              <strong id="total-visitors">...</strong> exploradores que já
-              passaram por esta galeria!</span
-            >
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção Sobre Moderna -->
-      <section id="about" class="about-section">
-        <div class="container">
-          <div class="about-content">
-            <div class="about-text">
-              <h2 class="section-title" data-lang="about-title">
-                Sobre a Galeria
-              </h2>
-              <p class="section-description" data-lang="about-description">
-                Nossa plataforma é o ponto de encontro entre grandes marcas e
-                seu público, oferecendo uma exposição visual de alto impacto que
-                destaca logos corporativos e fortalece conexões entre empresas e
-                consumidores.
-              </p>
-              <div class="about-features">
-                <div class="feature-item">
-                  <i class="fas fa-eye"></i>
-                  <h4>Visibilidade</h4>
-                  <p>Exposição para milhares de visitantes</p>
-                </div>
-                <div class="feature-item">
-                  <i class="fas fa-handshake"></i>
-                  <h4>Conectividade</h4>
-                  <p>Ligação direta com seu público</p>
-                </div>
-                <div class="feature-item">
-                  <i class="fas fa-chart-bar"></i>
-                  <h4>Performance</h4>
-                  <p>Métricas detalhadas de engajamento</p>
-                </div>
-              </div>
-            </div>
-            <div class="about-visual">
-              <div class="stats-card">
-                <div class="stat-item">
-                  <span class="stat-number">1000+</span>
-                  <span class="stat-label">Marcas</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">50K+</span>
-                  <span class="stat-label">Visitantes</span>
-                </div>
-                <div class="stat-item">
-                  <span class="stat-number">95%</span>
-                  <span class="stat-label">Satisfação</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção Contato Moderna -->
-      <section id="contact" class="contact-section">
-        <div class="container">
-          <div class="contact-content">
-            <div class="contact-info">
-              <h2 class="section-title" data-lang="contact-title">
-                Entre em Contato
-              </h2>
-              <p class="section-description" data-lang="contact-description">
-                Sua marca merece destaque! Apresente-a para novos públicos
-                fazendo parte da nossa galeria exclusiva.
-              </p>
-              <div class="contact-details">
-                <div class="contact-item">
-                  <i class="fas fa-envelope"></i>
-                  <div>
-                    <h4>Email</h4>
-                    <p>contato@nexonda.com</p>
-                  </div>
-                </div>
-                <div class="contact-item">
-                  <i class="fas fa-phone"></i>
-                  <div>
-                    <h4>Telefone</h4>
-                    <p>+55 (11) 99999-9999</p>
-                  </div>
-                </div>
-                <div class="contact-item">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <div>
-                    <h4>Localização</h4>
-                    <p>São Paulo, SP - Brasil</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <form id="contact-form" class="contact-form">
-              <div class="form-group">
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  required
-                  class="form-input"
-                />
-              </div>
-              <div class="form-group">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  required
-                  class="form-input"
-                />
-              </div>
-              <div class="form-group">
-                <textarea
-                  placeholder="Mensagem"
-                  required
-                  class="form-textarea"
-                ></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary btn-full">
-                <i class="fas fa-paper-plane"></i>
-                <span data-lang="submit">Enviar Mensagem</span>
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Modal Vídeo -->
-    <div id="youtube-overlay" class="d-none"></div>
-    <div id="youtube-modal" class="d-none">
-      <div
-        id="youtube-player"
-        style="display: none; width: 100%; height: 100%"
-      ></div>
-      <video
-        id="custom-video-player"
-        style="display: none; width: 100%; height: 100%"
-        controls
-      ></video>
-      <button
-        class="close-btn"
-        onclick="closeYouTubePlayer()"
-        aria-label="Fechar vídeo"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-
-    <!-- Footer Moderno -->
-    <footer class="modern-footer">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <img
-            src="./images/nexonda/logo_nexonda.svg"
-            alt="Nexonda"
-            class="footer-logo"
+        <!-- Formulário de email -->
+        <form class="email-form" id="emailForm" style="display: none">
+          <input
+            type="email"
+            class="email-input"
+            placeholder="Seu melhor email"
+            required
           />
-          <p class="footer-tagline">Conectando marcas ao mundo</p>
-        </div>
+          <button type="submit" class="submit-btn">Enviar</button>
+        </form>
 
-        <div class="footer-links">
-          <a
-            href="./pages/privacy-policy.html"
-            data-lang="privacy-policy"
-            class="footer-link"
-          >
-            <i class="fas fa-shield-alt"></i>
-            Política de Privacidade
+        <!-- Redes sociais -->
+        <div class="social-links">
+          <a href="#" class="social-link" title="LinkedIn">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+              />
+            </svg>
+          </a>
+          <a href="#" class="social-link" title="Instagram">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.781c-.49 0-.928-.175-1.297-.49-.368-.315-.49-.753-.49-1.243 0-.49.122-.928.49-1.243.369-.315.807-.49 1.297-.49s.928.175 1.297.49c.368.315.49.753.49 1.243 0 .49-.122.928-.49 1.243-.369.315-.807.49-1.297.49z"
+              />
+            </svg>
+          </a>
+          <a href="#" class="social-link" title="Twitter">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"
+              />
+            </svg>
           </a>
         </div>
-
-        <div class="footer-copyright">
-          <p data-lang="footer-text">
-            &copy; 2025 Nexonda. Todos os direitos reservados.
-          </p>
-        </div>
       </div>
-    </footer>
 
-    <!-- Container de Botões Flutuantes -->
-    <div class="floating-buttons-container">
-      <a
-        href="#"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="floating-btn whatsapp-float"
-        aria-label="Contato WhatsApp"
-      >
-        <i class="fab fa-whatsapp"></i>
-      </a>
+      <!-- Footer -->
+      <div class="footer">
+        <p>&copy; 2024 Nexonda. Todos os direitos reservados.</p>
+      </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
-    <script type="module" src="./js/screen-brand.js"></script>
-    <script type="module" src="./js/main.js"></script>
-    <script src="./js/click-tracker.js" defer></script>
-    <script type="module" src="./js/youtube-api.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script type="module" src="./js/advertising.js"></script>
-    <script type="module" src="./js/chatbot.js"></script>
+    <script>
+      // Data de lançamento (ajuste conforme necessário)
+      const launchDate = new Date("2024-12-31T23:59:59").getTime();
 
-    <!-- Debug Script (remover em produção) -->
-    <script src="./js/debug.js"></script>
+      // Contador regressivo
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = launchDate - now;
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days").textContent = days
+          .toString()
+          .padStart(2, "0");
+        document.getElementById("hours").textContent = hours
+          .toString()
+          .padStart(2, "0");
+        document.getElementById("minutes").textContent = minutes
+          .toString()
+          .padStart(2, "0");
+        document.getElementById("seconds").textContent = seconds
+          .toString()
+          .padStart(2, "0");
+
+        if (distance < 0) {
+          document.getElementById("countdown").innerHTML =
+            "<h2>Estamos no ar!</h2>";
+        }
+      }
+
+      // Atualiza o contador a cada segundo
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+
+      // Criação de partículas
+      function createParticles() {
+        const particlesContainer = document.getElementById("particles");
+        const particleCount = 50;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+          particle.style.left = Math.random() * 100 + "%";
+          particle.style.top = Math.random() * 100 + "%";
+          particle.style.animationDelay = Math.random() * 6 + "s";
+          particle.style.animationDuration = Math.random() * 3 + 3 + "s";
+          particlesContainer.appendChild(particle);
+        }
+      }
+
+      // Toggle do formulário de email
+      function toggleEmailForm() {
+        const form = document.getElementById("emailForm");
+        const btn = document.querySelector(".notify-btn");
+
+        if (form.style.display === "none") {
+          form.style.display = "flex";
+          btn.textContent = "Cancelar";
+          btn.style.background = "rgba(255, 255, 255, 0.1)";
+        } else {
+          form.style.display = "none";
+          btn.textContent = "Notifique-me quando estiver pronto";
+          btn.style.background = "var(--bg-gradient)";
+        }
+      }
+
+      // Manipulação do formulário
+      document
+        .getElementById("emailForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          const email = this.querySelector(".email-input").value;
+          const submitBtn = this.querySelector(".submit-btn");
+          const originalText = submitBtn.textContent;
+
+          // Simula envio
+          submitBtn.textContent = "Enviando...";
+          submitBtn.classList.add("loading");
+
+          setTimeout(() => {
+            submitBtn.textContent = "Enviado!";
+            submitBtn.style.background = "#00ff88";
+            submitBtn.style.color = "#000";
+
+            // Limpa o formulário
+            this.querySelector(".email-input").value = "";
+
+            setTimeout(() => {
+              submitBtn.textContent = originalText;
+              submitBtn.classList.remove("loading");
+              submitBtn.style.background = "";
+              submitBtn.style.color = "";
+              this.style.display = "none";
+
+              const btn = document.querySelector(".notify-btn");
+              btn.textContent = "Notifique-me quando estiver pronto";
+              btn.style.background = "var(--bg-gradient)";
+            }, 2000);
+          }, 1500);
+        });
+
+      // Inicialização
+      document.addEventListener("DOMContentLoaded", function () {
+        createParticles();
+      });
+
+      // Efeito de parallax sutil no scroll
+      window.addEventListener("scroll", function () {
+        const scrolled = window.pageYOffset;
+        const particles = document.querySelector(".particles");
+        particles.style.transform = `translateY(${scrolled * 0.5}px)`;
+      });
+    </script>
   </body>
 </html>
