@@ -497,6 +497,153 @@
         margin-top: 1rem;
         animation: slideInUp 0.5s ease-out;
       }
+
+      /* Seção de conteúdo */
+      .content-section {
+        max-width: 800px;
+        margin: 4rem auto 3rem;
+        padding: 0 2rem;
+        animation: slideInUp 1s ease-out 0.6s both;
+      }
+
+      .text-content {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(42, 123, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .text-content p {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: left;
+      }
+
+      .text-content p:last-child {
+        margin-bottom: 0;
+      }
+
+      .highlight-text {
+        font-size: 1.3rem !important;
+        font-weight: 600;
+        color: var(--accent-color) !important;
+        text-align: center !important;
+        margin-bottom: 2rem !important;
+      }
+
+      .brand-signature {
+        font-size: 1.2rem !important;
+        font-weight: 500;
+        color: var(--text-light) !important;
+        text-align: center !important;
+        font-style: italic;
+        margin-top: 2rem !important;
+      }
+
+      /* Player de áudio */
+      .audio-player {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .audio-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .audio-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--bg-gradient);
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-smooth);
+        box-shadow: 0 4px 15px rgba(42, 123, 255, 0.3);
+      }
+
+      .audio-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(42, 123, 255, 0.4);
+      }
+
+      .audio-btn.playing {
+        background: #00ff88;
+        color: var(--text-dark);
+      }
+
+      .audio-info {
+        flex: 1;
+      }
+
+      .audio-title {
+        display: block;
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 0.5rem;
+      }
+
+      .audio-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .progress-bar {
+        flex: 1;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--accent-color);
+        width: 0%;
+        transition: width 0.1s ease;
+      }
+
+      .audio-time {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        min-width: 40px;
+      }
+
+      @media (max-width: 768px) {
+        .content-section {
+          padding: 0 1rem;
+          margin: 3rem auto 2rem;
+        }
+
+        .text-content {
+          padding: 2rem 1.5rem;
+        }
+
+        .text-content p {
+          font-size: 1rem;
+        }
+
+        .highlight-text {
+          font-size: 1.2rem !important;
+        }
+
+        .audio-controls {
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+      }
     </style>
   </head>
 
@@ -543,6 +690,78 @@
           <div class="countdown-item">
             <span class="countdown-number" id="seconds">00</span>
             <span class="countdown-label">Segundos</span>
+          </div>
+        </div>
+
+        <!-- Seção de texto profissional -->
+        <div class="content-section">
+          <div class="text-content">
+            <p class="highlight-text">
+              Já reparou como algumas marcas simplesmente se destacam?
+            </p>
+
+            <p>
+              Não é sorte. É estratégia. É saber onde estar — e com quem falar.
+            </p>
+
+            <p>
+              Num mundo cada vez mais conectado, sua empresa precisa mais do que
+              apenas um cartão de visitas.
+            </p>
+
+            <p>
+              Ela precisa aparecer, encantar, e se posicionar com inteligência.
+            </p>
+
+            <p>
+              E isso começa entendendo o mercado:<br />
+              Saber quem é seu público, como se comporta, o que procura...<br />
+              Descobrir o que os concorrentes estão fazendo — e fazer melhor.
+            </p>
+
+            <p>
+              Essa é a inteligência de mercado: usar informações certas, no
+              momento certo, para atrair as oportunidades certas.
+            </p>
+
+            <p>
+              Com o Nexonda, sua empresa ganha presença digital, visibilidade
+              real e se conecta com quem realmente importa.
+            </p>
+
+            <p class="highlight-text">
+              Chegou a hora da sua marca surfar alto nessa nova maré de
+              possibilidades.
+            </p>
+
+            <p class="brand-signature">
+              Nexonda — sua marca na onda dos negócios.
+            </p>
+          </div>
+
+          <!-- Player de áudio -->
+          <div class="audio-player">
+            <div class="audio-controls">
+              <button id="audio-play-btn" class="audio-btn" title="Ouvir texto">
+                <svg
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+              <div class="audio-info">
+                <span class="audio-title">Ouvir este texto</span>
+                <div class="audio-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                  </div>
+                  <span class="audio-time" id="audio-time">0:00</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -726,6 +945,7 @@
       // Inicialização
       document.addEventListener("DOMContentLoaded", function () {
         createParticles();
+        initializeAudioPlayer();
       });
 
       // Função para validar email
@@ -827,6 +1047,71 @@
           document.body.prepend(btn);
         });
       });
+
+      // Player de áudio
+      let audioPlayer = null;
+      let isPlaying = false;
+
+      function initializeAudioPlayer() {
+        const audioUrl =
+          "https://firebasestorage.googleapis.com/v0/b/nexonda-281084.firebasestorage.app/o/Nexonda%2Fpropaganda_nexonda_02.mp3?alt=media&token=e3a1afbe-5a76-42e1-a873-cfa0be29509f";
+
+        audioPlayer = new Audio(audioUrl);
+        audioPlayer.preload = "metadata";
+
+        const playBtn = document.getElementById("audio-play-btn");
+        const progressFill = document.getElementById("progress-fill");
+        const audioTime = document.getElementById("audio-time");
+
+        // Controle de play/pause
+        playBtn.addEventListener("click", function () {
+          if (isPlaying) {
+            audioPlayer.pause();
+          } else {
+            audioPlayer.play();
+          }
+        });
+
+        // Atualizar progresso
+        audioPlayer.addEventListener("timeupdate", function () {
+          const progress =
+            (audioPlayer.currentTime / audioPlayer.duration) * 100;
+          progressFill.style.width = progress + "%";
+
+          const currentTime = formatTime(audioPlayer.currentTime);
+          audioTime.textContent = currentTime;
+        });
+
+        // Eventos de play/pause
+        audioPlayer.addEventListener("play", function () {
+          isPlaying = true;
+          playBtn.classList.add("playing");
+          playBtn.innerHTML =
+            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+        });
+
+        audioPlayer.addEventListener("pause", function () {
+          isPlaying = false;
+          playBtn.classList.remove("playing");
+          playBtn.innerHTML =
+            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+        });
+
+        audioPlayer.addEventListener("ended", function () {
+          isPlaying = false;
+          playBtn.classList.remove("playing");
+          playBtn.innerHTML =
+            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+          progressFill.style.width = "0%";
+          audioTime.textContent = "0:00";
+        });
+      }
+
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+      }
     </script>
   </body>
 </html>
