@@ -506,17 +506,90 @@
         animation: slideInUp 1s ease-out 0.6s both;
       }
 
+      /* Player de áudio discreto */
+      .audio-player-mini {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        justify-content: center;
+      }
+
+      .audio-btn-mini {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-light);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition-smooth);
+      }
+
+      .audio-btn-mini:hover {
+        background: var(--accent-color);
+        color: var(--text-dark);
+        transform: scale(1.1);
+      }
+
+      .audio-btn-mini.playing {
+        background: var(--accent-color);
+        color: var(--text-dark);
+      }
+
+      .audio-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* Controles de expansão */
+      .expand-controls {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .expand-btn {
+        background: none;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: var(--accent-color);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0 auto;
+        transition: var(--transition-smooth);
+      }
+
+      .expand-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--accent-color);
+      }
+
+      .expand-icon {
+        transition: transform 0.3s ease;
+      }
+
+      .expand-btn.expanded .expand-icon {
+        transform: rotate(180deg);
+      }
+
       .text-content {
         background: rgba(255, 255, 255, 0.03);
         border-radius: 20px;
-        padding: 3rem 2.5rem;
+        padding: 2rem 2rem;
         margin-bottom: 2rem;
         box-shadow: 0 8px 32px rgba(42, 123, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.1);
       }
 
       .text-content p {
-        font-size: 1.1rem;
+        font-size: 1rem;
         line-height: 1.8;
         margin-bottom: 1.5rem;
         color: rgba(255, 255, 255, 0.9);
@@ -528,7 +601,7 @@
       }
 
       .highlight-text {
-        font-size: 1.3rem !important;
+        font-size: 1.2rem !important;
         font-weight: 600;
         color: var(--accent-color) !important;
         text-align: center !important;
@@ -536,89 +609,12 @@
       }
 
       .brand-signature {
-        font-size: 1.2rem !important;
+        font-size: 1.1rem !important;
         font-weight: 500;
         color: var(--text-light) !important;
         text-align: center !important;
         font-style: italic;
         margin-top: 2rem !important;
-      }
-
-      /* Player de áudio */
-      .audio-player {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .audio-controls {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .audio-btn {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: var(--bg-gradient);
-        border: none;
-        color: var(--text-light);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition-smooth);
-        box-shadow: 0 4px 15px rgba(42, 123, 255, 0.3);
-      }
-
-      .audio-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 20px rgba(42, 123, 255, 0.4);
-      }
-
-      .audio-btn.playing {
-        background: #00ff88;
-        color: var(--text-dark);
-      }
-
-      .audio-info {
-        flex: 1;
-      }
-
-      .audio-title {
-        display: block;
-        font-size: 1rem;
-        color: rgba(255, 255, 255, 0.8);
-        margin-bottom: 0.5rem;
-      }
-
-      .audio-progress {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .progress-bar {
-        flex: 1;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 2px;
-        overflow: hidden;
-      }
-
-      .progress-fill {
-        height: 100%;
-        background: var(--accent-color);
-        width: 0%;
-        transition: width 0.1s ease;
-      }
-
-      .audio-time {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.6);
-        min-width: 40px;
       }
 
       @media (max-width: 768px) {
@@ -628,20 +624,19 @@
         }
 
         .text-content {
-          padding: 2rem 1.5rem;
+          padding: 1.5rem 1rem;
         }
 
         .text-content p {
-          font-size: 1rem;
+          font-size: 0.95rem;
         }
 
         .highlight-text {
-          font-size: 1.2rem !important;
+          font-size: 1.1rem !important;
         }
 
-        .audio-controls {
-          flex-direction: column;
-          gap: 1.5rem;
+        .audio-player-mini {
+          margin-bottom: 0.8rem;
         }
       }
     </style>
@@ -693,81 +688,104 @@
           </div>
         </div>
 
-        <!-- Seção de texto profissional -->
-        <div class="content-section">
-          <div class="text-content">
-            <p class="highlight-text">
-              Já reparou como algumas marcas simplesmente se destacam?
-            </p>
-
-            <p>
-              Não é sorte. É estratégia. É saber onde estar — e com quem falar.
-            </p>
-
-            <p>
-              Num mundo cada vez mais conectado, sua empresa precisa mais do que
-              apenas um cartão de visitas.
-            </p>
-
-            <p>
-              Ela precisa aparecer, encantar, e se posicionar com inteligência.
-            </p>
-
-            <p>
-              E isso começa entendendo o mercado:<br />
-              Saber quem é seu público, como se comporta, o que procura...<br />
-              Descobrir o que os concorrentes estão fazendo — e fazer melhor.
-            </p>
-
-            <p>
-              Essa é a inteligência de mercado: usar informações certas, no
-              momento certo, para atrair as oportunidades certas.
-            </p>
-
-            <p>
-              Com o Nexonda, sua empresa ganha presença digital, visibilidade
-              real e se conecta com quem realmente importa.
-            </p>
-
-            <p class="highlight-text">
-              Chegou a hora da sua marca surfar alto nessa nova maré de
-              possibilidades.
-            </p>
-
-            <p class="brand-signature">
-              Nexonda — sua marca na onda dos negócios.
-            </p>
-          </div>
-
-          <!-- Player de áudio -->
-          <div class="audio-player">
-            <div class="audio-controls">
-              <button id="audio-play-btn" class="audio-btn" title="Ouvir texto">
-                <svg
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </button>
-              <div class="audio-info">
-                <span class="audio-title">Ouvir este texto</span>
-                <div class="audio-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                  </div>
-                  <span class="audio-time" id="audio-time">0:00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <button class="notify-btn" onclick="toggleEmailForm()">
           Notifique-me quando estiver pronto
         </button>
+
+        <!-- Seção de texto profissional -->
+        <div class="content-section">
+          <!-- Player de áudio discreto -->
+          <div class="audio-player-mini">
+            <button
+              id="audio-play-btn"
+              class="audio-btn-mini"
+              title="Ouvir texto"
+            >
+              <svg
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
+            <span class="audio-label">Ouvir texto</span>
+          </div>
+
+          <!-- Botão expandir/recolher -->
+          <div class="expand-controls">
+            <button id="expand-btn" class="expand-btn" onclick="toggleText()">
+              <span class="expand-text">Ler mais</span>
+              <svg
+                class="expand-icon"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M7 10l5 5 5-5z" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="text-content" id="text-content">
+            <div class="text-preview">
+              <p class="highlight-text">
+                Já reparou como algumas marcas simplesmente se destacam?
+              </p>
+              <p>
+                Não é sorte. É estratégia. É saber onde estar — e com quem
+                falar.
+              </p>
+            </div>
+            <div class="text-full" style="display: none">
+              <p class="highlight-text">
+                Já reparou como algumas marcas simplesmente se destacam?
+              </p>
+
+              <p>
+                Não é sorte. É estratégia. É saber onde estar — e com quem
+                falar.
+              </p>
+
+              <p>
+                Num mundo cada vez mais conectado, sua empresa precisa mais do
+                que apenas um cartão de visitas.
+              </p>
+
+              <p>
+                Ela precisa aparecer, encantar, e se posicionar com
+                inteligência.
+              </p>
+
+              <p>
+                E isso começa entendendo o mercado:<br />
+                Saber quem é seu público, como se comporta, o que procura...<br />
+                Descobrir o que os concorrentes estão fazendo — e fazer melhor.
+              </p>
+
+              <p>
+                Essa é a inteligência de mercado: usar informações certas, no
+                momento certo, para atrair as oportunidades certas.
+              </p>
+
+              <p>
+                Com o Nexonda, sua empresa ganha presença digital, visibilidade
+                real e se conecta com quem realmente importa.
+              </p>
+
+              <p class="highlight-text">
+                Chegou a hora da sua marca surfar alto nessa nova maré de
+                possibilidades.
+              </p>
+
+              <p class="brand-signature">
+                Nexonda — sua marca na onda dos negócios.
+              </p>
+            </div>
+          </div>
+        </div>
 
         <!-- Modelo para integração com Google Forms -->
         <form
@@ -1060,8 +1078,6 @@
         audioPlayer.preload = "metadata";
 
         const playBtn = document.getElementById("audio-play-btn");
-        const progressFill = document.getElementById("progress-fill");
-        const audioTime = document.getElementById("audio-time");
 
         // Controle de play/pause
         playBtn.addEventListener("click", function () {
@@ -1072,45 +1088,73 @@
           }
         });
 
-        // Atualizar progresso
-        audioPlayer.addEventListener("timeupdate", function () {
-          const progress =
-            (audioPlayer.currentTime / audioPlayer.duration) * 100;
-          progressFill.style.width = progress + "%";
-
-          const currentTime = formatTime(audioPlayer.currentTime);
-          audioTime.textContent = currentTime;
-        });
-
         // Eventos de play/pause
         audioPlayer.addEventListener("play", function () {
           isPlaying = true;
           playBtn.classList.add("playing");
           playBtn.innerHTML =
-            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+            '<svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
         });
 
         audioPlayer.addEventListener("pause", function () {
           isPlaying = false;
           playBtn.classList.remove("playing");
           playBtn.innerHTML =
-            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+            '<svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
         });
 
         audioPlayer.addEventListener("ended", function () {
           isPlaying = false;
           playBtn.classList.remove("playing");
           playBtn.innerHTML =
-            '<svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
-          progressFill.style.width = "0%";
-          audioTime.textContent = "0:00";
+            '<svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
         });
       }
 
-      function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
+      // Função para expandir/recolher texto
+      function toggleText() {
+        const textContent = document.getElementById("text-content");
+        const textPreview = textContent.querySelector(".text-preview");
+        const textFull = textContent.querySelector(".text-full");
+        const expandBtn = document.getElementById("expand-btn");
+        const expandText = expandBtn.querySelector(".expand-text");
+
+        if (textFull.style.display === "none") {
+          // Expandir
+          textPreview.style.display = "none";
+          textFull.style.display = "block";
+          expandText.textContent = "Ler menos";
+          expandBtn.classList.add("expanded");
+        } else {
+          // Recolher
+          textPreview.style.display = "block";
+          textFull.style.display = "none";
+          expandText.textContent = "Ler mais";
+          expandBtn.classList.remove("expanded");
+        }
+      }
+
+      // Função para expandir/recolher texto
+      function toggleText() {
+        const textContent = document.getElementById("text-content");
+        const textPreview = textContent.querySelector(".text-preview");
+        const textFull = textContent.querySelector(".text-full");
+        const expandBtn = document.getElementById("expand-btn");
+        const expandText = expandBtn.querySelector(".expand-text");
+
+        if (textFull.style.display === "none") {
+          // Expandir
+          textPreview.style.display = "none";
+          textFull.style.display = "block";
+          expandText.textContent = "Ler menos";
+          expandBtn.classList.add("expanded");
+        } else {
+          // Recolher
+          textPreview.style.display = "block";
+          textFull.style.display = "none";
+          expandText.textContent = "Ler mais";
+          expandBtn.classList.remove("expanded");
+        }
       }
     </script>
   </body>
