@@ -639,6 +639,30 @@
           margin-bottom: 0.8rem;
         }
       }
+
+      /* Container do botão e formulário de notificação */
+      .notify-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 2.5rem auto 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .notify-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      .email-form {
+        width: 100%;
+      }
+      .cancel-btn {
+        background: #ff6b6b;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        margin-top: 0;
+        width: 100%;
+      }
     </style>
   </head>
 
@@ -688,10 +712,6 @@
           </div>
         </div>
 
-        <button class="notify-btn" onclick="toggleEmailForm()">
-          Notifique-me quando estiver pronto
-        </button>
-
         <!-- Seção de texto profissional -->
         <div class="content-section">
           <!-- Player de áudio discreto -->
@@ -732,54 +752,33 @@
           <div class="text-content" id="text-content">
             <div class="text-preview">
               <p class="highlight-text">
-                Já reparou como algumas marcas simplesmente se destacam?
+                Já percebeu como algumas marcas simplesmente se destacam?
               </p>
               <p>
-                Não é sorte. É estratégia. É saber onde estar — e com quem
-                falar.
+                Não é acaso. É posicionamento. É estar no lugar certo, falando
+                com as pessoas certas.
               </p>
             </div>
             <div class="text-full" style="display: none">
               <p class="highlight-text">
-                Já reparou como algumas marcas simplesmente se destacam?
+                Já percebeu como algumas marcas simplesmente se destacam?
               </p>
-
               <p>
-                Não é sorte. É estratégia. É saber onde estar — e com quem
-                falar.
+                Não é acaso. É posicionamento. É estar no lugar certo, falando
+                com as pessoas certas.
               </p>
-
               <p>
-                Num mundo cada vez mais conectado, sua empresa precisa mais do
-                que apenas um cartão de visitas.
+                Em um mundo hiperconectado, sua empresa precisa mais do que um
+                cartão de visitas — ela precisa ser vista, lembrada e desejada.
               </p>
-
               <p>
-                Ela precisa aparecer, encantar, e se posicionar com
-                inteligência.
+                Com o Nexonda, sua marca conquista presença digital,
+                visibilidade real e conexões que realmente fazem a diferença.
               </p>
-
-              <p>
-                E isso começa entendendo o mercado:<br />
-                Saber quem é seu público, como se comporta, o que procura...<br />
-                Descobrir o que os concorrentes estão fazendo — e fazer melhor.
-              </p>
-
-              <p>
-                Essa é a inteligência de mercado: usar informações certas, no
-                momento certo, para atrair as oportunidades certas.
-              </p>
-
-              <p>
-                Com o Nexonda, sua empresa ganha presença digital, visibilidade
-                real e se conecta com quem realmente importa.
-              </p>
-
               <p class="highlight-text">
-                Chegou a hora da sua marca surfar alto nessa nova maré de
-                possibilidades.
+                Chegou a hora de elevar o nível do seu negócio e surfar nas
+                melhores oportunidades do mercado.
               </p>
-
               <p class="brand-signature">
                 Nexonda — sua marca na onda dos negócios.
               </p>
@@ -787,58 +786,70 @@
           </div>
         </div>
 
-        <!-- Modelo para integração com Google Forms -->
-        <form
-          class="email-form"
-          id="emailForm"
-          style="display: none"
-          action="https://docs.google.com/forms/d/e/1FAIpQLSftbdSvZqXPkC1jXpFG7SWDIpM3Houi9tn85YHFC7tTLyMfWw/formResponse"
-          method="POST"
-          target="_blank"
-          onsubmit="handleFormSubmit(event)"
-        >
-          <div class="form-group">
-            <!-- Substitua entry.NOME pelo name do campo de nome do seu Google Forms -->
-            <input
-              type="text"
-              name="entry.1509627380"
-              class="email-input"
-              placeholder=" "
-              id="nome-contato"
-              required
-            />
-            <label for="nome-contato" class="floating-label">Seu nome</label>
-          </div>
-          <div class="form-group">
-            <!-- Substitua entry.EMPRESA pelo name do campo de empresa do seu Google Forms -->
-            <input
-              type="text"
-              name="entry.1551804674"
-              class="email-input"
-              placeholder=" "
-              id="nome-empresa"
-              required
-            />
-            <label for="nome-empresa" class="floating-label"
-              >Nome da empresa</label
+        <div class="notify-container">
+          <button
+            class="notify-btn"
+            id="notifyBtn"
+            onclick="toggleEmailForm(this)"
+          >
+            Notifique-me quando estiver pronto
+          </button>
+          <form
+            class="email-form"
+            id="emailForm"
+            style="display: none"
+            action="https://docs.google.com/forms/d/e/1FAIpQLSftbdSvZqXPkC1jXpFG7SWDIpM3Houi9tn85YHFC7tTLyMfWw/formResponse"
+            method="POST"
+            target="_blank"
+            onsubmit="handleFormSubmit(event)"
+          >
+            <div class="form-group">
+              <input
+                type="text"
+                name="entry.1509627380"
+                class="email-input"
+                placeholder=" "
+                id="nome-contato"
+                required
+              />
+              <label for="nome-contato" class="floating-label">Seu nome</label>
+            </div>
+            <div class="form-group">
+              <input
+                type="text"
+                name="entry.1551804674"
+                class="email-input"
+                placeholder=" "
+                id="nome-empresa"
+                required
+              />
+              <label for="nome-empresa" class="floating-label"
+                >Nome da empresa</label
+              >
+            </div>
+            <div class="form-group">
+              <input
+                type="email"
+                name="entry.263659827"
+                class="email-input"
+                placeholder=" "
+                id="email-contato"
+                required
+              />
+              <label for="email-contato" class="floating-label"
+                >Seu melhor email</label
+              >
+            </div>
+            <button
+              type="button"
+              class="submit-btn cancel-btn"
+              onclick="toggleEmailForm(document.getElementById('notifyBtn'))"
             >
-          </div>
-          <div class="form-group">
-            <!-- Substitua entry.EMAIL pelo name do campo de e-mail do seu Google Forms -->
-            <input
-              type="email"
-              name="entry.263659827"
-              class="email-input"
-              placeholder=" "
-              id="email-contato"
-              required
-            />
-            <label for="email-contato" class="floating-label"
-              >Seu melhor email</label
-            >
-          </div>
-          <button type="submit" class="submit-btn">Enviar</button>
-        </form>
+              Cancelar
+            </button>
+            <button type="submit" class="submit-btn">Enviar</button>
+          </form>
+        </div>
 
         <!-- Redes sociais -->
         <div class="social-links">
@@ -846,6 +857,7 @@
             href="#"
             class="social-link"
             title="LinkedIn"
+            target="_blank"
             style="display: none"
           >
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -854,28 +866,44 @@
               />
             </svg>
           </a>
-          <a href="#" class="social-link" title="Instagram">
+          <a
+            href="https://www.instagram.com/nexonda.oficial/?igsh=MWl6cGsxOHNkMHNzZA%3D%3D#"
+            class="social-link"
+            title="Instagram"
+            target="_blank"
+          >
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.418-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.928.875 1.418 2.026 1.418 3.323s-.49 2.448-1.418 3.244c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.781c-.49 0-.928-.175-1.297-.49-.368-.315-.49-.753-.49-1.243 0-.49.122-.928.49-1.243.369-.315.807-.49 1.297-.49s.928.175 1.297.49c.368.315.49.753.49 1.243 0 .49-.122.928-.49 1.243-.369.315-.807.49-1.297.49z"
               />
             </svg>
           </a>
-          <a href="#" class="social-link" title="Facebook">
+          <a
+            href="https://www.facebook.com/people/Nexonda-Projetos/pfbid0ij2waNCVH12HZfyDyYxbMt6Z88aCB8sWNQYN535K2aGZ9XH7kf42GvJJe36FDv1Vl/?rdid=SHN1BMQD3yAad3b0&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1B25cLqyAw%2F"
+            class="social-link"
+            title="Facebook"
+            target="_blank"
+          >
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
               />
             </svg>
           </a>
-          <a href="#" class="social-link" title="YouTube">
+          <a href="#" class="social-link" title="YouTube" target="_blank">
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"
               />
             </svg>
           </a>
-          <a href="#" class="social-link" title="Twitter" style="display: none">
+          <a
+            href="#"
+            class="social-link"
+            title="Twitter"
+            target="_blank"
+            style="display: none"
+          >
             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path
                 d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"
@@ -945,18 +973,15 @@
       }
 
       // Toggle do formulário de email
-      function toggleEmailForm() {
+      function toggleEmailForm(btn) {
         const form = document.getElementById("emailForm");
-        const btn = document.querySelector(".notify-btn");
-
+        const notifyBtn = btn;
         if (form.style.display === "none") {
           form.style.display = "flex";
-          btn.textContent = "Cancelar";
-          btn.style.background = "rgba(255, 255, 255, 0.1)";
+          notifyBtn.style.display = "none";
         } else {
           form.style.display = "none";
-          btn.textContent = "Notifique-me quando estiver pronto";
-          btn.style.background = "var(--bg-gradient)";
+          notifyBtn.style.display = "block";
         }
       }
 
@@ -1018,11 +1043,8 @@
               submitBtn.disabled = false;
               submitBtn.style.background = "";
               submitBtn.style.color = "";
-
-              // Resetar botão principal
-              const mainBtn = document.querySelector(".notify-btn");
-              mainBtn.textContent = "Notifique-me quando estiver pronto";
-              mainBtn.style.background = "var(--bg-gradient)";
+              // Mostrar novamente o botão de notificação
+              document.getElementById("notifyBtn").style.display = "block";
             }, 2000);
           })
           .catch(() => {
@@ -1057,7 +1079,9 @@
           var btn = document.createElement("button");
           btn.textContent = "Clique para ouvir o áudio de boas-vindas";
           btn.className = "notify-btn";
-          btn.style.margin = "2rem auto";
+          btn.style.margin = "2rem";
+          btn.style.width = "auto";
+          btn.style.fontSize = "10px";
           btn.onclick = function () {
             audio.play();
             btn.remove();
@@ -1072,7 +1096,7 @@
 
       function initializeAudioPlayer() {
         const audioUrl =
-          "https://firebasestorage.googleapis.com/v0/b/nexonda-281084.firebasestorage.app/o/Nexonda%2Fpropaganda_nexonda_02.mp3?alt=media&token=e3a1afbe-5a76-42e1-a873-cfa0be29509f";
+          "https://firebasestorage.googleapis.com/v0/b/nexonda-281084.firebasestorage.app/o/Nexonda%2Fpropaganda-nexonda_simples.mp3?alt=media&token=1954e247-0205-4698-b3ae-62e8886223af";
 
         audioPlayer = new Audio(audioUrl);
         audioPlayer.preload = "metadata";
