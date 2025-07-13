@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Premium - Nexonda</title>
+    <link rel="icon" href="../images/nexonda/favicon.ico" type="image/x-icon" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../images/nexonda/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../images/nexonda/favicon-16x16.png"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/admin-premium.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" src="../components/user-menu.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- Header Moderno Fixo -->
+    <header class="modern-header">
+      <nav class="nav-container">
+        <div class="nav-brand">
+          <a href="../index.html"
+            ><img
+              src="../images/nexonda/logo_nexonda.svg"
+              alt="Nexonda"
+              class="brand-logo"
+          /></a>
+        </div>
+        <div
+          class="nav-actions"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-left: auto;
+          "
+        >
+          <div class="dark-mode-toggle">
+            <button
+              id="dark-mode-btn"
+              class="theme-toggle"
+              aria-label="Alternar modo escuro"
+            >
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+          <!-- <user-menu></user-menu> -->
+        </div>
+      </nav>
+    </header>
+
+    <main class="main-content admin-premium-main">
+      <!-- Tela de Autenticação Premium -->
+      <div id="auth-premium-screen" class="hidden">
+        <div class="auth-container">
+          <div class="auth-header">
+            <div class="premium-badge">
+              <i class="fas fa-crown"></i>
+              <span>Premium Access</span>
+            </div>
+            <h1>Área Administrativa Premium</h1>
+            <p>Acesso restrito para usuários premium validados</p>
+          </div>
+
+          <!-- Step 1: Login com Gmail -->
+          <div id="step-login" class="auth-step active">
+            <div class="step-indicator">
+              <span class="step-number">1</span>
+              <span class="step-title">Login com Gmail</span>
+            </div>
+            <div class="auth-form">
+              <div class="form-group">
+                <label for="gmail-input">E-mail Gmail</label>
+                <input
+                  type="email"
+                  id="gmail-input"
+                  placeholder="seuemail@gmail.com"
+                  autocomplete="username"
+                  required
+                />
+                <small id="gmail-input-hint" class="form-hint"
+                  >Digite seu e-mail Gmail para continuar</small
+                >
+              </div>
+              <button id="gmail-login-btn" class="gmail-login-btn" disabled>
+                <i class="fab fa-google"></i>
+                <span>Entrar com Gmail</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: Validação de CNPJ -->
+          <div id="step-cnpj" class="auth-step">
+            <div class="step-indicator">
+              <span class="step-number">2</span>
+              <span class="step-title">Validação de CNPJ</span>
+            </div>
+            <div class="auth-form">
+              <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="user-email-display"></span>
+              </div>
+              <div class="form-group">
+                <label for="cnpj-input">CNPJ da Empresa</label>
+                <input
+                  type="text"
+                  id="cnpj-input"
+                  placeholder="00.000.000/0000-00"
+                  maxlength="18"
+                />
+                <small class="form-hint"
+                  >Digite o CNPJ cadastrado no sistema</small
+                >
+              </div>
+              <button id="validate-cnpj-btn" class="primary-btn">
+                <i class="fas fa-check"></i>
+                <span>Validar CNPJ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Código de Verificação -->
+          <div id="step-otp" class="auth-step">
+            <div class="step-indicator">
+              <span class="step-number">3</span>
+              <span class="step-title">Código de Verificação</span>
+            </div>
+            <div class="auth-form">
+              <div class="otp-info">
+                <i class="fas fa-envelope"></i>
+                <p>Enviamos um código de verificação para:</p>
+                <strong id="otp-email-display"></strong>
+              </div>
+              <div class="form-group">
+                <label for="otp-input">Código de Verificação</label>
+                <input
+                  type="text"
+                  id="otp-input"
+                  placeholder="000000"
+                  maxlength="6"
+                />
+                <small class="form-hint">Digite o código de 6 dígitos</small>
+              </div>
+              <div class="otp-timer">
+                <span id="otp-timer-text"
+                  >Código válido por:
+                  <span id="otp-countdown">05:00</span></span
+                >
+                <button id="resend-otp-btn" class="resend-btn" disabled>
+                  Reenviar código
+                </button>
+              </div>
+              <button id="verify-otp-btn" class="primary-btn">
+                <i class="fas fa-shield-alt"></i>
+                <span>Verificar Código</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div id="auth-loading" class="auth-loading hidden">
+            <div class="loading-spinner"></div>
+            <p id="loading-message">Verificando credenciais...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela Principal Premium (após autenticação) -->
+      <div id="premium-dashboard" class="hidden">
+        <div class="dashboard-header">
+          <div class="welcome-section">
+            <h1>Bem-vindo ao Admin Premium</h1>
+            <p>Gerencie suas funcionalidades premium</p>
+          </div>
+          <div class="user-premium-info">
+            <div class="premium-badge">
+              <i class="fas fa-crown"></i>
+              <span>Premium</span>
+            </div>
+            <div class="user-details">
+              <span id="premium-user-email"></span>
+              <span id="premium-user-cnpj"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards de Funcionalidades -->
+        <div class="features-grid">
+          <!-- Card de Propagandas -->
+          <div class="feature-card" id="advertising-card">
+            <div class="feature-icon">
+              <i class="fas fa-ad"></i>
+            </div>
+            <div class="feature-content">
+              <h3>Gerenciar Propagandas</h3>
+              <p>Crie e gerencie campanhas publicitárias premium</p>
+              <button class="feature-btn" onclick="openAdvertisingModal()">
+                <i class="fas fa-plus"></i>
+                <span>Abrir Modal</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card para Futuras Funcionalidades -->
+          <div class="feature-card coming-soon">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="feature-content">
+              <h3>Analytics Avançado</h3>
+              <p>Relatórios detalhados e métricas de performance</p>
+              <span class="coming-soon-badge">Em breve</span>
+            </div>
+          </div>
+
+          <!-- Card para Futuras Funcionalidades -->
+          <div class="feature-card coming-soon">
+            <div class="feature-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="feature-content">
+              <h3>Gestão de Usuários</h3>
+              <p>Controle de acesso e permissões avançadas</p>
+              <span class="coming-soon-badge">Em breve</span>
+            </div>
+          </div>
+
+          <!-- Card para Futuras Funcionalidades -->
+          <div class="feature-card coming-soon">
+            <div class="feature-icon">
+              <i class="fas fa-cog"></i>
+            </div>
+            <div class="feature-content">
+              <h3>Configurações Avançadas</h3>
+              <p>Personalização e configurações do sistema</p>
+              <span class="coming-soon-badge">Em breve</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão de Logout Premium -->
+        <div class="premium-actions">
+          <button id="logout-premium-btn" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Sair da Área Premium</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Substituir o footer antigo pelo novo componente reutilizável -->
+    <div id="footer-placeholder"></div>
+    <link rel="stylesheet" href="/css/footer.css" />
+    <script src="/js/load-footer.js"></script>
+
+    <!-- Modal de Cadastro de Propaganda -->
+    <div id="advertising-modal" class="modal hidden">
+      <div class="modal-content advertising-modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-ad"></i> Cadastrar Nova Propaganda</h2>
+          <button class="modal-close" onclick="closeAdvertisingModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- O conteúdo da modal será carregado dinamicamente -->
+          <div id="advertising-modal-content">
+            <!-- Formulário será inserido aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../js/main.js"></script>
+    <script type="module" src="../js/auth-premium.js"></script>
+    <script type="module" src="../js/admin-premium.js"></script>
+    <!-- Script de Teste (remover em produção) -->
+    <script type="module" src="../js/test-admin-premium.js"></script>
+  </body>
+</html>

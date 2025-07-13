@@ -569,6 +569,56 @@ exports.api = functions.https.onRequest({
         userId: data.userId,
         clientCNPJ: data.clientCNPJ,
       });
+
+      // === Sincronizar authorizedUsersClientePremium ===
+      try {
+        const premiumCollection = db.collection("authorizedUsersClientePremium");
+        const email = (data.email || '').toLowerCase();
+        if (email) {
+          if (data.planType === 'premium' || data.planType === 'premium-plus') {
+            // Cria ou atualiza
+            const existing = await premiumCollection.where("email", "==", email).get();
+            if (existing.empty) {
+              await premiumCollection.add({
+                email,
+                clientCNPJ: data.clientCNPJ,
+                clientName: data.clientName,
+                planType: data.planType,
+                ativo: true,
+                addedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium criado em authorizedUsersClientePremium:", email);
+            } else {
+              // Atualiza ativo/planType
+              const docId = existing.docs[0].id;
+              await premiumCollection.doc(docId).update({
+                planType: data.planType,
+                ativo: true,
+                clientCNPJ: data.clientCNPJ,
+                clientName: data.clientName,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium atualizado em authorizedUsersClientePremium:", email);
+            }
+          } else if (data.planType === 'basico') {
+            // Desativa se existir
+            const existing = await premiumCollection.where("email", "==", email).get();
+            if (!existing.empty) {
+              const docId = existing.docs[0].id;
+              await premiumCollection.doc(docId).update({
+                ativo: false,
+                planType: data.planType,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium desativado em authorizedUsersClientePremium:", email);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao sincronizar authorizedUsersClientePremium:", err);
+      }
+      // === FIM sincronização ===
+
       return res.status(201).json({id: docRef.id, message: "Logotipo criado com sucesso"});
     }
 
@@ -584,6 +634,56 @@ exports.api = functions.https.onRequest({
       }
 
       await logosCollection.doc(id).update(data);
+
+      // === Sincronizar authorizedUsersClientePremium ===
+      try {
+        const premiumCollection = db.collection("authorizedUsersClientePremium");
+        const email = (data.email || '').toLowerCase();
+        if (email) {
+          if (data.planType === 'premium' || data.planType === 'premium-plus') {
+            // Cria ou atualiza
+            const existing = await premiumCollection.where("email", "==", email).get();
+            if (existing.empty) {
+              await premiumCollection.add({
+                email,
+                clientCNPJ: data.clientCNPJ,
+                clientName: data.clientName,
+                planType: data.planType,
+                ativo: true,
+                addedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium criado em authorizedUsersClientePremium:", email);
+            } else {
+              // Atualiza ativo/planType
+              const docId = existing.docs[0].id;
+              await premiumCollection.doc(docId).update({
+                planType: data.planType,
+                ativo: true,
+                clientCNPJ: data.clientCNPJ,
+                clientName: data.clientName,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium atualizado em authorizedUsersClientePremium:", email);
+            }
+          } else if (data.planType === 'basico') {
+            // Desativa se existir
+            const existing = await premiumCollection.where("email", "==", email).get();
+            if (!existing.empty) {
+              const docId = existing.docs[0].id;
+              await premiumCollection.doc(docId).update({
+                ativo: false,
+                planType: data.planType,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+              });
+              console.log("Usuário premium desativado em authorizedUsersClientePremium:", email);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao sincronizar authorizedUsersClientePremium:", err);
+      }
+      // === FIM sincronização ===
+
       return res.status(200).json({message: "Logotipo atualizado com sucesso"});
     }
 
@@ -677,11 +777,52 @@ exports.contacts = functions.https.onRequest({
   }
 })));
 
+// Substituir authenticateMiddleware por um middleware customizado para premiumAds
+const premiumAdsAuthMiddleware = (handler) => async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({error: "Token não fornecido"});
+    }
+    const token = authHeader.split("Bearer ")[1];
+    const client = getAuthClient();
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const db = admin.firestore();
+    // Verifica em authorizedUsers
+    const userDoc = await db.collection("authorizedUsers").where("email", "==", payload.email).get();
+    // Verifica em authorizedUsersClientePremium (ativo: true)
+    const premiumDoc = await db.collection("authorizedUsersClientePremium")
+      .where("email", "==", payload.email)
+      .where("ativo", "==", true)
+      .get();
+    if (userDoc.empty && premiumDoc.empty) {
+      return res.status(401).json({error: "Usuário não autorizado"});
+    }
+    // Adiciona os dados do usuário ao request
+    req.user = {
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+      isPremium: !premiumDoc.empty,
+      isAdmin: userDoc.docs[0]?.data().isAdmin || false,
+    };
+    req.userId = payload.email;
+    return handler(req, res);
+  } catch (error) {
+    console.error("Erro na autenticação premiumAds:", error);
+    return res.status(401).json({error: "Token inválido ou usuário não autorizado"});
+  }
+};
+
 // --- API premiumAds ---
 exports.premiumAds = functions.https.onRequest({
   cors: true,
   maxInstances: 10,
-}, handleCors(authenticateMiddleware(async (req, res) => {
+}, handleCors(premiumAdsAuthMiddleware(async (req, res) => {
   const {db, userId} = getContext(req);
   console.log("=== DEBUG PREMIUM ADS ===");
   console.log("Contexto obtido para premiumAds:", {userId});
@@ -1208,6 +1349,99 @@ exports.authenticate = functions.https.onRequest({
   } catch (error) {
     console.error("Erro na autenticação:", error);
     return res.status(500).json({error: "Erro na autenticação"});
+  }
+});
+
+// --- API de autenticação premium ---
+exports.authenticatePremium = functions.https.onRequest({
+  cors: true,
+  maxInstances: 10,
+}, async (req, res) => {
+  // Configurar headers CORS explicitamente
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.set("Access-Control-Max-Age", "3600");
+
+  // Responder imediatamente para requisições OPTIONS (preflight)
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
+
+  try {
+    // Verifica se o header de autorização está presente
+    const authHeader = req.headers.authorization;
+    console.log("[Premium] Auth header:", authHeader);
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log("[Premium] Token não encontrado no header");
+      return res.status(401).json({error: "Token não fornecido"});
+    }
+
+    // Extrai o token
+    const token = authHeader.split("Bearer ")[1];
+    console.log("[Premium] Token recebido:", token.substring(0, 20) + "...");
+
+    try {
+      const client = getAuthClient();
+      // Verifica o token usando o OAuth2Client
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+      console.log("[Premium] Token verificado com sucesso:", {
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+      });
+
+      // Verifica se o email está autorizado na coleção premium
+      console.log("[Premium] Verificando autorização para email:", payload.email);
+      const premiumUsersCollection = admin.firestore().collection("authorizedUsersClientePremium");
+      const userDoc = await premiumUsersCollection
+          .where("email", "==", payload.email)
+          .where("ativo", "==", true)
+          .get();
+
+      console.log("[Premium] Resultado da busca por email:", {
+        email: payload.email,
+        encontrado: !userDoc.empty,
+        total: userDoc.size,
+      });
+
+      if (userDoc.empty) {
+        console.log("[Premium] Usuário não autorizado:", payload.email);
+        return res.status(401).json({error: "Usuário premium não autorizado"});
+      }
+
+      // Retorna os dados do usuário premium
+      const userData = userDoc.docs[0].data();
+      console.log("[Premium] Usuário autorizado:", {
+        email: payload.email,
+        planType: userData.planType,
+        clientName: userData.clientName,
+      });
+
+      return res.json({
+        authorized: true,
+        user: {
+          email: payload.email,
+          name: payload.name,
+          picture: payload.picture,
+          planType: userData.planType,
+          clientName: userData.clientName,
+          clientCNPJ: userData.clientCNPJ,
+        },
+      });
+    } catch (error) {
+      console.error("[Premium] Erro ao verificar token:", error);
+      return res.status(401).json({error: "Token inválido"});
+    }
+  } catch (error) {
+    console.error("[Premium] Erro na autenticação:", error);
+    return res.status(500).json({error: "Erro na autenticação premium"});
   }
 });
 

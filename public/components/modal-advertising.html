@@ -1,0 +1,462 @@
+<!-- Modal de Cadastro de Propaganda - Componente Reutilizável -->
+<div class="modal-advertising-component">
+  <div class="modal-header">
+    <h2><i class="fas fa-ad"></i> Cadastrar Nova Propaganda</h2>
+    <button class="modal-close" onclick="closeAdvertisingModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <form id="ad-form-modal" class="advertising-form">
+      <!-- Informações Básicas -->
+      <div class="form-section">
+        <h3><i class="fas fa-info-circle"></i> Informações Básicas</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ad-title-modal">Título da Propaganda*</label>
+            <input
+              type="text"
+              id="ad-title-modal"
+              name="title"
+              required
+              placeholder="Ex: Oferta Especial de Verão"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="ad-client-modal">Cliente Premium*</label>
+            <select id="ad-client-modal" name="clientCNPJ" required>
+              <option value="">Selecione um cliente</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ad-description-modal">Descrição*</label>
+          <textarea
+            id="ad-description-modal"
+            name="description"
+            required
+            placeholder="Descreva a promoção ou campanha"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Mídia -->
+      <div class="form-section">
+        <h3><i class="fas fa-image"></i> Mídia da Propaganda</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ad-type-modal">Tipo de Mídia*</label>
+            <select id="ad-type-modal" name="mediaType" required>
+              <option value="image">Imagem (Banner)</option>
+              <option value="video">Vídeo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="ad-upload-modal">Arquivo da Mídia*</label>
+            <input
+              type="file"
+              id="ad-upload-modal"
+              name="mediaFile"
+              accept="image/*,video/*"
+            />
+            <small class="hint">Suporta imagens ou vídeos .mp4</small>
+          </div>
+        </div>
+
+        <div class="form-group media-preview-wrapper">
+          <div id="media-preview-modal" class="media-preview">
+            <!-- Pré-visualização será inserida aqui -->
+          </div>
+
+          <div
+            id="upload-loading-modal"
+            class="upload-loading"
+            style="display: none"
+          >
+            <div class="loading-spinner"></div>
+            <p>⏳ Aguarde, carregando mídia...</p>
+          </div>
+        </div>
+
+        <div class="form-group" style="position: relative">
+          <label for="ad-media-modal">URL da Mídia*</label>
+          <textarea
+            id="ad-media-modal"
+            name="mediaUrl"
+            required
+            readonly
+            placeholder="https://res.cloudinary.com/..."
+            rows="2"
+            style="width: 100%; resize: none; padding-right: 70px"
+          ></textarea>
+
+          <button
+            type="button"
+            id="copy-button-modal"
+            class="copy-button"
+            title="Copiar URL"
+            aria-label="Copiar URL"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+              style="color: #007bff"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 4H7a2 2 0 01-2-2V7a2 2 0 012-2h3.5l1-1h3l1 1H17a2 2 0 012 2v11a2 2 0 01-2 2z"
+              />
+            </svg>
+          </button>
+
+          <small class="hint">URL gerada após upload</small>
+        </div>
+      </div>
+
+      <!-- Configurações -->
+      <div class="form-section">
+        <h3><i class="fas fa-cog"></i> Configurações</h3>
+
+        <div class="form-group">
+          <label for="ad-link-modal">Link de Destino*</label>
+          <input
+            type="url"
+            id="ad-link-modal"
+            name="targetUrl"
+            required
+            placeholder="https://exemplo.com/promocao"
+          />
+          <small class="hint"
+            >Página para onde o usuário será direcionado ao clicar</small
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ad-start-date-modal">Data de Início*</label>
+            <input
+              type="date"
+              id="ad-start-date-modal"
+              name="startDate"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="ad-end-date-modal">Data de Término*</label>
+            <input type="date" id="ad-end-date-modal" name="endDate" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ações -->
+      <div class="form-actions">
+        <button type="submit" class="save-btn">
+          <i class="fas fa-save"></i> Salvar Propaganda
+        </button>
+        <button type="reset" class="cancel-btn">
+          <i class="fas fa-times"></i> Limpar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Estilos específicos para o componente modal de propaganda */
+  .modal-advertising-component {
+    background: var(--card-bg, #ffffff);
+    border-radius: var(--border-radius, 16px);
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  [data-theme="dark"] .modal-advertising-component {
+    background: var(--card-bg-dark, #232a36);
+  }
+
+  .form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--surface, #f9fafb);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color, #2563eb);
+  }
+
+  [data-theme="dark"] .form-section {
+    background: var(--surface, #1f2937);
+  }
+
+  .form-section h3 {
+    color: var(--text-primary, #111827);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  [data-theme="dark"] .form-section h3 {
+    color: var(--text-primary, #f3f3f3);
+  }
+
+  .form-section h3 i {
+    color: var(--primary-color, #2563eb);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary, #111827);
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  [data-theme="dark"] .form-group label {
+    color: var(--text-primary, #f3f3f3);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--background, #fff);
+    color: var(--text-primary, #111827);
+    transition: all 0.3s ease;
+  }
+
+  [data-theme="dark"] .form-group input,
+  [data-theme="dark"] .form-group select,
+  [data-theme="dark"] .form-group textarea {
+    background: var(--background, #1f2937);
+    color: var(--text-primary, #f3f3f3);
+    border-color: var(--border, #374151);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .hint {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--text-secondary, #6b7280);
+    font-size: 0.75rem;
+  }
+
+  .media-preview {
+    margin-bottom: 1rem;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface, #f9fafb);
+    border: 2px dashed var(--border, #e5e7eb);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  [data-theme="dark"] .media-preview {
+    background: var(--surface, #1f2937);
+    border-color: var(--border, #374151);
+  }
+
+  .media-preview img,
+  .media-preview video {
+    max-width: 300px;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .upload-loading {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .upload-loading .loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 2px solid var(--border, #e5e7eb);
+    border-top: 2px solid var(--primary-color, #2563eb);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 0.5rem;
+  }
+
+  .copy-button {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .copy-button:hover {
+    background: var(--surface, #f9fafb);
+  }
+
+  [data-theme="dark"] .copy-button:hover {
+    background: var(--surface, #1f2937);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border, #e5e7eb);
+    margin-top: 2rem;
+  }
+
+  [data-theme="dark"] .form-actions {
+    border-top-color: var(--border, #374151);
+  }
+
+  .save-btn,
+  .cancel-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .save-btn {
+    background: var(--primary-color, #2563eb);
+    color: #fff;
+  }
+
+  .save-btn:hover {
+    background: var(--primary-600, #1d4ed8);
+    transform: translateY(-1px);
+  }
+
+  .cancel-btn {
+    background: var(--surface, #f9fafb);
+    color: var(--text-primary, #111827);
+  }
+
+  [data-theme="dark"] .cancel-btn {
+    background: var(--surface, #1f2937);
+    color: var(--text-primary, #f3f3f3);
+  }
+
+  .cancel-btn:hover {
+    background: var(--border, #e5e7eb);
+  }
+
+  [data-theme="dark"] .cancel-btn:hover {
+    background: var(--border, #374151);
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .modal-advertising-component {
+      width: 95%;
+      max-height: 95vh;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-section {
+      padding: 1rem;
+    }
+
+    .form-actions {
+      flex-direction: column;
+    }
+
+    .save-btn,
+    .cancel-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-advertising-component {
+      width: 98%;
+      margin: 1rem;
+    }
+
+    .form-section {
+      padding: 0.75rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.75rem;
+    }
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+</style>
