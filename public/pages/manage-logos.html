@@ -30,6 +30,167 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <style>
+      .input-with-ai {
+        position: relative;
+        display: flex;
+        align-items: stretch;
+      }
+      .input-with-ai input,
+      .input-with-ai textarea {
+        flex: 1;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+      .ai-suggest-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1rem;
+        border-radius: 0 8px 8px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50px;
+      }
+      .ai-suggest-btn:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-1px);
+      }
+      .ai-suggest-btn:active {
+        transform: translateY(0);
+      }
+      .ai-suggest-btn.loading {
+        background: #6b7280;
+        cursor: not-allowed;
+      }
+      .ai-suggest-btn.loading i {
+        animation: spin 1s linear infinite;
+      }
+      .ai-suggestions {
+        margin-top: 1rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        animation: slideDown 0.3s ease-out;
+      }
+      [data-theme="dark"] .ai-suggestions {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-color: #475569;
+      }
+      .ai-suggestions-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+      }
+      .ai-suggestions-header i {
+        font-size: 1.1em;
+      }
+      .close-suggestions {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0.25rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      .close-suggestions:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+      .ai-suggestions-content {
+        padding: 1rem;
+      }
+      .suggestion-item {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      [data-theme="dark"] .suggestion-item {
+        background: #1f2937;
+        border-left-color: #667eea;
+      }
+      .suggestion-label {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .suggestion-text {
+        color: var(--text-primary, #111827);
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+      }
+      [data-theme="dark"] .suggestion-text {
+        color: var(--text-primary, #f3f3f3);
+      }
+      .suggestion-tip {
+        font-size: 0.875rem;
+        color: var(--text-secondary, #6b7280);
+        font-style: italic;
+        padding: 0.5rem;
+        background: var(--surface, #f9fafb);
+        border-radius: 4px;
+        border-left: 3px solid #fbbf24;
+      }
+      [data-theme="dark"] .suggestion-tip {
+        background: var(--surface, #1f2937);
+        color: var(--text-secondary, #9ca3af);
+      }
+      .suggestion-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+      .apply-suggestion-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+      }
+      .apply-suggestion-btn:hover {
+        background: #059669;
+        transform: translateY(-1px);
+      }
+      .apply-suggestion-btn:active {
+        transform: translateY(0);
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
     <!-- Header Moderno Fixo -->
@@ -799,34 +960,83 @@
       <div class="admin-section">
         <h2><i class="fas fa-ad"></i> Cadastrar Nova Propaganda Premium</h2>
         <form id="ad-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="ad-title">Título da Propaganda*</label>
-              <input
-                type="text"
-                id="ad-title"
-                name="title"
-                required
-                placeholder="Ex: Oferta Especial de Verão"
-              />
+          <div class="form-section">
+            <h3><i class="fas fa-info-circle"></i> Informações Básicas</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ad-title">Título da Propaganda*</label>
+                <div class="input-with-ai">
+                  <input
+                    type="text"
+                    id="ad-title"
+                    name="title"
+                    required
+                    placeholder="Ex: Oferta Especial de Verão"
+                  />
+                  <button
+                    type="button"
+                    class="ai-suggest-btn"
+                    id="ai-title-btn-direct"
+                    title="Sugerir melhorias com IA"
+                    onclick="suggestTitleImprovements()"
+                  >
+                    <i class="fas fa-magic"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ad-client">Cliente Premium*</label>
+                <select id="ad-client" name="clientCNPJ" required>
+                  <option value="">Selecione um cliente</option>
+                </select>
+              </div>
             </div>
 
             <div class="form-group">
-              <label for="ad-client">Cliente Premium*</label>
-              <select id="ad-client" name="clientCNPJ" required>
-                <option value="">Selecione um cliente</option>
-              </select>
+              <label for="ad-description">Descrição*</label>
+              <div class="input-with-ai">
+                <textarea
+                  id="ad-description"
+                  name="description"
+                  required
+                  placeholder="Descreva a promoção ou campanha"
+                  rows="3"
+                ></textarea>
+                <button
+                  type="button"
+                  class="ai-suggest-btn"
+                  id="ai-description-btn-direct"
+                  title="Sugerir melhorias com IA"
+                  onclick="suggestDescriptionImprovements()"
+                >
+                  <i class="fas fa-magic"></i>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="ad-description">Descrição*</label>
-            <textarea
-              id="ad-description"
-              name="description"
-              required
-              placeholder="Descreva a promoção ou campanha"
-            ></textarea>
+            <!-- Container para sugestões da IA -->
+            <div
+              id="ai-suggestions-container"
+              class="ai-suggestions"
+              style="display: none"
+            >
+              <div class="ai-suggestions-header">
+                <i class="fas fa-robot"></i>
+                <span>Sugestões da IA</span>
+                <button
+                  type="button"
+                  class="close-suggestions"
+                  onclick="closeAISuggestions()"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div id="ai-suggestions-content" class="ai-suggestions-content">
+                <!-- Sugestões serão inseridas aqui -->
+              </div>
+            </div>
           </div>
 
           <div class="form-row">
@@ -1011,5 +1221,6 @@
     <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/manage-logos.js"></script>
     <script type="module" src="../js/manage-advertising.js"></script>
+    <script src="../js/advertising-ai.js"></script>
   </body>
 </html>

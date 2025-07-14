@@ -1,6 +1,7 @@
 import { premiumAdsApi, logosApi } from './api.js';
 import { showAlert } from '../components/alert.js';
 import { uploadToFirebaseStorage, deleteFromFirebaseStorage, showMediaPreview } from './firebase-upload.js';
+import './advertising-ai.js';
 
 // Elementos DOM
 const adForm = document.getElementById("ad-form");
@@ -141,7 +142,17 @@ async function loadClientsFromFirestore() {
 // Event Listeners
 if (adForm) {
     adForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        if (adForm.getAttribute('data-ai-applying') === 'true') {
+            console.log('Submit bloqueado: IA está aplicando sugestão');
+            e.preventDefault();
+            return;
+        }
+        if (adForm.getAttribute('data-manual-submit') !== 'true') {
+            console.log('Submit bloqueado: não é manual');
+            e.preventDefault();
+            return;
+        }
+        adForm.removeAttribute('data-manual-submit');
         
         // Validação adicional antes do envio
         const selectedType = mediaTypeSelect.value;
@@ -196,6 +207,13 @@ if (adForm) {
             showAlert('Erro ao salvar anúncio. Por favor, tente novamente.', 'error');
         }
     });
+}
+
+const saveBtn = document.querySelector('#ad-form .save-btn');
+if (saveBtn) {
+  saveBtn.addEventListener('click', function() {
+    adForm.setAttribute('data-manual-submit', 'true');
+  });
 }
 
 // function toCamelCase(str) {

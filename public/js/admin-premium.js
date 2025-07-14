@@ -113,29 +113,84 @@ async function getAdvertisingFormHTML() {
     // Retornar HTML do formulário de propaganda
     return `
         <form id="ad-form-modal" class="advertising-form">
+            <!-- Seção de informações do plano -->
+            <div class="plan-info-section" id="plan-info-section">
+                <div class="plan-info-header">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Informações do Plano</span>
+                </div>
+                <div class="plan-info-content" id="plan-info-content">
+                    <div class="plan-details">
+                        <span class="plan-name" id="plan-name">Carregando...</span>
+                        <span class="plan-limit" id="plan-limit">Verificando limite...</span>
+                    </div>
+                    <div class="plan-status" id="plan-status">
+                        <span class="status-indicator" id="status-indicator"></span>
+                        <span class="status-text" id="status-text">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="ad-title-modal">Título da Propaganda*</label>
-                    <input
-                        type="text"
-                        id="ad-title-modal"
-                        name="title"
-                        required
-                        placeholder="Ex: Oferta Especial de Verão"
-                    />
+                    <div class="input-with-ai">
+                        <input
+                            type="text"
+                            id="ad-title-modal"
+                            name="title"
+                            required
+                            placeholder="Ex: Oferta Especial de Verão"
+                        />
+                        <button
+                            type="button"
+                            class="ai-suggest-btn"
+                            id="ai-title-btn"
+                            title="Sugerir melhorias com IA"
+                            onclick="suggestTitleImprovements()"
+                        >
+                            <i class="fas fa-magic"></i>
+                        </button>
+                    </div>
                 </div>
                 <!-- Removido select de cliente -->
             </div>
             <div class="form-group">
                 <label for="ad-description-modal">Descrição*</label>
-                <textarea
-                    id="ad-description-modal"
-                    name="description"
-                    required
-                    placeholder="Descreva a promoção ou campanha"
-                    rows="3"
-                ></textarea>
+                <div class="input-with-ai">
+                    <textarea
+                        id="ad-description-modal"
+                        name="description"
+                        required
+                        placeholder="Descreva a promoção ou campanha"
+                        rows="3"
+                    ></textarea>
+                    <button
+                        type="button"
+                        class="ai-suggest-btn"
+                        id="ai-description-btn"
+                        title="Sugerir melhorias com IA"
+                        onclick="suggestDescriptionImprovements()"
+                    >
+                        <i class="fas fa-magic"></i>
+                    </button>
+                </div>
             </div>
+
+            <!-- Container para sugestões da IA -->
+            <div id="ai-suggestions-container" class="ai-suggestions" style="display: none;">
+                <div class="ai-suggestions-header">
+                    <i class="fas fa-robot"></i>
+                    <span>Sugestões da IA</span>
+                    <button type="button" class="close-suggestions" onclick="closeAISuggestions()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="ai-suggestions-content" class="ai-suggestions-content">
+                    <!-- Sugestões serão inseridas aqui -->
+                </div>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="ad-type-modal">Tipo de Mídia*</label>
@@ -244,10 +299,60 @@ async function initializeAdvertisingForm() {
         // Configurar validações
         setupFormValidations();
         
+        // Carregar informações do plano
+        await loadPlanInfo();
+        
     } catch (error) {
         console.error('Erro ao inicializar formulário:', error);
         showAlert('Erro ao inicializar formulário de propaganda', 'error');
     }
+}
+
+// Função para carregar e exibir informações do plano
+async function loadPlanInfo() {
+    try {
+        const premiumUser = getPremiumUser();
+        const clientCNPJ = premiumUser.cnpj || premiumUser.userCNPJ || premiumUser.clientCNPJ;
+        
+        if (!clientCNPJ) {
+            updatePlanInfoDisplay('Cliente não identificado', 'N/A', 'error', 'Erro ao identificar cliente');
+            return;
+        }
+        
+        const validation = await validateAdLimit(clientCNPJ);
+        updatePlanInfoDisplay(validation.planName, validation, validation.canCreate ? 'success' : 'warning', validation.canCreate ? 'Pode criar propaganda' : 'Limite atingido');
+        
+    } catch (error) {
+        console.error('Erro ao carregar informações do plano:', error);
+        updatePlanInfoDisplay('Erro', 'N/A', 'error', 'Erro ao carregar informações');
+    }
+}
+
+// Função para atualizar a exibição das informações do plano
+function updatePlanInfoDisplay(planName, validation, status, statusText) {
+    const planNameEl = document.getElementById('plan-name');
+    const planLimitEl = document.getElementById('plan-limit');
+    const statusIndicatorEl = document.getElementById('status-indicator');
+    const statusTextEl = document.getElementById('status-text');
+    
+    if (planNameEl) planNameEl.textContent = planName;
+    
+    if (planLimitEl && validation) {
+        if (validation.limit === Infinity) {
+            planLimitEl.textContent = 'Limite: Ilimitado';
+        } else {
+            planLimitEl.textContent = `Limite: ${validation.currentCount}/${validation.limit} propagandas`;
+        }
+    }
+    
+    if (statusIndicatorEl) {
+        statusIndicatorEl.className = `status-indicator ${status}`;
+        statusIndicatorEl.innerHTML = status === 'success' ? '<i class="fas fa-check-circle"></i>' : 
+                                    status === 'warning' ? '<i class="fas fa-exclamation-triangle"></i>' : 
+                                    '<i class="fas fa-times-circle"></i>';
+    }
+    
+    if (statusTextEl) statusTextEl.textContent = statusText;
 }
 
 async function populateClientSelect() {
@@ -383,12 +488,10 @@ function setupFormValidations() {
 // ===== HANDLER UNIFICADO DE SUBMIT (CADASTRO E EDIÇÃO) =====
 async function handleAdvertisingSubmit(event) {
     event.preventDefault();
-    console.log('[DEBUG] handleAdvertisingSubmit chamado');
     try {
         const form = event.target;
         const formData = new FormData(form);
         if (!validateAdvertisingForm(formData)) {
-            console.log('[DEBUG] Validação do formulário falhou');
             return;
         }
         const adData = {};
@@ -399,9 +502,18 @@ async function handleAdvertisingSubmit(event) {
         adData.createdBy = premiumUser.email;
         adData.createdAt = new Date().toISOString();
         adData.clientCNPJ = premiumUser.cnpj || premiumUser.userCNPJ || premiumUser.clientCNPJ;
+        
+        // Validação de limite de propagandas (apenas para novos cadastros)
+        const editId = form.getAttribute('data-edit-id');
+        if (!editId) {
+            const limitValidation = await validateAdLimit(adData.clientCNPJ);
+            if (!showLimitAlert(limitValidation)) {
+                return; // Para o envio se o limite foi atingido
+            }
+        }
+        
         const { premiumAdsApi } = await import('./api.js');
         // Se for edição, atualizar
-        const editId = form.getAttribute('data-edit-id');
         if (editId) {
             await premiumAdsApi.update(editId, adData);
             showAlert('Propaganda atualizada com sucesso!', 'success');
@@ -410,7 +522,6 @@ async function handleAdvertisingSubmit(event) {
             await premiumAdsApi.add(adData);
             showAlert('Propaganda cadastrada com sucesso!', 'success');
         }
-        console.log('[DEBUG] Propaganda enviada para API:', adData);
         closeAdvertisingModal();
         loadMyAds();
     } catch (error) {
@@ -452,15 +563,6 @@ function validateAdvertisingForm(formData) {
     const endDate = formData.get('endDate');
     const mediaType = formData.get('mediaType');
     const targetUrl = formData.get('targetUrl');
-
-    // Logs detalhados para depuração
-    console.log('[VALIDATE] title:', title);
-    console.log('[VALIDATE] description:', description);
-    console.log('[VALIDATE] mediaUrl:', mediaUrl);
-    console.log('[VALIDATE] startDate:', startDate);
-    console.log('[VALIDATE] endDate:', endDate);
-    console.log('[VALIDATE] mediaType:', mediaType);
-    console.log('[VALIDATE] targetUrl:', targetUrl);
 
     if (!title) {
         showAlert('Título é obrigatório.', 'error');
@@ -669,6 +771,82 @@ window.editAd = function(adId) {
     }
 };
 
+// Função para validar limite de propagandas baseado no plano
+async function validateAdLimit(clientCNPJ) {
+  try {
+    // Buscar todas as propagandas do cliente
+    const { premiumAdsApi } = await import('./api.js');
+    const allAds = await premiumAdsApi.getAll();
+    const clientAds = allAds.filter(ad => ad.clientCNPJ === clientCNPJ);
+    
+    // Contar propagandas ativas (não expiradas e ativas)
+    const now = new Date();
+    const activeAds = clientAds.filter(ad => {
+      const endDate = new Date(ad.endDate);
+      return endDate > now && ad.isActive !== false;
+    });
+    
+    // Buscar informações do cliente para verificar o plano
+    const { logosApi } = await import('./api.js');
+    const allLogos = await logosApi.getAll();
+    const client = allLogos.find(logo => logo.clientCNPJ === clientCNPJ);
+    
+    if (!client) {
+      throw new Error('Cliente não encontrado');
+    }
+    
+    const planType = client.planType;
+    const currentCount = activeAds.length;
+    
+    // Definir limites baseados no plano
+    let limit, planName;
+    if (planType === 'premium-plus') {
+      limit = Infinity; // Ilimitado
+      planName = 'Premium Plus';
+    } else if (planType === 'premium') {
+      limit = 10; // Máximo 10 propagandas
+      planName = 'Premium';
+    } else {
+      limit = 0; // Plano básico não pode ter propagandas
+      planName = 'Básico';
+    }
+    
+    return {
+      canCreate: currentCount < limit,
+      currentCount,
+      limit,
+      planType,
+      planName,
+      remaining: limit === Infinity ? 'Ilimitado' : limit - currentCount
+    };
+    
+  } catch (error) {
+    console.error('Erro ao validar limite de propagandas:', error);
+    throw error;
+  }
+}
+
+// Função para mostrar alerta de limite
+function showLimitAlert(validation) {
+  const { canCreate, currentCount, limit, planName, remaining } = validation;
+  
+  if (!canCreate) {
+    if (limit === 0) {
+      showAlert(`Plano ${planName} não permite cadastro de propagandas. Faça upgrade para Premium ou Premium Plus.`, 'warning');
+    } else {
+      showAlert(`Limite de propagandas atingido! Você tem ${currentCount}/${limit} propagandas ativas no plano ${planName}. Faça upgrade para Premium Plus para ter propagandas ilimitadas.`, 'warning');
+    }
+    return false;
+  }
+  
+  // Mostrar informação sobre limite restante
+  if (limit !== Infinity && remaining <= 3) {
+    showAlert(`Atenção: Você tem apenas ${remaining} propaganda(s) restante(s) no plano ${planName}. Considere fazer upgrade para Premium Plus.`, 'info');
+  }
+  
+  return true;
+}
+
 // ===== EXPORTS =====
 
 export function getAdvertisingModal() {
@@ -806,3 +984,6 @@ function createPremiumAdCard(ad) {
     `;
     return div;
 }
+
+// Importa o script da IA para sugestões de propaganda
+import './advertising-ai.js';

@@ -265,18 +265,10 @@ const premiumAdsApi = {
     }),
     
     // Atualizar anúncio
-    // update: (adId, adData) => apiRequest(`premiumAds/${adId}`, {
-    //     method: 'PUT',
-    //     body: JSON.stringify(adData)
-    // }),
-    
-    update: (adId, adData) => {
-        return apiRequest('premiumAds', {
-            method: 'PUT',
-            body: JSON.stringify({ id: adId, ...adData })
-        });
-    },
-
+    update: (adId, adData) => apiRequest(`premiumAds/${adId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ id: adId, ...adData })
+    }),
     
     // Deletar anúncio
     delete: (adId) => apiRequest(`premiumAds`, {
