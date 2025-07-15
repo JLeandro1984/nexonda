@@ -1,6 +1,6 @@
 // ===== AUTH PREMIUM - Sistema de Autenticação Premium =====
 
-import { showAlert } from '../components/alert.js';
+/*import { showAlert } from '../components/alert.js';*/
 import { logosApi } from './api.js';
 
 // Estados da aplicação
@@ -557,8 +557,25 @@ export function isPremiumAuthenticated() {
 
 export function requirePremiumAuth() {
     if (!isPremiumAuthenticated()) {
-        showAlert('Acesso restrito. Faça login premium para continuar.', 'error');
+        //showAlert('Acesso restrito. Faça login premium para continuar.', 'error');
         return false;
     }
     return true;
 } 
+/*
+function showAlert(message, type = 'info') {
+    // Remove qualquer alerta anterior
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) existingAlert.remove();
+
+    // Cria o HTML do modal
+    const alertBox = document.createElement('div');
+    alertBox.className = `custom-alert ${type}`;
+    alertBox.innerHTML = `
+        <div class="custom-alert-content">
+            <p>${message}</p>
+            <button onclick="this.parentElement.parentElement.remove()">Fechar</button>
+        </div>
+    `;
+    document.body.appendChild(alertBox);
+}*/

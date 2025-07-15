@@ -20,6 +20,16 @@ const cors = require("cors")({
 });
 const fetch = require("node-fetch"); // Caso queira usar futuramente
 const {OAuth2Client} = require("google-auth-library");
+const nodemailer = require('nodemailer');
+
+// Configuração do transporte SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'nexonda.projetos@gmail.com',
+    pass: process.env.NEXONDA_GMAIL_APP_PASSWORD // Defina essa variável de ambiente no deploy
+  }
+});
 
 admin.initializeApp();
 
@@ -1770,3 +1780,44 @@ exports.trackLogoClick = functions.https.onRequest({
     return res.status(500).json({success: false, error: "Erro interno do servidor."});
   }
 }));
+
+// Função para enviar código de verificação premium
+exports.sendPremiumVerificationCode = functions.https.onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      return res.status(405).send('Método não permitido');
+    }
+    const { email, name, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'E-mail e código são obrigatórios.' });
+    }
+    // Proteção contra múltiplos envios em sequência (cooldown de 2 minutos)
+    const db = admin.firestore();
+    const verifRef = db.collection('premiumVerificationCodes').doc(email);
+    const verifDoc = await verifRef.get();
+    const now = Date.now();
+    if (verifDoc.exists) {
+      const data = verifDoc.data();
+      if (data.lastSent && now - data.lastSent < 2 * 60 * 1000) {
+        return res.status(429).json({ error: 'Aguarde antes de solicitar um novo código.' });
+      }
+    }
+    // Salva o código e timestamp
+    await verifRef.set({ code, lastSent: now, expiresAt: now + 5 * 60 * 1000 }, { merge: true });
+    // Monta o e-mail
+    const mailOptions = {
+      from: 'Nexonda <nexonda.projetos@gmail.com>',
+      to: email,
+      subject: 'Seu código de verificação premium Nexonda',
+      text: `Olá${name ? ' ' + name : ''},\n\nSeu código de verificação premium é: ${code}\n\nEste código é válido por 5 minutos.\n\nSe não foi você, ignore este e-mail.\n\nEquipe Nexonda`,
+      html: `<p>Olá${name ? ' ' + name : ''},</p><p><b>Seu código de verificação premium é:</b> <span style='font-size:1.3em;'>${code}</span></p><p>Este código é válido por <b>5 minutos</b>.</p><p>Se não foi você, ignore este e-mail.<br><br>Equipe Nexonda</p>`
+    };
+    try {
+      await transporter.sendMail(mailOptions);
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Erro ao enviar e-mail:', error);
+      return res.status(500).json({ error: 'Erro ao enviar e-mail.' });
+    }
+  });
+});

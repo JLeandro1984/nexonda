@@ -99,7 +99,8 @@ async function handleGoogleLogin() {
         // (Removido: consulta à coleção authorizedUsersClientePremium via API do frontend)
         // Salva o email premium e redireciona para etapa CNPJ
         localStorage.setItem('premiumUserEmail', userEmail);
-        window.location.href = 'AdminPremium.html';
+        // Redireciona para AdminPremium.html, mas a tela deve mostrar a etapa de CNPJ
+        window.location.href = 'AdminPremium.html?step=cnpj';
     } catch (error) {
         console.error('Erro detalhado:', error);
         const errorMessage = document.querySelector('.error-message') || document.createElement('div');

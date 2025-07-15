@@ -5,6 +5,7 @@
     "node": "20"
   },
   "dependencies": {
-    "busboy": "^1.6.0"
+    "busboy": "^1.6.0",
+    "nodemailer": "^7.0.5"
   }
 }

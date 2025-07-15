@@ -5,7 +5,7 @@ class AlertComponent {
     this.alertBox.id = 'custom-alert';
     this.alertBox.className = 'modal-overlay hidden';
     this.alertBox.innerHTML = `
-      <div class="modal-box">
+      <div class="modal-box hidden">
         <div class="alert-header">
           <span id="alert-icon">⚠️</span>
           <h2 id="alert-title">Atenção</h2>
@@ -91,7 +91,7 @@ class AlertComponent {
   }
 
   showBox() {
-    this.alertBox.classList.remove('hidden');
+   /* this.alertBox.classList.remove('hidden');*/
     setTimeout(() => this.alertBox.classList.add('active'), 10);
   }
 
