@@ -162,7 +162,7 @@ function createCarouselItem(ad) {
 
 function createMediaContent(ad) {
   if (ad.mediaType === 'image') {
-    return `<img src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
+    return `<img class="img-propaganda" src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy">`;
   } else if (ad.mediaType === 'video') {
     return createVideoContent(ad);
   }
