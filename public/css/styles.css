@@ -772,7 +772,7 @@ a:hover {
 
 .gallery-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: var(--space-6);
   max-width: 1200px;
   margin: 0 auto;
