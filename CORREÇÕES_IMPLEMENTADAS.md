@@ -20,8 +20,8 @@
 
 **Arquivos Modificados:**
 
-- `src/js/main.js` - Código unificado do dark mode
-- `src/css/styles.css` - Estilos dark mode completos
+- `public/js/main.js` - Código unificado do dark mode
+- `public/css/styles.css` - Estilos dark mode completos
 
 ### 2. **Links Internos Não Funcionavam**
 
@@ -41,8 +41,8 @@
 
 **Arquivos Modificados:**
 
-- `src/js/main.js` - Smooth scroll corrigido
-- `src/css/styles.css` - Estilos de navegação
+- `public/js/main.js` - Smooth scroll corrigido
+- `public/css/styles.css` - Estilos de navegação
 
 ## 🧪 Como Testar as Correções
 

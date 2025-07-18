@@ -32,7 +32,7 @@ const transporter = nodemailer.createTransport({
 });
 
 admin.initializeApp();
-
+const db = admin.firestore(); 
 const GEMINI_API_KEY = "AIzaSyCr2ZNU8qertO4ivtCdul4K7UvFfQJkuQA";
 
 // Função HTTP exposta para o frontend
@@ -152,7 +152,6 @@ async function checkAuth(req, res, next) {
     const userData = await validateGoogleToken(token);
 
     // Verifica se o usuário está autorizado
-    const db = admin.firestore();
     const userDoc = await db.collection("authorizedUsers")
         .where("email", "==", userData.email)
         .get();
@@ -246,7 +245,7 @@ const authenticateMiddleware = (handler) => async (req, res) => {
 // Helper para contexto comum
 const getContext = (req) => {
   console.log("=== DEBUG GETCONTEXT ===");
-  const db = admin.firestore();
+  //const db = admin.firestore();
   console.log("Firestore inicializado:", db ? "Sim" : "Não");
 
   const userId = req.userId || (req.user && req.user.email);
@@ -327,7 +326,7 @@ exports.getGalleryStats = functions.https.onRequest({
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
-  const db = admin.firestore();
+  //const db = admin.firestore();
 
   try {
     if (req.method === "GET") {
@@ -364,7 +363,7 @@ exports.publicLogos = functions.https.onRequest({
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const logosCollection = db.collection("logos");
   const insightsCollection = db.collection("insights");
 
@@ -1130,7 +1129,7 @@ exports.publicContacts = functions.https.onRequest({
     return res.status(204).send("");
   }
 
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const contactsCollection = db.collection("contacts");
 
   try {
@@ -1173,7 +1172,7 @@ exports.publicPremiumAds = functions.https.onRequest({
     return res.status(204).send("");
   }
 
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const premiumAdsCollection = db.collection("premiumAds");
 
   try {
@@ -1463,7 +1462,7 @@ exports.listAuthorizedUsers = functions.https.onRequest({
   return cors(req, res, async () => {
     try {
       await checkAuth(req, res, async () => {
-        const db = admin.firestore();
+        //const db = admin.firestore();
         const usersSnapshot = await db.collection("authorizedUsers").get();
 
         const users = [];
@@ -1497,7 +1496,7 @@ exports.addAuthorizedUser = functions.https.onRequest({
           throw new Error("Email é obrigatório");
         }
 
-        const db = admin.firestore();
+        //const db = admin.firestore();
         await db.collection("authorizedUsers").add({
           email,
           name: name || email,
@@ -1527,7 +1526,7 @@ exports.removeAuthorizedUser = functions.https.onRequest({
           throw new Error("ID do usuário é obrigatório");
         }
 
-        const db = admin.firestore();
+        //const db = admin.firestore();
         await db.collection("authorizedUsers").doc(userId).delete();
 
         res.json({message: "Usuário removido com sucesso"});
@@ -1555,7 +1554,7 @@ exports.initializeAdmin = functions.https.onRequest({
       const userData = await validateGoogleToken(token);
 
       // Verifica se já existe algum usuário autorizado
-      const db = admin.firestore();
+      //const db = admin.firestore();
       const usersSnapshot = await db.collection("authorizedUsers").get();
 
       if (!usersSnapshot.empty) {
@@ -1602,7 +1601,7 @@ exports.checkAuth = functions.https.onRequest({
       const userData = await validateGoogleToken(token);
 
       // Verifica se o usuário está autorizado
-      const db = admin.firestore();
+      //const db = admin.firestore();
       const userDoc = await db.collection("authorizedUsers")
           .where("email", "==", userData.email)
           .get();
@@ -1648,7 +1647,7 @@ exports.logInsight = functions.https.onRequest({
     return res.status(405).json({error: "Método não permitido"});
   }
 
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const insightsCollection = db.collection("insights");
   const {type, payload} = req.body;
 
@@ -1669,9 +1668,11 @@ exports.logInsight = functions.https.onRequest({
       const logosSnapshot = await db.collection("logos")
           .where("clientFantasyName", "==", payload.clientFantasyName)
           .limit(1)
-          .get();
+        .get();
+      
+      let logoData; 
       if (!logosSnapshot.empty) {
-        const logoData = logosSnapshot.docs[0].data();
+         logoData = logosSnapshot.docs[0].data();
         if (logoData.clientCNPJ) {
           insightData.clientCNPJ = logoData.clientCNPJ;
         }
@@ -1714,7 +1715,7 @@ exports.trackAdEvent = functions.https.onRequest({
     return res.status(400).json({error: "eventType inválido. Use \"impression\" ou \"click\"."});
   }
 
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const adRef = db.collection("premiumAds").doc(adId);
 
   try {
@@ -1758,7 +1759,7 @@ exports.trackLogoClick = functions.https.onRequest({
     return res.status(400).json({error: "clientFantasyName é obrigatório."});
   }
 
-  const db = admin.firestore();
+  //const db = admin.firestore();
   const insightsCollection = db.collection("insights");
 
   try {
