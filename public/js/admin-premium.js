@@ -121,6 +121,12 @@ window.openAdvertisingModal = async function() {
 };
 
 window.closeAdvertisingModal = function() {
+    // Restaurar o título original da modal
+    const modalTitle = document.querySelector('.modal-header h2');
+    if (modalTitle) {
+        modalTitle.innerHTML = '<i class="fas fa-ad"></i> Cadastrar Nova Propaganda';
+    }
+    
     advertisingModal.classList.add('hidden');
     document.body.style.overflow = ''; // Restaurar scroll
     clearAdvertisingForm();
@@ -536,19 +542,32 @@ function setupFormValidations() {
     const form = document.getElementById('ad-form-modal');
     if (!form) return;
 
-    // Validação em tempo real
+    // Validação em tempo real (exceto para URL)
     const inputs = form.querySelectorAll('input[required], textarea[required], select[required]');
     inputs.forEach(input => {
-        input.addEventListener('blur', validateField);
-        input.addEventListener('input', clearFieldError);
+        // Não aplicar validação em tempo real para o campo de URL
+        if (input.name !== 'targetUrl') {
+            input.addEventListener('blur', validateField);
+            input.addEventListener('input', clearFieldError);
+        } else {
+            // Para URL, só limpar erro quando digitar
+            input.addEventListener('input', clearFieldError);
+        }
     });
 }
 
 // ===== HANDLER UNIFICADO DE SUBMIT (CADASTRO E EDIÇÃO) =====
 async function handleAdvertisingSubmit(event) {
     event.preventDefault();
+    
+    // Verificar se está sendo aplicada uma sugestão da IA
+    const form = event.target;
+    if (form.getAttribute('data-ai-applying') === 'true') {
+        console.log('[DEBUG] Submit bloqueado - aplicando sugestão da IA');
+        return;
+    }
+    
     try {
-        const form = event.target;
         const formData = new FormData(form);
         if (!validateAdvertisingForm(formData)) {
             return;
@@ -557,6 +576,16 @@ async function handleAdvertisingSubmit(event) {
         for (let [key, value] of formData.entries()) {
             adData[key] = value;
         }
+        
+        // Corrigir URL se necessário
+        if (adData.targetUrl && !adData.targetUrl.startsWith('http://') && !adData.targetUrl.startsWith('https://')) {
+            if (adData.targetUrl.startsWith('www.')) {
+                adData.targetUrl = 'https://' + adData.targetUrl;
+            } else {
+                adData.targetUrl = 'https://' + adData.targetUrl;
+            }
+        }
+        
         const premiumUser = getPremiumUser();
         adData.createdBy = premiumUser.email;
         adData.createdAt = new Date().toISOString();
@@ -581,6 +610,10 @@ async function handleAdvertisingSubmit(event) {
             await premiumAdsApi.add(adData);
             showAlert('Propaganda cadastrada com sucesso!', 'success');
         }
+        
+        // Limpar preview após salvar
+        clearMediaPreview();
+        
         closeAdvertisingModal();
         loadMyAds();
     } catch (error) {
@@ -621,7 +654,7 @@ function validateAdvertisingForm(formData) {
     const startDate = formData.get('startDate');
     const endDate = formData.get('endDate');
     const mediaType = formData.get('mediaType');
-    const targetUrl = formData.get('targetUrl');
+    let targetUrl = formData.get('targetUrl');
 
     if (!title) {
         showAlert('Título é obrigatório.', 'error');
@@ -651,6 +684,21 @@ function validateAdvertisingForm(formData) {
         showAlert('URL de destino é obrigatória.', 'error');
         return false;
     }
+    
+    // Auto-completar URL se necessário
+    if (targetUrl && !targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        if (targetUrl.startsWith('www.')) {
+            targetUrl = 'https://' + targetUrl;
+        } else {
+            targetUrl = 'https://' + targetUrl;
+        }
+        // Atualizar o valor no formulário
+        const targetUrlInput = document.getElementById('ad-target-url-modal');
+        if (targetUrlInput) {
+            targetUrlInput.value = targetUrl;
+        }
+    }
+    
     if (!isValidUrl(targetUrl)) {
         showAlert('A URL de destino não é válida.', 'error');
         return false;
@@ -671,9 +719,23 @@ function validateField(event) {
         return false;
     }
     
-    if (field.type === 'url' && value && !isValidUrl(value)) {
-        showFieldError(field, 'URL inválida');
-        return false;
+    // Validação de URL apenas se o campo for do tipo URL e tiver valor
+    if (field.name === 'targetUrl' && value) {
+        // Auto-completar URL se necessário antes de validar
+        let urlToValidate = value;
+        if (!urlToValidate.startsWith('http://') && !urlToValidate.startsWith('https://')) {
+            if (urlToValidate.startsWith('www.')) {
+                urlToValidate = 'https://' + urlToValidate;
+            } else {
+                urlToValidate = 'https://' + urlToValidate;
+            }
+        }
+        
+        // Só validar se a URL parece estar completa (tem pelo menos um ponto)
+        if (urlToValidate.includes('.') && !isValidUrl(urlToValidate)) {
+            showFieldError(field, 'URL inválida');
+            return false;
+        }
     }
     
     return true;
@@ -788,8 +850,15 @@ function formatDateToInput(date) {
 // Função global para abrir modal de edição corretamente
 window.openEditAdModal = function(adId, adData) {
     window.openAdvertisingModal().then(() => {
+        // Mudar o título da modal para "Editar Propaganda"
+        const modalTitle = document.querySelector('.modal-header h2');
+        if (modalTitle) {
+            modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Propaganda';
+        }
+        
         const form = document.getElementById('ad-form-modal');
         if (!form || !adData) return;
+        
         if (form.querySelector('[name="title"]')) {
             form.querySelector('[name="title"]').value = adData.title || '';
         }
@@ -803,7 +872,16 @@ window.openEditAdModal = function(adId, adData) {
             form.querySelector('[name="mediaUrl"]').value = adData.mediaUrl || '';
         }
         if (form.querySelector('[name="targetUrl"]')) {
-            form.querySelector('[name="targetUrl"]').value = adData.targetUrl || '';
+            // Auto-completar URL se necessário
+            let targetUrl = adData.targetUrl || '';
+            if (targetUrl && !targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                if (targetUrl.startsWith('www.')) {
+                    targetUrl = 'https://' + targetUrl;
+                } else {
+                    targetUrl = 'https://' + targetUrl;
+                }
+            }
+            form.querySelector('[name="targetUrl"]').value = targetUrl;
         }
         if (form.querySelector('[name="startDate"]')) {
             form.querySelector('[name="startDate"]').value = formatDateToInput(adData.startDate);

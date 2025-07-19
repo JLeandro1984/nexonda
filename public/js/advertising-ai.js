@@ -230,8 +230,12 @@ class AdvertisingAI {
   }
 
   applySuggestion(type, suggestion) {
-    const adForm = document.getElementById('ad-form');
-    if (adForm) adForm.setAttribute('data-ai-applying', 'true');
+    const adForm = document.getElementById('ad-form-modal') || document.getElementById('ad-form');
+    if (adForm) {
+      adForm.setAttribute('data-ai-applying', 'true');
+      console.log('[DEBUG] IA aplicando sugestão, submit bloqueado');
+    }
+    
     if (type === 'title') {
       const titleInput = document.getElementById('ad-title-modal') || document.getElementById('ad-title');
       if (titleInput) {
@@ -245,9 +249,15 @@ class AdvertisingAI {
         descriptionInput.focus();
       }
     }
+    
+    // Remover o atributo após um tempo para permitir submit manual
     setTimeout(() => {
-      if (adForm) adForm.removeAttribute('data-ai-applying');
-    }, 100);
+      if (adForm) {
+        adForm.removeAttribute('data-ai-applying');
+        console.log('[DEBUG] IA terminou de aplicar sugestão, submit liberado');
+      }
+    }, 500);
+    
     this.closeSuggestions();
     this.showSuccess('Sugestão aplicada com sucesso!');
   }
