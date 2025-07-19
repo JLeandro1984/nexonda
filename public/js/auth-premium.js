@@ -63,7 +63,6 @@ function initializeAuthPremium() {
     
     // Verificar se já está autenticado no sistema (token no localStorage)
     const token = localStorage.getItem('authToken');
-    console.log('[DEBUG] Token presente:', !!token);
     
     if (!token) {
         console.log('[DEBUG] Sem token, redirecionando para login premium');
@@ -74,10 +73,18 @@ function initializeAuthPremium() {
         return;
     }
     
+    // Verificar se já está autenticado premium (antes de verificar step)
+    const isAuthenticated = checkPremiumAuth();
+    
+    if (isAuthenticated) {
+        console.log('[DEBUG] Usuário já autenticado premium, exibindo dashboard');
+        showPremiumDashboard();
+        return;
+    }
+    
     // Verificar parâmetro step na URL
     const urlParams = new URLSearchParams(window.location.search);
     const stepParam = urlParams.get('step');
-    console.log('[DEBUG] Parâmetro step na URL:', stepParam);
     
     // Se step=cnpj, forçar a etapa de CNPJ independente do status de autenticação premium
     if (stepParam === 'cnpj') {
@@ -88,17 +95,14 @@ function initializeAuthPremium() {
         
         // Tentar obter email do localStorage primeiro
         let savedEmail = localStorage.getItem('premiumUserEmail');
-        console.log('[DEBUG] Email salvo no localStorage:', savedEmail);
         
         // Se não houver email salvo, tentar extrair do token JWT
         if (!savedEmail && token) {
             try {
                 const decodedToken = decodeJwt(token);
-                console.log('[DEBUG] Token decodificado:', decodedToken);
                 if (decodedToken && decodedToken.email) {
                     savedEmail = decodedToken.email;
                     localStorage.setItem('premiumUserEmail', savedEmail);
-                    console.log('[DEBUG] Email extraído do token e salvo:', savedEmail);
                 }
             } catch (error) {
                 console.error('[DEBUG] Erro ao decodificar token:', error);
@@ -107,7 +111,6 @@ function initializeAuthPremium() {
         
         if (savedEmail) {
             userEmail = savedEmail;
-            console.log('[DEBUG] Exibindo step CNPJ com email:', userEmail);
             showStep('cnpj');
         } else {
             console.log('[DEBUG] Sem email disponível, redirecionando para login premium');
@@ -116,16 +119,6 @@ function initializeAuthPremium() {
                 window.location.href = '/pages/login-premium.html';
             }, 2000);
         }
-        return;
-    }
-    
-    // Verificar se já está autenticado premium (apenas se não for step=cnpj)
-    const isAuthenticated = checkPremiumAuth();
-    console.log('[DEBUG] Usuário autenticado premium:', isAuthenticated);
-    
-    if (isAuthenticated) {
-        console.log('[DEBUG] Usuário já autenticado, exibindo dashboard');
-        showPremiumDashboard();
         return;
     }
     
@@ -412,15 +405,9 @@ function startOtpTimer() {
             clearInterval(otpTimer);
             document.getElementById('otp-countdown').textContent = '00:00';
             
-            // Código expirado - redirecionar para login premium
-            console.log('[DEBUG] Código OTP expirado, redirecionando para login');
-            showAlert('Código de verificação expirado. Faça login novamente.', 'Código Expirado', 'warning');
-            setTimeout(() => {
-                // Limpar dados de autenticação premium
-                clearPremiumAuth();
-                // Redirecionar para login premium
-                window.location.href = '/pages/login-premium.html';
-            }, 2000);
+            // Código expirado - mostrar aviso mas não redirecionar
+            console.log('[DEBUG] Código OTP expirado');
+            showAlert('Código de verificação expirado. Clique em "Reenviar código" para solicitar um novo.', 'Código Expirado', 'warning');
             return;
         }
         
@@ -581,17 +568,29 @@ function savePremiumAuth() {
     };
     
     localStorage.setItem('premiumAuth', JSON.stringify(authData));
+    console.log('[DEBUG] Autenticação premium salva com expiração em 24 horas');
 }
 
 function checkPremiumAuth() {
     const authData = localStorage.getItem('premiumAuth');
-    if (!authData) return false;
+    if (!authData) {
+        console.log('[DEBUG] Nenhuma autenticação premium encontrada');
+        return false;
+    }
     
     try {
         const data = JSON.parse(authData);
         const now = Date.now();
         
+        console.log('[DEBUG] Verificando autenticação premium:', {
+            email: data.email,
+            expiresAt: new Date(data.expiresAt),
+            now: new Date(now),
+            isValid: now < data.expiresAt
+        });
+        
         if (now > data.expiresAt) {
+            console.log('[DEBUG] Autenticação premium expirada, limpando dados');
             clearPremiumAuth();
             return false;
         }
@@ -599,9 +598,11 @@ function checkPremiumAuth() {
         // Restaurar dados
         userEmail = data.email;
         userCNPJ = data.cnpj;
+        console.log('[DEBUG] Autenticação premium válida, dados restaurados');
         return true;
         
     } catch (error) {
+        console.error('[DEBUG] Erro ao verificar autenticação premium:', error);
         clearPremiumAuth();
         return false;
     }
@@ -650,14 +651,42 @@ export function requirePremiumAuth() {
     return true;
 }
 
+// ===== VERIFICAÇÃO PERIÓDICA DA SESSÃO =====
+
+function startSessionCheck() {
+    // Verificar a sessão a cada 5 minutos
+    setInterval(() => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.log('[DEBUG] Token não encontrado, limpando sessão premium');
+            clearPremiumAuth();
+            return;
+        }
+        
+        // Verificar se a autenticação premium ainda é válida
+        const isPremiumValid = checkPremiumAuth();
+        if (!isPremiumValid) {
+            console.log('[DEBUG] Sessão premium expirada, limpando dados');
+            clearPremiumAuth();
+            return;
+        }
+        
+        console.log('[DEBUG] Sessão premium válida, mantendo ativa');
+    }, 5 * 60 * 1000); // 5 minutos
+}
+
 // ===== INICIALIZAÇÃO =====
 
 // Inicialização quando o DOM estiver pronto
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeAuthPremium);
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeAuthPremium();
+        startSessionCheck();
+    });
 } else {
     // DOM já está pronto
     initializeAuthPremium();
+    startSessionCheck();
 }
 
 // Também inicializar quando a página for carregada (para casos de navegação)
@@ -667,7 +696,10 @@ window.addEventListener('load', () => {
         return; // Não é a página premium
     }
     // Forçar reinicialização para garantir que o step seja respeitado
-    setTimeout(initializeAuthPremium, 100);
+    setTimeout(() => {
+        initializeAuthPremium();
+        startSessionCheck();
+    }, 100);
 });
 
 /*
