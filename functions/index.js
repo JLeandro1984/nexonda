@@ -819,6 +819,14 @@ const premiumAdsAuthMiddleware = (handler) => async (req, res) => {
       isPremium: !premiumDoc.empty,
       isAdmin: userDoc.docs[0]?.data().isAdmin || false,
     };
+    
+    // Se for usuário premium, adicionar o CNPJ
+    if (!premiumDoc.empty) {
+      const premiumData = premiumDoc.docs[0].data();
+      req.user.clientCNPJ = premiumData.clientCNPJ;
+      console.log("Usuário premium detectado, CNPJ:", premiumData.clientCNPJ);
+    }
+    
     req.userId = payload.email;
     return handler(req, res);
   } catch (error) {
@@ -939,12 +947,56 @@ exports.premiumAds = functions.https.onRequest({
         return res.status(400).json({error: "ID da propaganda não fornecido"});
       }
 
+      console.log("=== DEBUG PUT PREMIUM ADS ===");
+      console.log("ID da propaganda:", id);
+      console.log("UserId do contexto:", userId);
+      console.log("Dados para atualização:", data);
+
       const doc = await premiumAdsCollection.doc(id).get();
-      if (!doc.exists || doc.data().userId !== userId) {
+      if (!doc.exists) {
+        console.log("Documento não encontrado");
         return res.status(404).json({error: "Propaganda não encontrada"});
       }
 
+      const docData = doc.data();
+      console.log("Dados do documento:", {
+        userId: docData.userId,
+        createdBy: docData.createdBy,
+        clientCNPJ: docData.clientCNPJ
+      });
+
+      // Verificar se o usuário pode editar esta propaganda
+      // Pode editar se: 
+      // 1. userId coincide OU 
+      // 2. createdBy coincide OU 
+      // 3. é admin OU
+      // 4. é usuário premium e o CNPJ coincide
+      const userCNPJ = req.user.clientCNPJ || data.clientCNPJ;
+      const canEdit = docData.userId === userId || 
+                     docData.createdBy === userId || 
+                     req.user.isAdmin ||
+                     (req.user.isPremium && docData.clientCNPJ === userCNPJ);
+
+      console.log("Verificação de autorização:", {
+        docDataUserId: docData.userId,
+        contextUserId: userId,
+        docDataCreatedBy: docData.createdBy,
+        userIsAdmin: req.user.isAdmin,
+        userIsPremium: req.user.isPremium,
+        docDataClientCNPJ: docData.clientCNPJ,
+        userCNPJ: userCNPJ,
+        canEdit: canEdit
+      });
+
+      if (!canEdit) {
+        console.log("Usuário não autorizado a editar esta propaganda");
+        console.log("Motivo: userId não coincide, createdBy não coincide, usuário não é admin e não é premium com mesmo CNPJ");
+        return res.status(403).json({error: "Não autorizado a editar esta propaganda"});
+      }
+
+      console.log("Usuário autorizado, atualizando propaganda...");
       await premiumAdsCollection.doc(id).update(data);
+      console.log("Propaganda atualizada com sucesso");
       return res.status(200).json({message: "Propaganda atualizada com sucesso"});
     }
 
