@@ -39,3 +39,45 @@
 .hidden {
   display: none;
 }
+
+.alert-success,
+.alert-success,
+.alert-success * {
+  background-color: #e6f9ec !important;
+  color: #217a3a !important;
+}
+
+.alert-error,
+.alert-error,
+.alert-error * {
+  background-color: #fdeaea !important;
+  color: #b71c1c !important;
+}
+
+.alert-warning,
+.alert-warning,
+.alert-warning * {
+  background-color: #fffbe6 !important;
+  color: #b38f00 !important;
+}
+
+.alert-info,
+.alert-info,
+.alert-info * {
+  background-color: #e6f0fa !important;
+  color: #174ea6 !important;
+}
+
+@media (max-width: 600px) {
+  #custom-alert .modal-box {
+    width: 90vw !important;
+    font-size: 1rem !important;
+    padding: 1.2rem !important;
+  }
+  #custom-alert .alert-header h2 {
+    font-size: 1.1rem !important;
+  }
+  #custom-alert .alert-body p {
+    font-size: 1rem !important;
+  }
+}

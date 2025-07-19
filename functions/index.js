@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'nexonda.projetos@gmail.com',
-    pass: process.env.NEXONDA_GMAIL_APP_PASSWORD // Defina essa variável de ambiente no deploy
+    pass: 'vrzf fjex ujyq yztm' // Senha temporária para teste
   }
 });
 
@@ -1365,93 +1365,80 @@ exports.authenticate = functions.https.onRequest({
 exports.authenticatePremium = functions.https.onRequest({
   cors: true,
   maxInstances: 10,
-}, async (req, res) => {
-  // Configurar headers CORS explicitamente
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.set("Access-Control-Max-Age", "3600");
-
-  // Responder imediatamente para requisições OPTIONS (preflight)
-  if (req.method === "OPTIONS") {
-    return res.status(204).send("");
-  }
-
-  try {
-    // Verifica se o header de autorização está presente
-    const authHeader = req.headers.authorization;
-    console.log("[Premium] Auth header:", authHeader);
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("[Premium] Token não encontrado no header");
-      return res.status(401).json({error: "Token não fornecido"});
+}, (req, res) => {
+  return cors(req, res, async () => {
+    // Remover os headers CORS manuais
+    // Responder imediatamente para requisições OPTIONS (preflight)
+    if (req.method === "OPTIONS") {
+      return res.status(204).send("");
     }
-
-    // Extrai o token
-    const token = authHeader.split("Bearer ")[1];
-    console.log("[Premium] Token recebido:", token.substring(0, 20) + "...");
-
     try {
-      const client = getAuthClient();
-      // Verifica o token usando o OAuth2Client
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-
-      const payload = ticket.getPayload();
-      console.log("[Premium] Token verificado com sucesso:", {
-        email: payload.email,
-        name: payload.name,
-        picture: payload.picture,
-      });
-
-      // Verifica se o email está autorizado na coleção premium
-      console.log("[Premium] Verificando autorização para email:", payload.email);
-      const premiumUsersCollection = admin.firestore().collection("authorizedUsersClientePremium");
-      const userDoc = await premiumUsersCollection
-          .where("email", "==", payload.email)
-          .where("ativo", "==", true)
-          .get();
-
-      console.log("[Premium] Resultado da busca por email:", {
-        email: payload.email,
-        encontrado: !userDoc.empty,
-        total: userDoc.size,
-      });
-
-      if (userDoc.empty) {
-        console.log("[Premium] Usuário não autorizado:", payload.email);
-        return res.status(401).json({error: "Usuário premium não autorizado"});
+      // Verifica se o header de autorização está presente
+      const authHeader = req.headers.authorization;
+      console.log("[Premium] Auth header:", authHeader);
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        console.log("[Premium] Token não encontrado no header");
+        return res.status(401).json({error: "Token não fornecido"});
       }
-
-      // Retorna os dados do usuário premium
-      const userData = userDoc.docs[0].data();
-      console.log("[Premium] Usuário autorizado:", {
-        email: payload.email,
-        planType: userData.planType,
-        clientName: userData.clientName,
-      });
-
-      return res.json({
-        authorized: true,
-        user: {
+      // Extrai o token
+      const token = authHeader.split("Bearer ")[1];
+      console.log("[Premium] Token recebido:", token.substring(0, 20) + "...");
+      try {
+        const client = getAuthClient();
+        // Verifica o token usando o OAuth2Client
+        const ticket = await client.verifyIdToken({
+          idToken: token,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        console.log("[Premium] Token verificado com sucesso:", {
           email: payload.email,
           name: payload.name,
           picture: payload.picture,
+        });
+        // Verifica se o email está autorizado na coleção premium
+        console.log("[Premium] Verificando autorização para email:", payload.email);
+        const premiumUsersCollection = admin.firestore().collection("authorizedUsersClientePremium");
+        const userDoc = await premiumUsersCollection
+            .where("email", "==", payload.email)
+            .where("ativo", "==", true)
+            .get();
+        console.log("[Premium] Resultado da busca por email:", {
+          email: payload.email,
+          encontrado: !userDoc.empty,
+          total: userDoc.size,
+        });
+        if (userDoc.empty) {
+          console.log("[Premium] Usuário não autorizado:", payload.email);
+          return res.status(401).json({error: "Usuário premium não autorizado"});
+        }
+        // Retorna os dados do usuário premium
+        const userData = userDoc.docs[0].data();
+        console.log("[Premium] Usuário autorizado:", {
+          email: payload.email,
           planType: userData.planType,
           clientName: userData.clientName,
-          clientCNPJ: userData.clientCNPJ,
-        },
-      });
+        });
+        return res.json({
+          authorized: true,
+          user: {
+            email: payload.email,
+            name: payload.name,
+            picture: payload.picture,
+            planType: userData.planType,
+            clientName: userData.clientName,
+            clientCNPJ: userData.clientCNPJ,
+          },
+        });
+      } catch (error) {
+        console.error("[Premium] Erro ao verificar token:", error);
+        return res.status(401).json({error: "Token inválido"});
+      }
     } catch (error) {
-      console.error("[Premium] Erro ao verificar token:", error);
-      return res.status(401).json({error: "Token inválido"});
+      console.error("[Premium] Erro na autenticação:", error);
+      return res.status(500).json({error: "Erro na autenticação premium"});
     }
-  } catch (error) {
-    console.error("[Premium] Erro na autenticação:", error);
-    return res.status(500).json({error: "Erro na autenticação premium"});
-  }
+  });
 });
 
 // --- API para listar usuários autorizados ---
@@ -1784,41 +1771,75 @@ exports.trackLogoClick = functions.https.onRequest({
 
 // Função para enviar código de verificação premium
 exports.sendPremiumVerificationCode = functions.https.onRequest(async (req, res) => {
-  cors(req, res, async () => {
-    if (req.method !== 'POST') {
-      return res.status(405).send('Método não permitido');
+  // Configuração CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const { email, cnpj, otpCode } = req.body;
+    
+    if (!email || !cnpj || !otpCode) {
+      return res.status(400).json({ error: 'Email, CNPJ e código OTP são obrigatórios' });
     }
-    const { email, name, code } = req.body;
-    if (!email || !code) {
-      return res.status(400).json({ error: 'E-mail e código são obrigatórios.' });
-    }
-    // Proteção contra múltiplos envios em sequência (cooldown de 2 minutos)
-    const db = admin.firestore();
-    const verifRef = db.collection('premiumVerificationCodes').doc(email);
-    const verifDoc = await verifRef.get();
-    const now = Date.now();
-    if (verifDoc.exists) {
-      const data = verifDoc.data();
-      if (data.lastSent && now - data.lastSent < 2 * 60 * 1000) {
-        return res.status(429).json({ error: 'Aguarde antes de solicitar um novo código.' });
+
+    // Log para debug
+    console.log('Configuração Gmail:', {
+      user: 'nexonda.projetos@gmail.com',
+      password: '***CONFIGURADA***'
+    });
+    console.log('Dados recebidos:', { email, cnpj, otpCode });
+
+    // Configuração do transporte SMTP
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'nexonda.projetos@gmail.com',
+        pass: 'vrzf fjex ujyq yztm' // Senha de app do Gmail
       }
-    }
-    // Salva o código e timestamp
-    await verifRef.set({ code, lastSent: now, expiresAt: now + 5 * 60 * 1000 }, { merge: true });
-    // Monta o e-mail
+    });
+
+    // Configuração do email
     const mailOptions = {
-      from: 'Nexonda <nexonda.projetos@gmail.com>',
+      from: 'nexonda.projetos@gmail.com',
       to: email,
-      subject: 'Seu código de verificação premium Nexonda',
-      text: `Olá${name ? ' ' + name : ''},\n\nSeu código de verificação premium é: ${code}\n\nEste código é válido por 5 minutos.\n\nSe não foi você, ignore este e-mail.\n\nEquipe Nexonda`,
-      html: `<p>Olá${name ? ' ' + name : ''},</p><p><b>Seu código de verificação premium é:</b> <span style='font-size:1.3em;'>${code}</span></p><p>Este código é válido por <b>5 minutos</b>.</p><p>Se não foi você, ignore este e-mail.<br><br>Equipe Nexonda</p>`
+      subject: 'Código de Verificação - Nexonda Premium',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Código de Verificação Nexonda Premium</h2>
+          <p>Olá!</p>
+          <p>Seu código de verificação para acessar o painel premium é:</p>
+          <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0;">
+            <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 5px;">${otpCode}</h1>
+          </div>
+          <p>Este código expira em 10 minutos.</p>
+          <p>Se você não solicitou este código, ignore este email.</p>
+          <hr>
+          <p style="color: #666; font-size: 12px;">Nexonda - Sistema de Gestão Premium</p>
+        </div>
+      `
     };
-    try {
-      await transporter.sendMail(mailOptions);
-      return res.status(200).json({ success: true });
-    } catch (error) {
-      console.error('Erro ao enviar e-mail:', error);
-      return res.status(500).json({ error: 'Erro ao enviar e-mail.' });
-    }
-  });
+
+    // Enviar email
+    await transporter.sendMail(mailOptions);
+    
+    console.log(`Código OTP ${otpCode} enviado para ${email}`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Código de verificação enviado com sucesso'
+    });
+
+  } catch (error) {
+    console.error('Erro ao enviar e-mail:', error);
+    res.status(500).json({ 
+      error: 'Erro ao enviar código de verificação',
+      details: error.message 
+    });
+  }
 });

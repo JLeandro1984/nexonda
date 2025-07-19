@@ -79,37 +79,10 @@
             <p>Acesso restrito para usuários premium validados</p>
           </div>
 
-          <!-- Step 1: Login com Gmail -->
-          <div id="step-login" class="auth-step active">
+          <!-- Step 1: Validação de CNPJ -->
+          <div id="step-cnpj" class="auth-step active">
             <div class="step-indicator">
               <span class="step-number">1</span>
-              <span class="step-title">Login com Gmail</span>
-            </div>
-            <div class="auth-form">
-              <div class="form-group">
-                <label for="gmail-input">E-mail Gmail</label>
-                <input
-                  type="email"
-                  id="gmail-input"
-                  placeholder="seuemail@gmail.com"
-                  autocomplete="username"
-                  required
-                />
-                <small id="gmail-input-hint" class="form-hint"
-                  >Digite seu e-mail Gmail para continuar</small
-                >
-              </div>
-              <button id="gmail-login-btn" class="gmail-login-btn" disabled>
-                <i class="fab fa-google"></i>
-                <span>Entrar com Gmail</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 2: Validação de CNPJ -->
-          <div id="step-cnpj" class="auth-step">
-            <div class="step-indicator">
-              <span class="step-number">2</span>
               <span class="step-title">Validação de CNPJ</span>
             </div>
             <div class="auth-form">
@@ -136,10 +109,10 @@
             </div>
           </div>
 
-          <!-- Step 3: Código de Verificação -->
+          <!-- Step 2: Código de Verificação -->
           <div id="step-otp" class="auth-step">
             <div class="step-indicator">
-              <span class="step-number">3</span>
+              <span class="step-number">2</span>
               <span class="step-title">Código de Verificação</span>
             </div>
             <div class="auth-form">

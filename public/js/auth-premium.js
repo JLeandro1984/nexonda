@@ -3,8 +3,23 @@
 /*import { showAlert } from '../components/alert.js';*/
 import { logosApi } from './api.js';
 
+// Função para decodificar JWT
+function decodeJwt(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('Erro ao decodificar o token JWT:', e);
+        return null;
+    }
+}
+
 // Estados da aplicação
-let currentStep = 'login';
+let currentStep = 'cnpj';
 let userEmail = '';
 let userCNPJ = '';
 let otpCode = '';
@@ -15,12 +30,10 @@ let attempts = 0;
 const MAX_ATTEMPTS = 3;
 const OTP_VALIDITY_MINUTES = 5;
 const RESEND_COOLDOWN_MINUTES = 2;
-let emailExistsInLogos = false;
 
 // Elementos DOM
 const authScreen = document.getElementById('auth-premium-screen');
 const premiumDashboard = document.getElementById('premium-dashboard');
-const gmailLoginBtn = document.getElementById('gmail-login-btn');
 const validateCnpjBtn = document.getElementById('validate-cnpj-btn');
 const verifyOtpBtn = document.getElementById('verify-otp-btn');
 const resendOtpBtn = document.getElementById('resend-otp-btn');
@@ -39,8 +52,6 @@ const premiumUserEmail = document.getElementById('premium-user-email');
 const premiumUserCnpj = document.getElementById('premium-user-cnpj');
 const loadingElement = document.getElementById('auth-loading');
 const loadingMessage = document.getElementById('loading-message');
-const gmailInput = document.getElementById('gmail-input');
-const gmailInputHint = document.getElementById('gmail-input-hint');
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,45 +59,86 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeAuthPremium() {
+    console.log('[DEBUG] initializeAuthPremium iniciada');
+    
     // Verificar se já está autenticado no sistema (token no localStorage)
     const token = localStorage.getItem('authToken');
+    console.log('[DEBUG] Token presente:', !!token);
+    
     if (!token) {
-        showAlert('Você precisa estar autenticado para acessar esta área. Faça login normalmente primeiro.', 'Acesso restrito', 'error');
+        console.log('[DEBUG] Sem token, redirecionando para login premium');
+        showAlert('Você precisa estar autenticado para acessar esta área. Faça login premium primeiro.', 'Acesso Restrito', 'error');
         setTimeout(() => {
-            window.location.href = '/pages/login.html';
-        }, 1500);
+            window.location.href = '/pages/login-premium.html';
+        }, 2000);
         return;
     }
-    // Verificar se já está autenticado premium
+    
+    // Verificar parâmetro step na URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const stepParam = urlParams.get('step');
+    console.log('[DEBUG] Parâmetro step na URL:', stepParam);
+    
+    // Se step=cnpj, forçar a etapa de CNPJ independente do status de autenticação premium
+    if (stepParam === 'cnpj') {
+        console.log('[DEBUG] Step=cnpj detectado, forçando etapa de CNPJ');
+        // Limpar autenticação premium anterior para forçar novo fluxo
+        clearPremiumAuth();
+        setupEventListeners();
+        
+        // Tentar obter email do localStorage primeiro
+        let savedEmail = localStorage.getItem('premiumUserEmail');
+        console.log('[DEBUG] Email salvo no localStorage:', savedEmail);
+        
+        // Se não houver email salvo, tentar extrair do token JWT
+        if (!savedEmail && token) {
+            try {
+                const decodedToken = decodeJwt(token);
+                console.log('[DEBUG] Token decodificado:', decodedToken);
+                if (decodedToken && decodedToken.email) {
+                    savedEmail = decodedToken.email;
+                    localStorage.setItem('premiumUserEmail', savedEmail);
+                    console.log('[DEBUG] Email extraído do token e salvo:', savedEmail);
+                }
+            } catch (error) {
+                console.error('[DEBUG] Erro ao decodificar token:', error);
+            }
+        }
+        
+        if (savedEmail) {
+            userEmail = savedEmail;
+            console.log('[DEBUG] Exibindo step CNPJ com email:', userEmail);
+            showStep('cnpj');
+        } else {
+            console.log('[DEBUG] Sem email disponível, redirecionando para login premium');
+            showAlert('Email não encontrado. Faça login premium novamente.', 'Email Não Encontrado', 'error');
+            setTimeout(() => {
+                window.location.href = '/pages/login-premium.html';
+            }, 2000);
+        }
+        return;
+    }
+    
+    // Verificar se já está autenticado premium (apenas se não for step=cnpj)
     const isAuthenticated = checkPremiumAuth();
+    console.log('[DEBUG] Usuário autenticado premium:', isAuthenticated);
+    
     if (isAuthenticated) {
+        console.log('[DEBUG] Usuário já autenticado, exibindo dashboard');
         showPremiumDashboard();
         return;
     }
-    // Event listeners
-    setupEventListeners();
-    // Verificar se há email salvo
-    const savedEmail = localStorage.getItem('premiumUserEmail');
-    if (savedEmail) {
-        userEmail = savedEmail;
-        showStep('cnpj');
-    }
+    
+    // Se chegou aqui, não está autenticado premium e não tem step=cnpj
+    // Redirecionar para login premium
+    console.log('[DEBUG] Usuário não autenticado premium, redirecionando para login');
+    showAlert('Acesso restrito. Faça login premium para continuar.', 'Acesso Restrito', 'error');
+    setTimeout(() => {
+        window.location.href = '/pages/login-premium.html';
+    }, 2000);
 }
 
 function setupEventListeners() {
-    // Login Gmail
-    if (gmailLoginBtn) {
-        gmailLoginBtn.addEventListener('click', handleGmailLogin);
-    }
-    // Validação e feedback do input Gmail
-    if (gmailInput) {
-        gmailInput.addEventListener('input', handleGmailInputValidationAsync);
-        gmailInput.addEventListener('blur', handleGmailInputValidationAsync);
-        gmailInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !gmailLoginBtn.disabled) handleGmailLogin();
-        });
-    }
-
     // Validação CNPJ
     if (validateCnpjBtn) {
         validateCnpjBtn.addEventListener('click', handleCnpjValidation);
@@ -128,37 +180,6 @@ function setupEventListeners() {
 
 // ===== HANDLERS =====
 
-async function handleGmailLogin() {
-    try {
-        // Pega o valor do input
-        const email = gmailInput.value.trim();
-        if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
-            showAlert('Digite um e-mail Gmail válido.', 'Erro', 'error');
-            gmailInput.classList.add('error-state');
-            gmailInputHint.textContent = 'Digite um e-mail Gmail válido (ex: seuemail@gmail.com)';
-            gmailInputHint.classList.add('error-message');
-            return;
-        }
-        // Verifica se existe na coleção logos
-        if (!emailExistsInLogos) {
-            showAlert('E-mail não cadastrado no sistema.', 'Erro', 'error');
-            gmailInput.classList.add('error-state');
-            gmailInputHint.textContent = 'E-mail não cadastrado no sistema.';
-            gmailInputHint.classList.add('error-message');
-            gmailLoginBtn.disabled = true;
-            return;
-        }
-        showLoading('Iniciando login com Gmail...');
-        userEmail = email;
-        localStorage.setItem('premiumUserEmail', email);
-        hideLoading();
-        showStep('cnpj');
-    } catch (error) {
-        hideLoading();
-        showAlert('Erro ao fazer login com Gmail: ' + error.message, 'error');
-    }
-}
-
 async function handleCnpjValidation() {
     try {
         const cnpj = cnpjInput.value.replace(/\D/g, '');
@@ -180,9 +201,11 @@ async function handleCnpjValidation() {
             userCNPJ = cnpj;
             hideLoading();
             clearCnpjError();
-            savePremiumAuth();
-            // Redireciona diretamente para AdminPremium.html após validação do CNPJ
-            window.location.href = 'AdminPremium.html';
+            // savePremiumAuth(); // Remover salvamento e redirecionamento prematuro
+            // window.location.href = 'AdminPremium.html';
+            // Novo fluxo: gerar e enviar código OTP, mostrar step OTP
+            await sendOtpCode();
+            showStep('otp');
             return;
         } else {
             hideLoading();
@@ -214,6 +237,12 @@ async function handleOtpVerification() {
     try {
         const inputOtp = otpInput.value;
         
+        console.log('[DEBUG] handleOtpVerification iniciada');
+        console.log('[DEBUG] Input OTP:', inputOtp);
+        console.log('[DEBUG] OTP esperado:', otpCode);
+        console.log('[DEBUG] userEmail:', userEmail);
+        console.log('[DEBUG] userCNPJ:', userCNPJ);
+        
         if (!inputOtp || inputOtp.length !== 6) {
             showAlert('Digite o código de 6 dígitos.', 'error');
             return;
@@ -228,15 +257,19 @@ async function handleOtpVerification() {
         
         // Verificar OTP
         if (inputOtp === otpCode) {
+            console.log('[DEBUG] OTP válido! Salvando autenticação...');
             hideLoading();
             showAlert('Autenticação realizada com sucesso!', 'success');
             
             // Salvar dados de autenticação
             savePremiumAuth();
+            console.log('[DEBUG] Autenticação salva, mostrando dashboard...');
             
             // Mostrar dashboard
             showPremiumDashboard();
+            console.log('[DEBUG] Dashboard deve estar visível agora');
         } else {
+            console.log('[DEBUG] OTP inválido. Tentativa:', attempts + 1);
             hideLoading();
             showAlert('Código incorreto. Tente novamente.', 'error');
             attempts++;
@@ -248,6 +281,7 @@ async function handleOtpVerification() {
         }
         
     } catch (error) {
+        console.error('[DEBUG] Erro na verificação OTP:', error);
         hideLoading();
         showAlert('Erro ao verificar código: ' + error.message, 'error');
     }
@@ -255,12 +289,18 @@ async function handleOtpVerification() {
 
 async function handleResendOtp() {
     try {
+        console.log('[DEBUG] handleResendOtp - Iniciando reenvio de código');
+        console.log(`[DEBUG] handleResendOtp - Código atual antes do reenvio: ${otpCode}`);
+        
         showLoading('Reenviando código...');
         await sendOtpCode();
         hideLoading();
         showAlert('Novo código enviado com sucesso!', 'success');
         
+        console.log(`[DEBUG] handleResendOtp - Código após reenvio: ${otpCode}`);
+        
     } catch (error) {
+        console.error('[DEBUG] handleResendOtp - Erro ao reenviar código:', error);
         hideLoading();
         showAlert('Erro ao reenviar código: ' + error.message, 'error');
     }
@@ -270,62 +310,7 @@ function handlePremiumLogout() {
     clearPremiumAuth();
     resetAuth();
     showAuthScreen();
-    showAlert('Logout realizado com sucesso!', 'success');
-}
-
-async function handleGmailInputValidationAsync() {
-    const value = gmailInput.value.trim();
-    const isFormatValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(value);
-    if (!isFormatValid) {
-        gmailInput.classList.remove('success-state');
-        gmailInput.classList.add('error-state');
-        gmailInputHint.textContent = 'Digite um e-mail Gmail válido (ex: seuemail@gmail.com)';
-        gmailInputHint.classList.remove('success-message');
-        gmailInputHint.classList.add('error-message');
-        gmailLoginBtn.disabled = true;
-        emailExistsInLogos = false;
-        return;
-    }
-    // Consulta na coleção logos
-    gmailInputHint.textContent = 'Verificando e-mail...';
-    gmailInputHint.classList.remove('error-message', 'success-message');
-    gmailInput.classList.remove('error-state', 'success-state');
-    gmailLoginBtn.disabled = true;
-    emailExistsInLogos = false;
-    try {
-        const { logosApi } = await import('./api.js');
-        const logos = await logosApi.getAll();
-        // Log para debug
-        console.log('[AdminPremium] Emails encontrados na coleção logos:', logos.map(l => l.email));
-        // Busca case-insensitive
-        const found = logos.some(logo => (logo.email || '').toLowerCase() === value.toLowerCase());
-        if (found) {
-            gmailInput.classList.remove('error-state');
-            gmailInput.classList.add('success-state');
-            gmailInputHint.textContent = 'E-mail cadastrado!';
-            gmailInputHint.classList.remove('error-message');
-            gmailInputHint.classList.add('success-message');
-            gmailLoginBtn.disabled = false;
-            emailExistsInLogos = true;
-        } else {
-            gmailInput.classList.remove('success-state');
-            gmailInput.classList.add('error-state');
-            gmailInputHint.textContent = 'E-mail não cadastrado no sistema.';
-            gmailInputHint.classList.remove('success-message');
-            gmailInputHint.classList.add('error-message');
-            gmailLoginBtn.disabled = true;
-            emailExistsInLogos = false;
-        }
-    } catch (error) {
-        console.error('[AdminPremium] Erro ao consultar API logos:', error);
-        gmailInput.classList.remove('success-state');
-        gmailInput.classList.add('error-state');
-        gmailInputHint.textContent = 'Erro ao verificar e-mail. Tente novamente mais tarde.';
-        gmailInputHint.classList.remove('success-message');
-        gmailInputHint.classList.add('error-message');
-        gmailLoginBtn.disabled = true;
-        emailExistsInLogos = false;
-    }
+    window.location.href = '/pages/login-premium.html';
 }
 
 // ===== FUNÇÕES AUXILIARES =====
@@ -363,23 +348,57 @@ async function validateCnpjInLogos(email, cnpj) {
 }
 
 async function sendOtpCode() {
-    // Gerar código OTP de 6 dígitos
-    otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Definir expiração (5 minutos)
-    otpExpiry = new Date(Date.now() + OTP_VALIDITY_MINUTES * 60 * 1000);
-    
-    // Em produção, enviar email real
-    console.log(`Código OTP enviado para ${userEmail}: ${otpCode}`);
-    
-    // Mostrar código no console para teste
-    showAlert(`Código de teste: ${otpCode}`, 'info');
-    
-    // Iniciar timer
-    startOtpTimer();
-    
-    // Configurar reenvio
-    setupResendTimer();
+    try {
+        // Gerar código OTP de 6 dígitos
+        const newOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        otpCode = newOtpCode; // Atribuir à variável global
+        
+        // Definir expiração (5 minutos)
+        otpExpiry = new Date(Date.now() + OTP_VALIDITY_MINUTES * 60 * 1000);
+        
+        console.log(`[DEBUG] sendOtpCode - Gerando novo código OTP para ${userEmail}: ${otpCode}`);
+        console.log(`[DEBUG] sendOtpCode - Código armazenado na variável otpCode: ${otpCode}`);
+        
+        // Enviar código via Cloud Function
+        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/sendPremiumVerificationCode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: userEmail,
+                cnpj: userCNPJ,
+                otpCode: otpCode
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro ao enviar código');
+        }
+        
+        console.log('[DEBUG] sendOtpCode - Código OTP enviado com sucesso');
+        console.log(`[DEBUG] sendOtpCode - Código final na variável: ${otpCode}`);
+        
+        showAlert('Código de verificação enviado para seu e-mail!', 'Código Enviado', 'success');
+        
+        // Iniciar timer
+        startOtpTimer();
+        
+        // Configurar reenvio
+        setupResendTimer();
+        
+    } catch (error) {
+        console.error('[DEBUG] sendOtpCode - Erro ao enviar código OTP:', error);
+        
+        // Em caso de erro, mostrar código no console para teste
+        console.log(`[DEBUG] sendOtpCode - Código de teste (envio falhou): ${otpCode}`);
+        showAlert(`Erro ao enviar código. Código de teste: ${otpCode}`, 'Erro no Envio', 'error');
+        
+        // Mesmo assim, iniciar timer e reenvio
+        startOtpTimer();
+        setupResendTimer();
+    }
 }
 
 function startOtpTimer() {
@@ -392,6 +411,16 @@ function startOtpTimer() {
         if (timeLeft === 0) {
             clearInterval(otpTimer);
             document.getElementById('otp-countdown').textContent = '00:00';
+            
+            // Código expirado - redirecionar para login premium
+            console.log('[DEBUG] Código OTP expirado, redirecionando para login');
+            showAlert('Código de verificação expirado. Faça login novamente.', 'Código Expirado', 'warning');
+            setTimeout(() => {
+                // Limpar dados de autenticação premium
+                clearPremiumAuth();
+                // Redirecionar para login premium
+                window.location.href = '/pages/login-premium.html';
+            }, 2000);
             return;
         }
         
@@ -430,26 +459,66 @@ function formatCNPJ(input) {
 // ===== CONTROLE DE TELAS =====
 
 function showStep(step) {
+    console.log('[DEBUG] showStep chamada com:', step);
+    
+    // Verificar se a tela de autenticação está visível
+    const authScreen = document.getElementById('auth-premium-screen');
+    const premiumDashboard = document.getElementById('premium-dashboard');
+    
+    console.log('[DEBUG] Auth screen hidden:', authScreen?.classList.contains('hidden'));
+    console.log('[DEBUG] Premium dashboard hidden:', premiumDashboard?.classList.contains('hidden'));
+    
+    // Garantir que a tela de autenticação está visível
+    if (authScreen) {
+        authScreen.classList.remove('hidden');
+        console.log('[DEBUG] Auth screen agora visível');
+    }
+    
+    // Garantir que o dashboard está oculto
+    if (premiumDashboard) {
+        premiumDashboard.classList.add('hidden');
+        console.log('[DEBUG] Premium dashboard oculto');
+    }
+    
     // Esconder todos os steps
-    document.querySelectorAll('.auth-step').forEach(el => {
+    const allSteps = document.querySelectorAll('.auth-step');
+    console.log('[DEBUG] Steps encontrados:', allSteps.length);
+    
+    allSteps.forEach(el => {
         el.classList.remove('active');
+        console.log('[DEBUG] Step removido:', el.id);
     });
     
     // Mostrar step atual
     const stepElement = document.getElementById(`step-${step}`);
+    console.log('[DEBUG] Elemento do step encontrado:', !!stepElement);
+    
     if (stepElement) {
         stepElement.classList.add('active');
+        console.log('[DEBUG] Step ativado:', step);
+    } else {
+        console.error('[DEBUG] Elemento do step não encontrado:', `step-${step}`);
     }
     
     currentStep = step;
     
     // Atualizar informações
     if (step === 'cnpj' && userEmail) {
-        userEmailDisplay.textContent = userEmail;
+        console.log('[DEBUG] Atualizando email display:', userEmail);
+        if (userEmailDisplay) {
+            userEmailDisplay.textContent = userEmail;
+        } else {
+            console.error('[DEBUG] userEmailDisplay não encontrado');
+        }
     }
     
     if (step === 'otp' && userEmail) {
-        otpEmailDisplay.textContent = userEmail;
+        console.log('[DEBUG] Atualizando OTP email display:', userEmail);
+        if (otpEmailDisplay) {
+            otpEmailDisplay.textContent = userEmail;
+        } else {
+            console.error('[DEBUG] otpEmailDisplay não encontrado');
+        }
     }
 }
 
@@ -467,16 +536,32 @@ function hideLoading() {
 }
 
 function showPremiumDashboard() {
-    if (authScreen) authScreen.classList.add('hidden');
+    console.log('[DEBUG] showPremiumDashboard iniciada');
+    console.log('[DEBUG] authScreen:', !!authScreen);
+    console.log('[DEBUG] premiumDashboard:', !!premiumDashboard);
+    
+    if (authScreen) {
+        authScreen.classList.add('hidden');
+        console.log('[DEBUG] Auth screen ocultada');
+    }
+    
     if (premiumDashboard) {
         premiumDashboard.classList.remove('hidden');
+        console.log('[DEBUG] Premium dashboard tornada visível');
         
         // Atualizar informações do usuário
-        if (premiumUserEmail) premiumUserEmail.textContent = userEmail;
+        if (premiumUserEmail) {
+            premiumUserEmail.textContent = userEmail;
+            console.log('[DEBUG] Email atualizado no dashboard:', userEmail);
+        }
+        
         if (premiumUserCnpj) {
             const formattedCnpj = userCNPJ.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
             premiumUserCnpj.textContent = `CNPJ: ${formattedCnpj}`;
+            console.log('[DEBUG] CNPJ atualizado no dashboard:', formattedCnpj);
         }
+    } else {
+        console.error('[DEBUG] Elemento premiumDashboard não encontrado!');
     }
 }
 
@@ -539,7 +624,9 @@ function resetAuth() {
     if (otpTimer) clearInterval(otpTimer);
     if (resendTimer) clearTimeout(resendTimer);
     
-    showStep('login');
+    // Redirecionar para login premium em vez de mostrar step login
+    console.log('[DEBUG] Reset auth, redirecionando para login premium');
+    window.location.href = '/pages/login-premium.html';
 }
 
 // ===== EXPORTS =====
@@ -561,7 +648,28 @@ export function requirePremiumAuth() {
         return false;
     }
     return true;
-} 
+}
+
+// ===== INICIALIZAÇÃO =====
+
+// Inicialização quando o DOM estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAuthPremium);
+} else {
+    // DOM já está pronto
+    initializeAuthPremium();
+}
+
+// Também inicializar quando a página for carregada (para casos de navegação)
+window.addEventListener('load', () => {
+    // Verificar se já foi inicializado
+    if (!document.getElementById('auth-premium-screen')) {
+        return; // Não é a página premium
+    }
+    // Forçar reinicialização para garantir que o step seja respeitado
+    setTimeout(initializeAuthPremium, 100);
+});
+
 /*
 function showAlert(message, type = 'info') {
     // Remove qualquer alerta anterior

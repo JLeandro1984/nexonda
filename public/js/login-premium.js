@@ -83,23 +83,35 @@ async function handleGoogleLogin() {
         }
         localStorage.setItem('authToken', result.token);
         const decodedToken = decodeJwt(result.token);
+        console.log('[DEBUG] Token decodificado:', decodedToken);
+        
         let userEmail = '';
         if (decodedToken && decodedToken.email) {
             userEmail = decodedToken.email;
             localStorage.setItem('userName', decodedToken.name || '');
+            console.log('[DEBUG] Email obtido do token:', userEmail);
+        } else {
+            console.error('[DEBUG] Email não encontrado no token decodificado');
         }
+        
         const savedToken = localStorage.getItem('authToken');
         if (!savedToken) {
             throw new Error('Erro ao salvar o token');
         }
+        
         // ===== Validação premium: checar se email existe na coleção logos =====
         if (!userEmail) {
             throw new Error('Não foi possível obter o e-mail do usuário Google.');
         }
+        
         // (Removido: consulta à coleção authorizedUsersClientePremium via API do frontend)
         // Salva o email premium e redireciona para etapa CNPJ
         localStorage.setItem('premiumUserEmail', userEmail);
+        console.log('[DEBUG] Email salvo no localStorage:', userEmail);
+        console.log('[DEBUG] Verificando se foi salvo:', localStorage.getItem('premiumUserEmail'));
+        
         // Redireciona para AdminPremium.html, mas a tela deve mostrar a etapa de CNPJ
+        console.log('[DEBUG] Redirecionando para AdminPremium.html?step=cnpj');
         window.location.href = 'AdminPremium.html?step=cnpj';
     } catch (error) {
         console.error('Erro detalhado:', error);

@@ -25,7 +25,8 @@
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^6.3.2",
     "google-auth-library": "^9.6.3",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
     "eslint": "^8.15.0",

@@ -80,8 +80,12 @@ class AlertComponent {
       info: 'ℹ️'
     };
     this.alertIcon.textContent = icons[type] || icons.warning;
-    this.alertBox.classList.remove('alert-warning', 'alert-error', 'alert-success', 'alert-info');
-    this.alertBox.classList.add(`alert-${type}`);
+    // Remove classes antigas do modal-box
+    const modalBox = this.alertBox.querySelector('.modal-box');
+    if (modalBox) {
+      modalBox.classList.remove('alert-warning', 'alert-error', 'alert-success', 'alert-info');
+      modalBox.classList.add(`alert-${type}`);
+    }
   }
 
   showButtons({ close = false, confirm = false, cancel = false }) {

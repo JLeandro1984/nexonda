@@ -44,6 +44,15 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="./components/user-menu.js"></script>
     <link rel="stylesheet" href="./components/alert.css" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#007bff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <script src="/js/pwa.js" defer></script>
   </head>
 
   <body id="index-page">
@@ -201,7 +210,7 @@
           <div class="section-header">
             <h2 class="section-title">Marcas Premium</h2>
             <p class="section-subtitle">
-              Conheça as empresas que fazem parte do nosso seleto grupo premium
+              Conheça as empresas que integram nosso seleto grupo premium
             </p>
           </div>
           <div class="premium-logos-container" id="premium-logos-grid">
@@ -448,36 +457,11 @@
       </button>
     </div>
 
-    <!-- Footer Moderno -->
-    <footer class="modern-footer">
-      <div class="footer-content">
-        <div class="footer-brand">
-          <img
-            src="./images/nexonda/logo_nexonda.svg"
-            alt="Nexonda"
-            class="footer-logo"
-          />
-          <p class="footer-tagline">Conectando marcas ao mundo</p>
-        </div>
-
-        <div class="footer-links">
-          <a
-            href="./pages/privacy-policy.html"
-            data-lang="privacy-policy"
-            class="footer-link"
-          >
-            <i class="fas fa-shield-alt"></i>
-            Política de Privacidade
-          </a>
-        </div>
-
-        <div class="footer-copyright">
-          <p data-lang="footer-text">
-            &copy; 2025 Nexonda. Todos os direitos reservados.
-          </p>
-        </div>
-      </div>
-    </footer>
+    <!-- Substituir o footer antigo pelo novo componente reutilizável -->
+    <div id="footer-placeholder"></div>
+    <link rel="stylesheet" href="./css/footer.css" />
+    <script src="./js/load-footer.js"></script>
+    <script src="./js/test-footer.js"></script>
 
     <!-- Container de Botões Flutuantes -->
     <div class="floating-buttons-container">
