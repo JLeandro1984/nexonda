@@ -139,7 +139,7 @@ function createLogoCard(logo) {
   const cardId = `logo-card-${Math.random().toString(36).substr(2, 9)}`;
   // Exibe o ícone de info apenas se o plano não for 'basico'
   const showInfoIcon = (logo.planType || '').toLowerCase() !== 'basico';
-  const infoIconHtml = showInfoIcon ? `<span class="icon info-icon small-info-icon" title="Para mais informações clique aqui." data-logo="${encodeURIComponent(JSON.stringify(logo))}"><i class="fas fa-info-circle"></i></span>` : '';
+  const infoIconHtml = showInfoIcon ? `<span class="icon info-icon small-info-icon" title="Para mais informações clique aqui." data-logo="${encodeURIComponent(JSON.stringify(logo))}"><i id="ico-maps" class="fas fa-location-dot"></i></span>` : '';
   const cardContent = `
     <div class="logo-card">
       <div class="logo-img-container">

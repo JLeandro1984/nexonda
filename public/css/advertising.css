@@ -28,6 +28,7 @@
   gap: 1.5rem;
   padding: 1rem 0; /* Remove padding lateral */
   scroll-padding: 0 2rem; /* Alinha com o container */
+  text-align: center;
 }
 
 .premium-carousel::-webkit-scrollbar {
@@ -226,10 +227,10 @@ div[data-video-url] {
 
 .ad-frame {
   background: var(--background, #fff);
-  border-radius: 2rem;
+  border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   overflow: hidden;
-  max-width: 480px;
+  max-width: 380px;
   width: 100%;
   position: relative;
   display: flex;
@@ -240,6 +241,7 @@ div[data-video-url] {
 .ad-media-container {
   position: relative;
   width: 100%;
+  height: auto;
   aspect-ratio: 16/9;
   background: #111;
   display: flex;
@@ -287,38 +289,54 @@ div[data-video-url] {
 .ad-next-btn {
   right: 1rem;
 }
-
+/* 
 .ad-info-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  background: linear-gradient(
+  /* background: linear-gradient(
     90deg,
     rgba(0, 0, 0, 0.7) 60%,
     rgba(0, 0, 0, 0.3) 100%
+  );
+  background: linear-gradient(
+    90deg,
+    rgba(37, 99, 235, 0.95) 40%,
+    rgba(147, 197, 253, 0.3) 100%
   );
   color: #fff;
   padding: 1.1rem 1.5rem;
   position: relative;
   min-height: 64px;
+} */
+.ad-info-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  position: relative;
+  min-height: 120px; /* opcional, para garantir espaço */
 }
 
 .ad-info {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  flex: 1;
 }
 
 .ad-title {
-  font-weight: 600;
-  font-size: 1.1rem;
-  letter-spacing: 0.01em;
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 4px;
 }
 
 .ad-slogan {
-  font-size: 0.95rem;
-  color: #e0e0e0;
+  font-size: 14px;
+  color: #555;
 }
 
 .ad-cta-btn {
@@ -340,6 +358,136 @@ div[data-video-url] {
   color: #fff;
 }
 
+.ad-btn-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#ads-video {
+  margin: 20px 0;
+  padding: 20px;
+}
+
+.ad-title,
+.ad-slogan {
+  display: inline-block;
+  /* max-width: 350px;*/
+  /* white-space: nowrap;*/
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: default;
+}
+
+/*Propaganda img - premium-plus*/
+#ads-img-premium-plus {
+  margin: 20px 0 0 0;
+  padding: 10px 0;
+}
+
+.ad-card-premium-plus {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 600px;
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.ad-card-premium-plus:hover,
+.ad-frame:hover {
+  transform: scale(1.02);
+}
+
+.ad-image-premium-plus {
+  width: 168px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ad-content-premium-plus {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.premium-ad-experience-img {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0;
+  background: transparent;
+}
+
+.ad-title-premium-plus {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.ad-description-premium-plus {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+.ad-button-premium-plus {
+  align-self: start;
+  margin-top: 10px;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background: var(--primary-600, #2563eb);
+  color: #fff;
+  border-radius: 1.2rem;
+}
+
+.ad-button-premium-plus:hover {
+  background: var(--primary-700, #1d4ed8);
+}
+
+@media (max-width: 480px) {
+  .ad-card-premium-plus {
+    flex-direction: column;
+    align-items: center;
+    margin: 0 10px;
+  }
+
+  .ad-image-premium-plus {
+    width: 100%;
+    height: 200px;
+  }
+
+  .ad-content-premium-plus {
+    padding: 16px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .ad-button-premium-plus {
+    align-self: center;
+    width: 100%;
+  }
+
+  .ad-btn-container {
+    justify-content: center;
+  }
+
+  .ad-btn-container {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
 @media (max-width: 600px) {
   .ad-frame {
     border-radius: 1rem;
@@ -356,6 +504,14 @@ div[data-video-url] {
     margin-top: 0.5rem;
     width: 100%;
     text-align: center;
+  }
+  .ad-title,
+  .ad-slogan {
+    text-align: center;
+  }
+  .ad-btn-container {
+    justify-content: center;
+    width: 100%;
   }
 }
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexonda - Em Manutenção</title>
+    <link rel="icon" href="./icons/icon.svg" type="image/x-icon" />
+    <style>
+      :root {
+        --primary-color: #1a237e;
+        --secondary-color: #3949ab;
+        --text-color: #333;
+        --bg-color: #f5f5f5;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: var(--bg-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        color: var(--text-color);
+      }
+
+      .container {
+        max-width: 500px;
+        padding: 20px;
+      }
+
+      .logo {
+        width: 120px;
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+      }
+
+      p {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 30px;
+      }
+
+      .btn-whatsapp {
+        display: inline-block;
+        background-color: #25d366;
+        color: white;
+        text-decoration: none;
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+      }
+
+      .btn-whatsapp:hover {
+        background-color: #1ebe5b;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .btn-whatsapp {
+          font-size: 0.9rem;
+          padding: 10px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        src="./images/nexonda/logo_nexonda.png"
+        alt="Logo Nexonda"
+        class="logo"
+        style="width: 300px"
+      />
+      <h1>Estamos em manutenção</h1>
+      <p>
+        Estamos fazendo melhorias em nosso sistema para oferecer a melhor
+        experiência possível.<br />Volte em breve!
+      </p>
+      <a
+        class="btn-whatsapp"
+        href="https://wa.me/5515996257159"
+        target="_blank"
+      >
+        Fale conosco no WhatsApp
+      </a>
+    </div>
+  </body>
+</html>
