@@ -310,8 +310,8 @@ async function getAdvertisingFormHTML() {
                 />
                 <small class="hint">Link para onde o usuário será direcionado ao clicar na propaganda</small>
             </div>
-            <div class="form-group media-preview-wrapper">
-                <div id="media-preview-modal" style="margin-bottom: 12px">
+            <div id="preview-anexo" class="form-group">
+                <div id="media-preview-modal" class="media-preview-wrapper" style="margin-bottom: 12px">
                     <!-- Pré-visualização será inserida aqui -->
                 </div>
                 <div

@@ -1850,12 +1850,6 @@ body.dark-mode .premium-logos-section {
   flex-shrink: 0;
 }
 
-/* body.dark-mode .premium-logo-item {
-  background: var(--gray-800);
-  border-color: var(--gray-700);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-} */
-
 .premium-logo-item:hover {
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -2091,17 +2085,6 @@ body#index-page .premium-ad-item {
   border-color: var(--border, #eee);
 }
 
-body.dark-mode .custom-select-option.selected {
-  background: #fff !important;
-  color: var(--primary-700, #2563eb) !important;
-  border-left: 4px solid var(--primary-700, #2563eb);
-  font-weight: bold;
-}
-
-body#index-page .company-name {
-  color: var(--text-primary, #222);
-}
-
 body#index-page .logo-img-container {
   background: #fff !important;
   border-color: var(--border, #eee) !important;
@@ -2133,6 +2116,52 @@ body#index-page .logo-img-container {
   transform: scale(1.02);
 }
 
+/*Início - Ajuste Dark*/
+body.dark-mode .custom-select-option.selected {
+  background: #fff !important;
+  color: var(--primary-700, #2563eb) !important;
+  border-left: 4px solid var(--primary-700, #2563eb);
+  font-weight: bold;
+}
+
+/* body.dark-mode .premium-logo-item {
+  background: var(--gray-800);
+  border-color: var(--gray-700);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+} */
+
+body.dark-mode #my-ads-section {
+  background: var(--card-bg-dark, #232a36) !important;
+  border-color: var(--gray-700);
+}
+
+body.dark-mode #my-ads-section .section-title {
+  color: var(--gray-400) !important;
+}
+body.dark-mode #my-ads-section .premium-ad-card {
+  box-shadow: none !important;
+}
+
+body.dark-mode #advertising-modal label,
+body.dark-mode .plan-name {
+  color: var(--gray-400) !important;
+}
+
+body.dark-mode #ad-upload-modal,
+body.dark-mode #upload-loading-modal {
+  color: var(--gray-600) !important;
+}
+
+body.dark-mode .plan-info-section {
+  background: var(--gray-800) !important;
+  border-color: var(--gray-700);
+}
+
+body#index-page .company-name {
+  color: var(--text-primary, #222);
+}
+
+/*Início - Ajuste resoluções menores*/
 @media (max-width: 480px) {
   .container {
     padding: 0 var(--space-4);
