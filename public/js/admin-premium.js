@@ -3,6 +3,28 @@
 import { showAlert } from '../components/alert.js';
 import { requirePremiumAuth, getPremiumUser } from './auth-premium.js';
 
+// ===== Função para Configurar Contadores de Caracteres =====
+function setupCharacterCounters(parentElement = document) {
+    // Usa o elemento pai fornecido ou o documento inteiro por padrão
+    parentElement.querySelectorAll(".char-input").forEach((input) => {
+        const max = parseInt(input.dataset.maxlength);
+        // Também busca o contador dentro do elemento pai especificado
+        const counter = parentElement.querySelector(`.char-count[data-for="${input.id}"]`);
+
+        if (!counter || isNaN(max)) return; // Se não encontrar o contador ou o limite, pula
+
+        const updateCounter = () => {
+            const remaining = max - input.value.length;
+            counter.textContent = `${remaining}`;
+        };
+
+        // Remove listener antigo para evitar duplicatas se for chamada várias vezes
+        input.removeEventListener('input', updateCounter);
+        input.addEventListener("input", updateCounter);
+        updateCounter(); // Atualiza a contagem inicial
+    });
+}
+
 // Elementos DOM
 const advertisingModal = document.getElementById('advertising-modal');
 const advertisingModalContent = document.getElementById('advertising-modal-content');
@@ -178,7 +200,10 @@ async function getAdvertisingFormHTML() {
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="ad-title-modal">Título da Propaganda*</label>
+                    <div class="label-with-counter">
+                        <label for="ad-title-modal">Título da Propaganda*</label>
+                        <small class="char-count" data-for="ad-title-modal">45</small>
+                    </div>
                     <div class="input-with-ai">
                         <input
                             type="text"
@@ -186,7 +211,10 @@ async function getAdvertisingFormHTML() {
                             name="title"
                             required
                             placeholder="Ex: Oferta Especial de Verão"
-                        />
+                            maxlength="45"
+                            class="char-input"
+                            data-maxlength="45"
+                        />                       
                         <button
                             type="button"
                             class="ai-suggest-btn"
@@ -201,7 +229,10 @@ async function getAdvertisingFormHTML() {
                 <!-- Removido select de cliente -->
             </div>
             <div class="form-group">
-                <label for="ad-description-modal">Descrição*</label>
+                <div class="label-with-counter">
+                    <label for="ad-description-modal">Descrição*</label>
+                    <small class="char-count" data-for="ad-description-modal">100</small>
+                </div>
                 <div class="input-with-ai">
                     <textarea
                         id="ad-description-modal"
@@ -209,7 +240,10 @@ async function getAdvertisingFormHTML() {
                         required
                         placeholder="Descreva a promoção ou campanha"
                         rows="3"
-                    ></textarea>
+                        maxlength="110"
+                        class="char-input"
+                        data-maxlength="110"
+                    ></textarea>                     
                     <button
                         type="button"
                         class="ai-suggest-btn"
@@ -219,7 +253,7 @@ async function getAdvertisingFormHTML() {
                     >
                         <i class="fas fa-magic"></i>
                     </button>
-                </div>
+                </div>                
             </div>
 
             <!-- Container para sugestões da IA -->
@@ -294,7 +328,7 @@ async function getAdvertisingFormHTML() {
                     name="mediaUrl"
                     required
                     readonly
-                    placeholder="https://res.cloudinary.com/..."
+                    placeholder="https://firebasestorage.googleapis.com/..."
                     rows="2"
                     style="width: 100%; resize: none; padding-right: 70px"
                 ></textarea>
@@ -343,6 +377,9 @@ async function initializeAdvertisingForm() {
         
         // Configurar validações
         setupFormValidations();
+        
+        // ===== Inicializar Contadores de Caracteres
+        setupCharacterCounters(advertisingModalContent); 
         
         // Carregar informações do plano
         await loadPlanInfo();
@@ -1132,6 +1169,24 @@ function createPremiumAdCard(ad) {
     `;
     return div;
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".char-input").forEach((input) => {
+    const max = parseInt(input.dataset.maxlength);
+    const counter = document.querySelector(`.char-count[data-for="${input.id}"]`);
+
+    if (!counter || isNaN(max)) return;
+
+    const updateCounter = () => {
+      const remaining = max - input.value.length;
+      counter.textContent = `${remaining}`;
+    };
+
+    input.addEventListener("input", updateCounter);
+    updateCounter(); // atualiza no carregamento
+  });
+});
 
 // Importa o script da IA para sugestões de propaganda
 import './advertising-ai.js';

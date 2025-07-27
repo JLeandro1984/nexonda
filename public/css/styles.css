@@ -1091,123 +1091,6 @@ a:hover {
   text-align: right;
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1024px) {
-  .hero-container {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: var(--space-12);
-  }
-
-  .about-content {
-    grid-template-columns: 1fr;
-    gap: var(--space-12);
-  }
-
-  .contact-content {
-    grid-template-columns: 1fr;
-    gap: var(--space-12);
-  }
-
-  .footer-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: var(--space-6);
-  }
-}
-
-@media (max-width: 768px) {
-  .nav-menu {
-    display: none;
-  }
-
-  .nav-menu.active {
-    display: flex;
-    background: #424e72;
-  }
-
-  .mobile-menu-toggle {
-    display: flex;
-  }
-
-  .hero-title {
-    font-size: var(--font-size-4xl);
-  }
-
-  .hero-description {
-    font-size: var(--font-size-lg);
-  }
-
-  .hero-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .btn {
-    width: 100%;
-    max-width: 300px;
-    justify-content: center;
-  }
-
-  .search-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .gallery-container {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--space-4);
-  }
-
-  .about-features {
-    grid-template-columns: 1fr;
-  }
-
-  .stats-card {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-
-  .floating-buttons-container {
-    bottom: var(--space-4);
-    right: var(--space-4);
-  }
-
-  .floating-btn {
-    width: 48px;
-    height: 48px;
-  }
-
-  .floating-btn i {
-    font-size: var(--font-size-lg);
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 0 var(--space-4);
-  }
-
-  .nav-container {
-    padding: var(--space-3) var(--space-4);
-  }
-
-  .hero-container {
-    padding: var(--space-12) var(--space-4);
-  }
-
-  .hero-title {
-    font-size: var(--font-size-3xl);
-  }
-
-  .section-title {
-    font-size: var(--font-size-2xl);
-  }
-
-  .gallery-container {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* ===== LEGACY COMPATIBILITY ===== */
 /* Mantendo classes antigas para compatibilidade com scripts existentes */
 .logo img {
@@ -1919,22 +1802,6 @@ body.dark-mode .custom-select-search {
   transition: filter 0.3s;
 }
 
-@media (max-width: 900px) {
-  .ads-video-container video {
-    height: 220px;
-  }
-}
-
-@media (max-width: 600px) {
-  .ads-video-container video {
-    height: 140px;
-  }
-  .ads-video-container {
-    max-width: 100vw;
-    border-radius: var(--radius-lg);
-  }
-}
-
 body.dark-mode .ads-video-container {
   background: var(--gray-800);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -2031,43 +1898,6 @@ body.dark-mode .premium-logo-item:hover {
   animation-play-state: paused;
 }
 
-/* Responsividade para logotipos premium */
-@media (max-width: 768px) {
-  .premium-logos-container {
-    gap: var(--space-4);
-    padding: var(--space-1) 0;
-  }
-
-  .premium-logo-item {
-    width: 100px;
-    height: 70px;
-  }
-
-  .premium-logos-container {
-    animation-duration: 25s;
-  }
-}
-
-@media (max-width: 480px) {
-  .premium-logos-container {
-    gap: var(--space-3);
-    padding: var(--space-1) 0;
-  }
-
-  .premium-logo-item {
-    width: 80px;
-    height: 60px;
-  }
-
-  .premium-logo-item img {
-    padding: 5px;
-  }
-
-  .premium-logos-container {
-    animation-duration: 20s;
-  }
-}
-
 /* ===== VIDEO BUTTON YOUTUBE NOS CARDS ===== */
 .video-btn {
   position: relative;
@@ -2159,17 +1989,27 @@ body.dark-mode .premium-logo-item:hover {
   pointer-events: none;
 }
 
-@media (max-width: 600px) {
-  .video-btn {
-    width: 28px;
-    height: 28px;
-  }
-  .video-btn-yt-bg {
-    font-size: 1rem;
-  }
-  .video-btn-play i {
-    font-size: 0.7rem;
-  }
+/*estilo contador de caracteres*/
+#charCount {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.label-with-counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label-with-counter label {
+  font-weight: bold;
+}
+
+.label-with-counter .char-count {
+  font-size: 0.85em;
+  color: #666;
 }
 
 /* ===== SOCIAL BUTTONS PADRÃO ===== */
@@ -2237,17 +2077,6 @@ body.dark-mode .premium-logo-item:hover {
   transform: scale(1.08);
 }
 
-@media (max-width: 600px) {
-  .instagram-btn,
-  .facebook-btn,
-  .whatsapp-btn,
-  .youtube-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 1rem;
-  }
-}
-
 /* Remover estilos antigos do .video-btn se não for mais usado nos cards */
 .video-btn,
 .video-btn-yt-bg,
@@ -2302,4 +2131,190 @@ body#index-page .logo-img-container {
 #ico-maps:hover {
   color: rgb(100, 98, 98);
   transform: scale(1.02);
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--space-4);
+  }
+
+  .nav-container {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .hero-container {
+    padding: var(--space-12) var(--space-4);
+  }
+
+  .hero-title {
+    font-size: var(--font-size-3xl);
+  }
+
+  .section-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .gallery-container {
+    grid-template-columns: 1fr;
+  }
+
+  .premium-logos-container {
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
+  }
+
+  .premium-logo-item {
+    width: 80px;
+    height: 60px;
+  }
+
+  .premium-logo-item img {
+    padding: 5px;
+  }
+
+  .premium-logos-container {
+    animation-duration: 20s;
+  }
+}
+
+@media (max-width: 600px) {
+  .ads-video-container video {
+    height: 140px;
+  }
+  .ads-video-container {
+    max-width: 100vw;
+    border-radius: var(--radius-lg);
+  }
+
+  .video-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .video-btn-yt-bg {
+    font-size: 1rem;
+  }
+  .video-btn-play i {
+    font-size: 0.7rem;
+  }
+
+  .instagram-btn,
+  .facebook-btn,
+  .whatsapp-btn,
+  .youtube-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-menu {
+    display: none;
+  }
+
+  .nav-menu.active {
+    display: flex;
+    background: #424e72;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .hero-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .hero-description {
+    font-size: var(--font-size-lg);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  .search-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-container {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-4);
+  }
+
+  .about-features {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .floating-buttons-container {
+    bottom: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .floating-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .floating-btn i {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Responsividade para logotipos premium */
+  .premium-logos-container {
+    gap: var(--space-4);
+    padding: var(--space-1) 0;
+  }
+
+  .premium-logo-item {
+    width: 100px;
+    height: 70px;
+  }
+
+  .premium-logos-container {
+    animation-duration: 25s;
+  }
+}
+
+@media (max-width: 900px) {
+  .ads-video-container video {
+    height: 220px;
+  }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: var(--space-12);
+  }
+
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: var(--space-6);
+  }
 }

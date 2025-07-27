@@ -113,25 +113,26 @@ class AdvertisingAI {
   }
 
   buildPrompt(type, currentText) {
-    const basePrompt = `💬 **Atue como um especialista em marketing digital com foco em anúncios de alto impacto. Receba o seguinte ${type === 'title' ? 'título' : 'descrição'} de uma propaganda e sugira melhorias para torná-lo mais atrativo, claro e persuasivo.**
+  const basePrompt = `💬 **Atue como um especialista em marketing digital com foco em anúncios de alto impacto. Receba o seguinte ${type === 'title' ? 'título' : 'descrição'} de uma propaganda e sugira melhorias para torná-lo mais atrativo, claro e persuasivo.**
 
-**Seu objetivo é:**
+      **Seu objetivo é:**
 
-1. **Otimizar o ${type === 'title' ? 'título' : 'descrição'} para chamar atenção imediatamente (sem clickbait exagerado).**
-2. **Melhorar o ${type === 'title' ? 'título' : 'descrição'} para engajar o público e incentivar a ação, mantendo a essência da mensagem original.**
-3. **Manter um tom profissional, confiável e coerente com empresas sérias.**
+      1. **Otimizar o ${type === 'title' ? 'título' : 'descrição'} para chamar atenção imediatamente (sem clickbait exagerado).**
+      2. **Melhorar o ${type === 'title' ? 'título' : 'descrição'} para engajar o público e incentivar a ação, mantendo a essência da mensagem original.**
+      3. **Manter um tom profissional, confiável e coerente com empresas sérias.**
+      4. **Respeitar os limites de caracteres: até ${type === 'title' ? '45' : '110'} caracteres.**
 
-**Entrada do cliente:**
-🏷️ **${type === 'title' ? 'Título' : 'Descrição'}:** \`${currentText}\`
+      **Entrada do cliente:**
+      🏷️ **${type === 'title' ? 'Título' : 'Descrição'}:** \`${currentText}\`
 
-**Responda APENAS com este formato exato:**
-✅ **Novo ${type === 'title' ? 'Título' : 'Descrição'} sugerido:**
-📝 **${type === 'title' ? 'Descrição' : 'Título'} melhorado:**
-💡 **Dica de melhoria ou palavra-chave relevante (opcional):**
+      **Responda APENAS com este formato exato:**
+      ✅ **Novo ${type === 'title' ? 'Título' : 'Descrição'} sugerido:**
+      📝 **${type === 'title' ? 'Descrição' : 'Título'} melhorado:**
+      💡 **Dica de melhoria ou palavra-chave relevante (opcional):**
 
-**IMPORTANTE:** Responda de forma direta e objetiva, sem explicações adicionais.`;
+      **IMPORTANTE:** Responda de forma direta e objetiva, sem explicações adicionais.`;
 
-    return basePrompt;
+      return basePrompt;
   }
 
   async callGemini(prompt) {

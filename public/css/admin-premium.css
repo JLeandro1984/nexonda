@@ -1,5 +1,4 @@
 /* ===== ADMIN PREMIUM STYLES ===== */
-
 /* Base e Layout */
 .admin-premium-main {
   padding: 2rem 1.5rem;
@@ -972,7 +971,7 @@
 #advertising-modal textarea,
 #advertising-modal select {
   border: 1px solid #cfd8dc;
-  border-radius: 7px;
+  border-radius: 7px 0 0 7px;
   padding: 8px 10px;
   font-size: 1rem;
   background: #f7fafd;
@@ -1092,7 +1091,7 @@
 .ad-media {
   flex: 0 0 140px;
   height: 140px;
-  background: #f5f7fa;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1115,7 +1114,7 @@
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #fff;
+  color: #0ba00d;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 .ad-info {
