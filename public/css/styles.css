@@ -1342,8 +1342,9 @@ body.dark-mode #premium-ads {
   background: var(--gray-800);
 }
 
-body.dark-mode .company-name {
-  color: #000 !important;
+body.dark-mode .company-name,
+body.dark-mode #ico-maps {
+  color: #fff !important;
 }
 
 body.dark-mode .about-section {
@@ -1403,6 +1404,56 @@ body.dark-mode .contact-form {
 body.dark-mode .contact-item {
   background: var(--gray-800);
   border-color: var(--gray-600);
+}
+
+body.dark-mode .premium-ad-content {
+  background: var(--gray-700);
+  border-color: var(--gray-600);
+}
+
+body.dark-mode .premium-ad-content h3 {
+  color: #fff;
+}
+
+body.dark-mode .premium-ad-content p {
+  color: var(--gray-400);
+}
+
+body.dark-mode .ad-title,
+body.dark-mode #adTitle-premium-plus {
+  color: var(--gray-200) !important;
+}
+
+body.dark-mode .ad-slogan,
+body.dark-mode #adDescription-premium-plus {
+  color: var(--gray-400);
+}
+
+body.dark-mode .ad-card-premium-plus {
+  background: #181c24;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+}
+
+body.dark-mode #adImage-premium-plus {
+  background: #fff;
+}
+
+body.dark-mode .ad-frame {
+  background: #181c24;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+}
+
+body.dark-mode .ad-info-bar {
+  background: linear-gradient(
+    90deg,
+    rgba(24, 28, 36, 0.95) 60%,
+    rgba(24, 28, 36, 0.7) 100%
+  );
+  color: #fff;
+}
+
+body.dark-mode .contact-details h4 {
+  color: var(--gray-600);
 }
 
 /* Dark mode para footer */
@@ -1758,8 +1809,8 @@ body.dark-mode .custom-select-search {
 
 /* Dark mode improvements */
 [data-theme="dark"] .logo-card {
-  background: var(--gray-800);
-  border-color: var(--gray-700);
+  background: var(--gray-700) !important;
+  border-color: var(--gray-600) !important;
 }
 
 [data-theme="dark"] .logo-card-header {
@@ -1932,11 +1983,11 @@ body.dark-mode .premium-logos-section {
   flex-shrink: 0;
 }
 
-body.dark-mode .premium-logo-item {
+/* body.dark-mode .premium-logo-item {
   background: var(--gray-800);
   border-color: var(--gray-700);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-}
+} */
 
 .premium-logo-item:hover {
   transform: translateY(-2px) scale(1.05);
@@ -2207,8 +2258,8 @@ body.dark-mode .premium-logo-item:hover {
 /* Garante que os cards de logo e propaganda fiquem brancos no index, mesmo no dark mode */
 body#index-page .logo-card,
 body#index-page .premium-ad-item {
-  background: #fff !important;
-  border-color: var(--border, #eee) !important;
+  background: #fff;
+  border-color: var(--border, #eee);
 }
 
 body.dark-mode .custom-select-option.selected {

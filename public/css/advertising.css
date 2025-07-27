@@ -316,10 +316,10 @@ div[data-video-url] {
   justify-content: space-between;
   gap: 10px;
   padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+  /*border-radius: 0 6px 0 6px;*/
   position: relative;
-  min-height: 120px; /* opcional, para garantir espaço */
+  min-height: 120px;
 }
 
 .ad-info {
@@ -365,7 +365,7 @@ div[data-video-url] {
 
 #ads-video {
   margin: 20px 0;
-  padding: 20px;
+  padding: 10px;
 }
 
 .ad-title,
@@ -380,6 +380,10 @@ div[data-video-url] {
 }
 
 /*Propaganda img - premium-plus*/
+.hide {
+  display: none !important;
+}
+
 #ads-img-premium-plus {
   margin: 20px 0 0 0;
   padding: 10px 0;
@@ -387,8 +391,8 @@ div[data-video-url] {
 
 .ad-card-premium-plus {
   display: flex;
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #3a7bd5, #00d2ff); /* leve profundidade */
+  border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   max-width: 600px;
@@ -396,14 +400,16 @@ div[data-video-url] {
   transition: transform 0.3s ease;
 }
 
+.ad-card-premium-plus img {
+  background: #fff;
+}
 .ad-card-premium-plus:hover,
 .ad-frame:hover {
   transform: scale(1.02);
 }
 
 .ad-image-premium-plus {
-  width: 168px;
-  height: auto;
+  width: 167px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -424,15 +430,17 @@ div[data-video-url] {
   background: transparent;
 }
 
-.ad-title-premium-plus {
+.ad-title-premium-plus,
+.ad-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #222;
+  color: #ffffff;
 }
 
-.ad-description-premium-plus {
+.ad-description-premium-plus,
+.ad-slogan {
   font-size: 0.95rem;
-  color: #555;
+  color: #e0f7ff;
   line-height: 1.4;
 }
 
@@ -513,23 +521,4 @@ div[data-video-url] {
     justify-content: center;
     width: 100%;
   }
-}
-
-[data-theme="dark"] .ad-frame {
-  background: #181c24;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
-}
-
-[data-theme="dark"] .ad-info-bar {
-  background: linear-gradient(
-    90deg,
-    rgba(24, 28, 36, 0.95) 60%,
-    rgba(24, 28, 36, 0.7) 100%
-  );
-  color: #fff;
-}
-
-[data-theme="dark"] .ad-title,
-[data-theme="dark"] .ad-slogan {
-  color: #fff;
 }

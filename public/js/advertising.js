@@ -4,7 +4,7 @@ import { formatarNumeroAbreviado } from './utils.js';
 // Variáveis globais
 let carouselInterval = null;
 let updateTimeout = null;
-const UPDATE_INTERVAL = 30000; // 30 segundos
+const UPDATE_INTERVAL = 1800000; // 30 min
 let currentAds = []; // Armazena os anúncios atuais
 window.currentAds = currentAds;
 
@@ -426,6 +426,124 @@ document.addEventListener('click', function (e) {
    
   }
 });
+
+/*Proganda img premium plus*/
+let intervalId = null;
+let indexAtual = 0;
+const adsSection = document.getElementById('ads-img-premium-plus');
+
+function getPremiumImagensAds() {
+  if (!window.currentAds || !Array.isArray(window.currentAds)) {
+    console.warn('currentAds não está disponível ou não é um array');
+    return [];
+  }
+
+  return window.currentAds
+    .filter(ad => {
+      if (!ad || !ad.mediaType) return false;
+      const isImage = ad.mediaType === 'image';
+      const isPremiumPlus = ad.planType === 'premium-plus';
+      const hasValidUrl = ad.mediaUrl && (
+        ad.mediaUrl.split('?')[0].endsWith('.jpg') ||
+        ad.mediaUrl.split('?')[0].endsWith('.jpeg') ||
+        ad.mediaUrl.split('?')[0].endsWith('.png') ||
+        ad.mediaUrl.split('?')[0].endsWith('.webp') ||
+        ad.mediaUrl.split('?')[0].endsWith('.gif')
+      );
+      return isImage && isPremiumPlus && hasValidUrl;
+    })
+    .map(ad => ({
+      imagem: ad.mediaUrl,
+      titulo: ad.title || 'Título não informado',
+      descricao: ad.description || 'Descrição não disponível.'
+    }));
+}
+
+function setupAdsImage() {
+  adsSection.classList.add('hide');
+
+  const adsImage = document.getElementById('ads-img-premium-plus');
+  if (!adsImage) return;
+
+  let propagandas = getPremiumImagensAds();
+  debugger
+  
+  if (propagandas.length) {
+      adsSection.classList.remove('hide');
+  }    
+  
+  //if (!propagandas.length) {   
+    // propagandas = [
+    //   {
+    //     imagem: "https://lh6.googleusercontent.com/proxy/xlpoCWFRtpZ8rbroj2Xnx4KF5Kih0mcANpDnV9_7RMDeaboLR4h-SnpMh815gP90kEEjzi61tmLA9q8XcnDeSO-YnBEWs2RII46G5amFSDh0RKjkzuOt4CkNpZZEhLbtPQ",
+    //     titulo: "Tecnologia com Descontos Incríveis",
+    //     descricao: "Smartphones, notebooks e acessórios com preços imperdíveis. Só nesta semana!"
+    //   },
+    //   {
+    //     imagem: "https://lh5.googleusercontent.com/proxy/WiTIDMsS0CvI4dFSgVQ1VM9GoXTX9HAGO01bg2unfmb6oB2vvK87gbO5OhLNwcwEKgh1_xSxp6khU8onmtCVr39I0xG5eDa0fJcVDwCCXPbS6sYF109kTqhRxhfsBDsoqwc",
+    //     titulo: "Combo Lanche + Refri por R$19,90!",
+    //     descricao: "Seu lanche favorito com preço de dar água na boca. Válido só até as 22h!"
+    //   }
+    // ];
+  //}
+
+  // Propaganda fixa ao final
+  // propagandas.push({
+  //   imagem: "https://lh5.googleusercontent.com/proxy/5PqoHTX4sAxuw4QOqmhJEjjnQHSAl2IimO3aXqHi0PiOtUFVUwgSvV84gumfeQEwQs4S2Ll8kUoAiIf9N5kDXQW9G43SrbaSnEYZUb_B3l39wYmIAvytk7ensMYeS-gc6g",
+  //   titulo: "Moda Inverno 2025 com até 60% OFF!",
+  //   descricao: "Estilo e conforto para os dias frios. Aproveite as ofertas exclusivas da nova coleção!"
+  // });
+
+  function exibirPropaganda(index) {
+    const propaganda = propagandas[index];
+    if (!propaganda) return;
+
+    const imgEl = document.getElementById("adImage-premium-plus");
+    const titleEl = document.getElementById("adTitle-premium-plus");
+    const descEl = document.getElementById("adDescription-premium-plus");
+
+    if (imgEl && propaganda.imagem) {
+      imgEl.src = propaganda.imagem;
+    }
+
+    if (titleEl && propaganda.titulo) {
+      titleEl.textContent = propaganda.titulo;
+    }
+
+    if (descEl && propaganda.descricao) {
+      descEl.textContent = propaganda.descricao;
+    }
+  }
+
+  function iniciarRotacao() {
+    if (intervalId) clearInterval(intervalId); // evita duplicação
+    exibirPropaganda(indexAtual);
+    intervalId = setInterval(() => {
+      indexAtual = (indexAtual + 1) % propagandas.length;
+      exibirPropaganda(indexAtual);
+    }, 30000); // 30 segundos
+  }
+
+  iniciarRotacao();
+}
+
+document.addEventListener('DOMContentLoaded', () => {  
+  setupAdsImage();
+  window.addEventListener('premiumAdsUpdated', setupAdsImage);
+  verificarEExibirAdsImagem();
+});
+
+function verificarEExibirAdsImagem() {
+  const adsSection = document.getElementById('ads-img-premium-plus');
+  const imgEl = document.getElementById('adImage-premium-plus');
+
+  if (adsSection && imgEl && imgEl.src && imgEl.src.includes('https://')) {
+    adsSection.classList.remove('hide');
+  } else {
+    adsSection.classList.add('hide');
+  }
+}
+
 
 // Função para rastrear impressões
 function trackImpressions(ads) {

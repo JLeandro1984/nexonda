@@ -351,13 +351,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== FUNCIONALIDADES EXISTENTES (MANTIDAS) =====
 
 // ===== ADS VIDEO RANDOM PLAYER INTEGRADO COM CARROSSEL =====
-function getPremiumVideoUrls() {
+function getPremiumVideoUrls() {  
   if (!window.currentAds || !Array.isArray(window.currentAds)) return [];
-  return window.currentAds
+  const propaganda = window.currentAds
     .filter(ad => ad.mediaType === 'video' && ad.mediaUrl &&
       (ad.mediaUrl.endsWith('.mp4') || ad.mediaUrl.includes('.mp4?') || ad.mediaUrl.includes('youtube.com') || ad.mediaUrl.includes('youtu.be')) &&
       ad.planType === 'premium-plus')
     .map(ad => ad.mediaUrl);
+  return propaganda;
 }
 
 function setupAdsVideoPlayer() {
@@ -496,61 +497,4 @@ function displayPremiumLogos(logos) {
     }
   });
 }
-
-//Inicio código teste
- const propagandas = [
-      {
-        imagem: "https://firebasestorage.googleapis.com/v0/b/nexonda-281084.firebasestorage.app/o/ads%2Fjlrodrigues2009_gmail_com%2Flogo_nexonda_1752461437298.png?alt=media&token=d0230bb9-a1b8-4cd3-ace9-9dbb13cc0b00",
-        titulo: "Moda Inverno 2025 com até 60% OFF!",
-        descricao: "Estilo e conforto para os dias frios. Aproveite as ofertas exclusivas da nova coleção!"
-   },
-   {
-      imagem: "https://firebasestorage.googleapis.com/v0/b/nexonda-281084.firebasestorage.app/o/ads%2Fjlrodrigues2009_gmail_com%2FNexonda_oficial_02.png?alt=media&token=cf82cd74-0d01-44b9-a33d-8a38a6f07ec4",   
-      titulo: "Moda Inverno 2025 com até 60% OFF!",
-      descricao: "Estilo e conforto para os dias frios. Aproveite as ofertas exclusivas da nova coleção!",
-  
-      },
-       {
-        imagem: "https://lh5.googleusercontent.com/proxy/5PqoHTX4sAxuw4QOqmhJEjjnQHSAl2IimO3aXqHi0PiOtUFVUwgSvV84gumfeQEwQs4S2Ll8kUoAiIf9N5kDXQW9G43SrbaSnEYZUb_B3l39wYmIAvytk7ensMYeS-gc6g",
-        titulo: "Moda Inverno 2025 com até 60% OFF!",
-        descricao: "Estilo e conforto para os dias frios. Aproveite as ofertas exclusivas da nova coleção!"
-      },
-      {
-        imagem: "https://lh6.googleusercontent.com/proxy/xlpoCWFRtpZ8rbroj2Xnx4KF5Kih0mcANpDnV9_7RMDeaboLR4h-SnpMh815gP90kEEjzi61tmLA9q8XcnDeSO-YnBEWs2RII46G5amFSDh0RKjkzuOt4CkNpZZEhLbtPQ",
-        titulo: "Tecnologia com Descontos Incríveis",
-        descricao: "Smartphones, notebooks e acessórios com preços imperdíveis. Só nesta semana!"
-      },
-      {
-        imagem: "https://lh5.googleusercontent.com/proxy/WiTIDMsS0CvI4dFSgVQ1VM9GoXTX9HAGO01bg2unfmb6oB2vvK87gbO5OhLNwcwEKgh1_xSxp6khU8onmtCVr39I0xG5eDa0fJcVDwCCXPbS6sYF109kTqhRxhfsBDsoqwc",
-        titulo: "Combo Lanche + Refri por R$19,90!",
-        descricao: "Seu lanche favorito com preço de dar água na boca. Válido só até as 22h!"
-      }
-    ];
-
-    let indexAtual = 0;
-
-    function exibirPropaganda(index) {
-      const propaganda = propagandas[index];
-      document.getElementById("adImage-premium-plus").src = propaganda.imagem;
-      document.getElementById("adTitle-premium-plus").textContent = propaganda.titulo;
-      document.getElementById("adDescription-premium-plus").textContent = propaganda.descricao;
-    }
-
-    function saibaMais() {
-      alert("Redirecionando para mais informações da campanha...");
-      // window.location.href = "https://seusite.com/campanha"; // Altere se quiser link real
-    }
-
-    function iniciarRotacao() {
-      exibirPropaganda(indexAtual);
-      setInterval(() => {
-        indexAtual = (indexAtual + 1) % propagandas.length;
-        exibirPropaganda(indexAtual);
-      }, 15000); // 15 segundos
-    }
-
-    iniciarRotacao();
-
-    //Fim código teste
-
 
