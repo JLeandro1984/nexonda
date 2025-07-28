@@ -965,7 +965,10 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="ad-title">Título da Propaganda*</label>
+                <div class="label-with-counter">
+                  <label for="ad-title">Título da Propaganda*</label>
+                  <small class="char-count" data-for="ad-title">45</small>
+                </div>
                 <div class="input-with-ai">
                   <input
                     type="text"
@@ -973,6 +976,9 @@
                     name="title"
                     required
                     placeholder="Ex: Oferta Especial de Verão"
+                    maxlength="45"
+                    class="char-input"
+                    data-maxlength="45"
                   />
                   <button
                     type="button"
@@ -995,7 +1001,10 @@
             </div>
 
             <div class="form-group">
-              <label for="ad-description">Descrição*</label>
+              <div class="label-with-counter">
+                <label for="ad-description">Descrição*</label>
+                <small class="char-count" data-for="ad-description">110</small>
+              </div>
               <div class="input-with-ai">
                 <textarea
                   id="ad-description"
@@ -1003,6 +1012,9 @@
                   required
                   placeholder="Descreva a promoção ou campanha"
                   rows="3"
+                  maxlength="110"
+                  class="char-input"
+                  data-maxlength="110"
                 ></textarea>
                 <button
                   type="button"

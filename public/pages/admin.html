@@ -24,6 +24,7 @@
   </head>
   <body>
     <!-- Header Moderno -->
+    <!-- Header Moderno Fixo -->
     <header class="modern-header">
       <nav class="nav-container">
         <div class="nav-brand">
@@ -34,14 +35,25 @@
               class="brand-logo"
           /></a>
         </div>
-        <div class="dark-mode-toggle">
-          <button
-            id="dark-mode-btn"
-            class="theme-toggle"
-            aria-label="Alternar modo escuro"
-          >
-            <i class="fas fa-moon"></i>
-          </button>
+        <div
+          class="nav-actions"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-left: auto;
+          "
+        >
+          <div class="dark-mode-toggle d-none">
+            <button
+              id="dark-mode-btn"
+              class="theme-toggle"
+              aria-label="Alternar modo escuro"
+            >
+              <i class="fas fa-moon"></i>
+            </button>
+          </div>
+          <user-menu></user-menu>
         </div>
       </nav>
     </header>

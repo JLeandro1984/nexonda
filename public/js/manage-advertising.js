@@ -3,6 +3,29 @@ import { showAlert } from '../components/alert.js';
 import { uploadToFirebaseStorage, deleteFromFirebaseStorage, showMediaPreview } from './firebase-upload.js';
 import './advertising-ai.js';
 
+
+// ===== Função para Configurar Contadores de Caracteres =====
+function setupCharacterCounters(parentElement = document) {
+    // Usa o elemento pai fornecido ou o documento inteiro por padrão
+    parentElement.querySelectorAll(".char-input").forEach((input) => {
+        const max = parseInt(input.dataset.maxlength);
+        // Também busca o contador dentro do elemento pai especificado
+        const counter = parentElement.querySelector(`.char-count[data-for="${input.id}"]`);
+
+        if (!counter || isNaN(max)) return; // Se não encontrar o contador ou o limite, pula
+
+        const updateCounter = () => {
+            const remaining = max - input.value.length;
+            counter.textContent = `${remaining}`;
+        };
+
+        // Remove listener antigo para evitar duplicatas se for chamada várias vezes
+        input.removeEventListener('input', updateCounter);
+        input.addEventListener("input", updateCounter);
+        updateCounter(); // Atualiza a contagem inicial
+    });
+}
+
 // Elementos DOM
 const adForm = document.getElementById("ad-form");
 const adsGrid = document.getElementById("premium-ads-list");
@@ -67,6 +90,8 @@ async function init() {
             renderAds();
             populateClientSelect();
             console.log('Inicialização de propagandas concluída com sucesso');
+
+            setupCharacterCounters();
         } catch (error) {
             console.error('Erro ao carregar propagandas:', error);
             if (error.message && error.message.includes('autenticação')) {
