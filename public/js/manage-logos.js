@@ -13,6 +13,7 @@ const filterCategory = document.getElementById("filter-category");
 const logoCategorySelect = document.getElementById("logo-category");
 const ufSelect = document.getElementById('client-uf');
 const cnpjInput = document.getElementById("client-CNPJ");
+const documentType =document.getElementById('document-type');
 const cepInput = document.getElementById('client-cep');
 const saveBtn = document.querySelector('.save-btn');
 const cancelBtn = document.querySelector('.cancel-btn');
@@ -602,15 +603,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Funções de máscara e validação (mantidas iguais)
 cnpjInput.addEventListener('input', function () {
+    const type = documentType.value;
+debugger
     let value = cnpjInput.value.replace(/\D/g, ''); // Remove tudo que não é dígito
 
-    if (value.length > 14) value = value.slice(0, 14); // Limita a 14 dígitos
-
-    // Aplica a máscara: 00.000.000/0000-00
-    value = value.replace(/^(\d{2})(\d)/, '$1.$2');
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-    value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
-    value = value.replace(/(\d{4})(\d)/, '$1-$2');
+      if (type === 'cnpj') {
+      value = value.slice(0, 14);
+      value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+      value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      value = value.replace(/(\d{4})(\d)/, '$1-$2');
+        
+    } else if (type === 'cpf') {
+      value = value.slice(0, 11);
+      value = value.replace(/^(\d{3})(\d)/, '$1.$2');
+      value = value.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+      value = value.replace(/\.(\d{3})(\d)/, '.$1-$2');
+    }
 
     cnpjInput.value = value;
 });
@@ -703,127 +712,133 @@ emailInput.addEventListener('input', function () {
   }
 });
 
+function detectDocumentType(documentoCliente) {
+  let value = documentoCliente.replace(/\D/g, ''); // Remove tudo que não é número
+
+  let type = '';
+  if (value.length === 14) {
+    type = 'cnpj';
+  } else if (value.length === 11) {
+    type = 'cpf';
+  } else {
+    type = 'outro';
+  }
+
+  return type;
+}
+
 // Carrega os dados de um logo no formulário para edição    
 function loadLogoForEdit(logo) {
-    console.log('Carregando logo para edição:', logo); // Debug
-    
-    // Preenche os campos do formulário
-    const form = document.getElementById("logo-form");
-    
-    // Informações básicas
-    form.querySelector("#client-name").value = logo.clientName || '';
-    form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
-    form.querySelector("#client-CNPJ").value = logo.clientCNPJ || '';
-    
-    // Endereço
-    form.querySelector("#client-cep").value = logo.clientCep || '';
-    form.querySelector("#client-address").value = logo.clientAddress || '';
-    form.querySelector("#client-number").value = logo.clientNumber || '';
-    form.querySelector("#client-neighborhood").value = logo.clientNeighborhood || '';
-    form.querySelector("#client-city").value = logo.clientCity || '';
-    form.querySelector("#client-uf").value = logo.clientUf || '';
-    form.querySelector("#client-lat").value = logo.clientLat || '';
-    form.querySelector("#client-lng").value = logo.clientLng || '';
-    
-    // Contatos
-    form.querySelector("#telephone").value = logo.telephone || '';
-    form.querySelector("#cellphone").value = logo.cellphone || '';
-    form.querySelector("#email").value = logo.email || '';
-    
-    // URLs
-    form.querySelector("#client-website").value = logo.websiteUrl || logo.clientWebsite || '';
-    form.querySelector("#client-videoUrl").value = logo.videoUrl || logo.clientVideoUrl || '';
-    form.querySelector("#client-instagramUrl").value = logo.instagramUrl || logo.clientInstagramUrl || '';
-    form.querySelector("#client-facebookUrl").value = logo.facebookUrl || logo.clientFacebookUrl || '';
-    form.querySelector("#client-whatsapp").value = logo.clientWhatsapp || '';
-    
-    // Categoria e descrição
-    form.querySelector("#logo-category").value = logo.logoCategory || '';
-    form.querySelector("#logo-description").value = logo.description || logo.logoDescription || '';
-    
-    // Contrato
-    if (logo.startDate) {
-        const startDate = new Date(logo.startDate);
-        form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
-    }
-    
-    if (logo.endDate) {
-        const endDate = new Date(logo.endDate);
-        form.querySelector("#end-date").value = endDate.toISOString().split('T')[0];
-    }
-    
-    form.querySelector("#contract-months").value = logo.contractMonths || '';
-    form.querySelector("#plan_type").value = logo.planType || '';
-    form.querySelector("#client_level").value = logo.clientLevel || '';
-    form.querySelector("#contract_value").value = logo.contractValue || '';
-    
-    // Radio buttons
-    if (logo.contractActive !== undefined) {
-        const activeValue = logo.contractActive.toString();
-        form.querySelector(`input[name="contract-active"][value="${activeValue}"]`).checked = true;
-    }
-    
-    if (logo.showAddressActive !== undefined) {
-        const showAddressValue = logo.showAddressActive.toString();
-        form.querySelector(`input[name="show-address-active"][value="${showAddressValue}"]`).checked = true;
-    }
-    debugger
-    // Horário de funcionamento
-   if (logo.openingHours) {
-        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  console.log('Carregando logo para edição:', logo); // Debug
 
-        days.forEach(day => {
-            const dayData = logo.openingHours[day];
-            if (dayData) {
-            const startEl = form.querySelector(`#${day}-start`);
-            const lunchStartEl = form.querySelector(`#${day}-lunch-start`);
-            const lunchEndEl = form.querySelector(`#${day}-lunch-end`);
-            const endEl = form.querySelector(`#${day}-end`);
-            const closedEl = form.querySelector(`#${day}-closed`);
+  const form = document.getElementById("logo-form");
 
-            startEl.value = dayData.start || '';
-            lunchStartEl.value = dayData.lunch_start || '';
-            lunchEndEl.value = dayData.lunch_end || '';
-            endEl.value = dayData.end || '';
-            closedEl.checked = dayData.closed || false;
+  // Informações básicas
+  form.querySelector("#client-name").value = logo.clientName || '';
+  form.querySelector("#client-fantasy-name").value = logo.clientFantasyName || '';
 
-            // ✅ Aplica o 'disabled' aos time inputs se o dia estiver marcado como fechado
-            const isClosed = closedEl.checked;
-            [startEl, lunchStartEl, lunchEndEl, endEl].forEach(input => {
-                input.disabled = isClosed;
-            });
-            }
+  // Documento (tipo + número formatado)
+  const docTypeEl = form.querySelector("#document-type");
+  const docInputEl = form.querySelector("#client-CNPJ");
+  //const docType = logo.documentType || 'outro';
+  const docValue = logo.clientCNPJ || '';
+
+  const docType = detectDocumentType(docValue);
+  docTypeEl.value = docType;
+
+  // Dispara evento de alteração para atualizar label, placeholder etc.
+  const changeEvent = new Event("change");
+  docTypeEl.dispatchEvent(changeEvent);
+
+  // Aplica a formatação conforme o tipo
+  if (docType === "cnpj") {
+    docInputEl.value = formatCNPJ(docValue);
+  } else if (docType === "cpf") {
+    docInputEl.value = formatCPF(docValue);
+  } else {
+    docInputEl.value = docValue;
+  }
+
+  // Endereço
+  form.querySelector("#client-cep").value = logo.clientCep || '';
+  form.querySelector("#client-address").value = logo.clientAddress || '';
+  form.querySelector("#client-number").value = logo.clientNumber || '';
+  form.querySelector("#client-neighborhood").value = logo.clientNeighborhood || '';
+  form.querySelector("#client-city").value = logo.clientCity || '';
+  form.querySelector("#client-uf").value = logo.clientUf || '';
+  form.querySelector("#client-lat").value = logo.clientLat || '';
+  form.querySelector("#client-lng").value = logo.clientLng || '';
+
+  // Contatos
+  form.querySelector("#telephone").value = logo.telephone || '';
+  form.querySelector("#cellphone").value = logo.cellphone || '';
+  form.querySelector("#email").value = logo.email || '';
+
+  // URLs
+  form.querySelector("#client-website").value = logo.websiteUrl || logo.clientWebsite || '';
+  form.querySelector("#client-videoUrl").value = logo.videoUrl || logo.clientVideoUrl || '';
+  form.querySelector("#client-instagramUrl").value = logo.instagramUrl || logo.clientInstagramUrl || '';
+  form.querySelector("#client-facebookUrl").value = logo.facebookUrl || logo.clientFacebookUrl || '';
+  form.querySelector("#client-whatsapp").value = logo.clientWhatsapp || '';
+
+  // Categoria e descrição
+  form.querySelector("#logo-category").value = logo.logoCategory || '';
+  form.querySelector("#logo-description").value = logo.description || logo.logoDescription || '';
+
+  // Contrato
+  if (logo.startDate) {
+    const startDate = new Date(logo.startDate);
+    form.querySelector("#start-date").value = startDate.toISOString().split('T')[0];
+  }
+
+  if (logo.endDate) {
+    const endDate = new Date(logo.endDate);
+    form.querySelector("#end-date").value = endDate.toISOString().split('T')[0];
+  }
+
+  form.querySelector("#contract-months").value = logo.contractMonths || '';
+  form.querySelector("#plan_type").value = logo.planType || '';
+  form.querySelector("#client_level").value = logo.clientLevel || '';
+  form.querySelector("#contract_value").value = logo.contractValue || '';
+
+  // Radio buttons
+  if (logo.contractActive !== undefined) {
+    const activeValue = logo.contractActive.toString();
+    form.querySelector(`input[name="contract-active"][value="${activeValue}"]`).checked = true;
+  }
+
+  if (logo.showAddressActive !== undefined) {
+    const showAddressValue = logo.showAddressActive.toString();
+    form.querySelector(`input[name="show-address-active"][value="${showAddressValue}"]`).checked = true;
+  }
+
+  // Horário de funcionamento
+  if (logo.openingHours) {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+    days.forEach(day => {
+      const dayData = logo.openingHours[day];
+      if (dayData) {
+        const startEl = form.querySelector(`#${day}-start`);
+        const lunchStartEl = form.querySelector(`#${day}-lunch-start`);
+        const lunchEndEl = form.querySelector(`#${day}-lunch-end`);
+        const endEl = form.querySelector(`#${day}-end`);
+        const closedEl = form.querySelector(`#${day}-closed`);
+
+        startEl.value = dayData.start || '';
+        lunchStartEl.value = dayData.lunch_start || '';
+        lunchEndEl.value = dayData.lunch_end || '';
+        endEl.value = dayData.end || '';
+        closedEl.checked = dayData.closed || false;
+
+        // Aplica o 'disabled' aos time inputs se o dia estiver marcado como fechado
+        const isClosed = closedEl.checked;
+        [startEl, lunchStartEl, lunchEndEl, endEl].forEach(input => {
+          input.disabled = isClosed;
         });
-    }
-       
-    // Imagem do logo
-    editingStoragePath = logo?.storagePath;
-    const logoPreview = form.querySelector("#logo-preview_img");
-    const logoImageUrl = logo.imageUrl;
-    if (logoImageUrl) {
-        logoPreview.src = logoImageUrl;
-        logoPreview.style.display = 'block';
-        form.querySelector("#logo-image-url").value = logoImageUrl;
-    } else {
-        logoPreview.src = '';
-        logoPreview.style.display = 'none';
-        form.querySelector("#logo-image-url").value = '';
-    }
-
-    // Atualiza o botão de salvar
-    const saveBtn = form.querySelector('.save-btn .btn-text');
-    if (saveBtn) {
-        saveBtn.textContent = 'Atualizar';
-    } else {
-        form.querySelector('.save-btn').textContent = 'Atualizar';
-    }
-    form.querySelector('.save-btn').classList.add('update');
-    
-    // Mostra o botão de cancelar edição se estiver oculto
-   // document.getElementById('cancel-button').style.display = 'inline-block';
-    
-    // Scroll para o formulário
-    form.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
 }
 
 // Filtra e atualiza a lista exibida
@@ -1021,6 +1036,21 @@ function formatCNPJ(value) {
     return value;
 }
 
+function formatCPF(value) {
+  value = value.replace(/\D/g, '');
+  if (value.length > 11) value = value.slice(0, 11);
+
+  if (value.length > 9) {
+    value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
+  } else if (value.length > 6) {
+    value = value.replace(/^(\d{3})(\d{3})(\d{3}).*/, '$1.$2.$3');
+  } else if (value.length > 3) {
+    value = value.replace(/^(\d{3})(\d{3}).*/, '$1.$2');
+  }
+
+  return value;
+}
+
 function limparCamposEndereco() {
   document.getElementById('client-address').value = '';
   document.getElementById('client-neighborhood').value = '';
@@ -1035,44 +1065,58 @@ document.getElementById('client-CNPJ').addEventListener('blur', async function (
   const feedback = document.getElementById('cnpj-feedback');
   feedback.textContent = '';
 
-  if (cnpj.length !== 14) {
-    feedback.textContent = 'CNPJ deve conter 14 dígitos.';
-    limparCamposEndereco();
-    return;
-  }
+  const type = documentType.value;
 
-  // Formata visualmente
-  cnpjInput.value = formatCNPJ(cnpj);
-   
-  // Busca dados pelo CNPJ
-  const cnpjData = await fetchCNPJData(cnpj);
-  if (cnpjData) {
-    // Preenche campos
-    document.getElementById('client-name').value = cnpjData.nome || '';
-    document.getElementById('client-fantasy-name').value = cnpjData.fantasia || '';
-    document.getElementById('client-cep').value = cnpjData.cep ? cnpjData.cep.replace(/\D/g, '') : '';
+   if (type = "cpf") {    
+    if (cnpj.length !== 11) {
+      feedback.textContent = 'CPF deve conter 11 dígitos.';
+     // limparCamposEndereco();
+      return;
+    }
+
+     // Formata visualmente
+     cnpjInput.value = formatCPF(cnpj);
+  }
+  else if (type = "cnpj") {
+      if (cnpj.length !== 14) {
+        feedback.textContent = 'CNPJ deve conter 14 dígitos.';
+        limparCamposEndereco();
+        return;
+      }
+  
+    // Formata visualmente
+    cnpjInput.value = formatCNPJ(cnpj);
+    
+    // Busca dados pelo CNPJ
+    const cnpjData = await fetchCNPJData(cnpj);
+    if (cnpjData) {
+      // Preenche campos
+      document.getElementById('client-name').value = cnpjData.nome || '';
+      document.getElementById('client-fantasy-name').value = cnpjData.fantasia || '';
+      document.getElementById('client-cep').value = cnpjData.cep ? cnpjData.cep.replace(/\D/g, '') : '';
       document.getElementById('client-address').value = cnpjData.logradouro || '';
       document.getElementById('client-number').value = cnpjData.numero || '';
-    document.getElementById('client-neighborhood').value = cnpjData.bairro || '';
-    document.getElementById('client-city').value = cnpjData.municipio || '';
-    document.getElementById('client-uf').value = cnpjData.uf || '';
-    
-    // Se o CEP foi preenchido, tenta completar qualquer informação faltante
-    const cep = document.getElementById('client-cep').value.replace(/\D/g, '');
-    if (cep.length === 8 && (!cnpjData.logradouro || !cnpjData.bairro)) {
-      const cepData = await fetchCEPData(cep);
-      if (cepData) {
-        if (!cnpjData.logradouro) document.getElementById('client-address').value = cepData.logradouro || '';
-        if (!cnpjData.bairro) document.getElementById('client-neighborhood').value = cepData.bairro || '';
-        if (!cnpjData.municipio) document.getElementById('client-city').value = cepData.localidade || '';
-        if (!cnpjData.uf) document.getElementById('client-uf').value = cepData.uf || '';
+      document.getElementById('client-neighborhood').value = cnpjData.bairro || '';
+      document.getElementById('client-city').value = cnpjData.municipio || '';
+      document.getElementById('client-uf').value = cnpjData.uf || '';
+      
+      // Se o CEP foi preenchido, tenta completar qualquer informação faltante
+      const cep = document.getElementById('client-cep').value.replace(/\D/g, '');
+      if (cep.length === 8 && (!cnpjData.logradouro || !cnpjData.bairro)) {
+        const cepData = await fetchCEPData(cep);
+        if (cepData) {
+          if (!cnpjData.logradouro) document.getElementById('client-address').value = cepData.logradouro || '';
+          if (!cnpjData.bairro) document.getElementById('client-neighborhood').value = cepData.bairro || '';
+          if (!cnpjData.municipio) document.getElementById('client-city').value = cepData.localidade || '';
+          if (!cnpjData.uf) document.getElementById('client-uf').value = cepData.uf || '';
+        }
       }
+              
+      obterCoordenadasGoogle();
+    } else {
+      feedback.textContent = 'CNPJ não encontrado. Verifique os dados.';
+      limparCamposEndereco();
     }
-            
-     obterCoordenadasGoogle();
-  } else {
-    feedback.textContent = 'CNPJ não encontrado. Verifique os dados.';
-    limparCamposEndereco();
   }
 });
 
@@ -1182,6 +1226,32 @@ document.addEventListener('DOMContentLoaded', () => {
         handleNavigation();
     }
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  const documentType = document.getElementById('document-type');
+  const label = document.getElementById('document-label');
+  const input = document.getElementById('client-CNPJ');
+
+  documentType.addEventListener('change', () => {
+    const type = documentType.value;
+    if (type === 'cnpj') {
+      label.textContent = 'CNPJ:';
+      input.placeholder = '00.000.000/0000-00';
+      input.maxLength = 18;
+    } else if (type === 'cpf') {
+      label.textContent = 'CPF:';
+      input.placeholder = '000.000.000-00';
+      input.maxLength = 14;
+    } else {
+      label.textContent = 'Documento do Cliente:';
+      input.placeholder = 'Digite o documento';
+      input.removeAttribute('maxLength');
+    }
+
+    input.value = '';
+  });
+});
+
 
 // Função para extrair o path do Firebase Storage da URL
 function extractFirebasePathFromUrl(url) {

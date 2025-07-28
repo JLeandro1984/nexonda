@@ -246,7 +246,15 @@
               />
             </div>
             <div class="form-group">
-              <label for="client-CNPJ">CNPJ:</label>
+              <label for="document-type">Tipo de Documento:</label>
+              <select id="document-type" name="document-type" required>
+                <option value="cnpj">CNPJ</option>
+                <option value="cpf">CPF</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label id="document-label" for="client-CNPJ">CNPJ:</label>
               <input
                 type="text"
                 id="client-CNPJ"
@@ -450,6 +458,7 @@
               <textarea
                 id="logo-description"
                 name="logo_description"
+                maxlength="500"
               ></textarea>
             </div>
 
