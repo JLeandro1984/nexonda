@@ -19,7 +19,7 @@
       #privacy-policy {
         padding: 40px 20px;
         max-width: 900px;
-        margin: 40px auto;
+        margin: 0 auto;
         background-color: var(--background-color);
         color: var(--text-color);
         border-radius: 8px;
@@ -87,6 +87,93 @@
       .download-pdf i {
         margin-right: 8px;
       }
+
+      .main-content-privacy-policy {
+        background: var(--gray-200);
+        padding-top: 80px;
+      }
+
+      .container-privacy-policy {
+        background: var(--gray-200);
+        padding: 20px;
+      }
+
+      /* Voltar para Início - estilos modernos e responsivos */
+      .back-to-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5em;
+        margin: 0;
+        padding: 0.5em 1.2em;
+        background: rgba(37, 99, 235, 0.08);
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.05rem;
+        border-radius: 999px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+        border: 1px solid rgba(37, 99, 235, 0.13);
+        outline: none;
+      }
+
+      .back-to-home i {
+        font-size: 1.1em;
+        transition: transform 0.18s;
+      }
+
+      .back-to-home:hover,
+      .back-to-home:focus {
+        background: #2563eb;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.13);
+        text-decoration: none;
+      }
+
+      .back-to-home:hover i,
+      .back-to-home:focus i {
+        transform: translateX(-2px);
+      }
+
+      .modern-header {
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.04);
+        width: 100%;
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 72px;
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 72px;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem; /* Espaço entre o botão e o link */
+      }
+
+      @media (max-width: 600px) {
+        .back-to-home {
+          margin: 1.2rem 0 1rem 0.7rem;
+          font-size: 0.98rem;
+          padding: 0.45em 1em;
+        }
+      }
     </style>
     <link rel="icon" href="../images/nexonda/favicon.ico" type="image/x-icon" />
     <link
@@ -103,7 +190,7 @@
     />
   </head>
 
-  <body>
+  <body id="body-privacy-policy">
     <!-- Header Moderno -->
     <header class="modern-header">
       <nav class="nav-container">
@@ -115,214 +202,225 @@
               class="brand-logo"
           /></a>
         </div>
-        <div class="dark-mode-toggle">
-          <button
-            id="dark-mode-btn"
-            class="theme-toggle"
-            aria-label="Alternar modo escuro"
-          >
-            <i class="fas fa-moon"></i>
-          </button>
+        <div class="nav-actions">
+          <a href="../index.html" class="back-to-home">
+            <i class="fas fa-arrow-left"></i> <i class="fas fa-home"></i>
+          </a>
+          <div class="dark-mode-toggle">
+            <button
+              id="dark-mode-btn"
+              class="theme-toggle"
+              aria-label="Alternar modo escuro"
+            >
+              <i class="fas fa-sun"></i>
+            </button>
+          </div>
         </div>
       </nav>
     </header>
-    <main class="main-content">
-      <section id="privacy-policy">
-        <div id="policy-content">
-          <h1>Política de Privacidade</h1>
-          <p class="update-date">Última atualização: 22 de junho de 2025</p>
+    <main class="main-content-privacy-policy">
+      <div class="container-privacy-policy">
+        <section id="privacy-policy">
+          <div id="policy-content">
+            <h1>Política de Privacidade</h1>
+            <p class="update-date">Última atualização: 22 de junho de 2025</p>
 
-          <h2>1. Quem somos</h2>
-          <p>
-            A Nexonda é operada por nossa equipe e atua como Controlador de
-            Dados sob os termos da Lei Geral de Proteção de Dados (LGPD).
-          </p>
+            <h2>1. Quem somos</h2>
+            <p>
+              A Nexonda é operada por nossa equipe e atua como Controlador de
+              Dados sob os termos da Lei Geral de Proteção de Dados (LGPD).
+            </p>
 
-          <h2>2. Dados que Coletamos</h2>
-          <ul>
-            <li>
-              <strong>Dados cadastrais:</strong> Nome, e-mail, telefone, CNPJ,
-              cidade e estado;
-            </li>
-            <li>
-              <strong>Dados de conteúdo:</strong> Logotipos, imagens e vídeos
-              enviados para divulgação;
-            </li>
-            <li>
-              <strong>Informações técnicas:</strong> Endereço IP, tipo de
-              navegador, dispositivo e sistema operacional;
-            </li>
-            <li>
-              <strong>Dados de navegação:</strong> Interações, filtros
-              utilizados, pesquisas e páginas visitadas.
-            </li>
-          </ul>
+            <h2>2. Dados que Coletamos</h2>
+            <ul>
+              <li>
+                <strong>Dados cadastrais:</strong> Nome, e-mail, telefone, CNPJ,
+                cidade e estado;
+              </li>
+              <li>
+                <strong>Dados de conteúdo:</strong> Logotipos, imagens e vídeos
+                enviados para divulgação;
+              </li>
+              <li>
+                <strong>Informações técnicas:</strong> Endereço IP, tipo de
+                navegador, dispositivo e sistema operacional;
+              </li>
+              <li>
+                <strong>Dados de navegação:</strong> Interações, filtros
+                utilizados, pesquisas e páginas visitadas.
+              </li>
+            </ul>
 
-          <h2>3. Finalidade e Base Legal para o Tratamento</h2>
-          <p>
-            Utilizamos os dados coletados para as seguintes finalidades e com as
-            seguintes bases legais:
-          </p>
-          <ul>
-            <li>
-              <strong>Execução de contrato:</strong> Para exibir logotipos e
-              propagandas publicitárias de forma segmentada;
-            </li>
-            <li>
-              <strong>Consentimento:</strong> Para envio de comunicações e uso
-              de cookies não essenciais;
-            </li>
-            <li>
-              <strong>Legítimo interesse:</strong> Para análise de navegação,
-              segurança da plataforma e melhorias nos serviços;
-            </li>
-            <li>
-              <strong>Cumprimento de obrigação legal:</strong> Quando exigido
-              por autoridades competentes.
-            </li>
-          </ul>
+            <h2>3. Finalidade e Base Legal para o Tratamento</h2>
+            <p>
+              Utilizamos os dados coletados para as seguintes finalidades e com
+              as seguintes bases legais:
+            </p>
+            <ul>
+              <li>
+                <strong>Execução de contrato:</strong> Para exibir logotipos e
+                propagandas publicitárias de forma segmentada;
+              </li>
+              <li>
+                <strong>Consentimento:</strong> Para envio de comunicações e uso
+                de cookies não essenciais;
+              </li>
+              <li>
+                <strong>Legítimo interesse:</strong> Para análise de navegação,
+                segurança da plataforma e melhorias nos serviços;
+              </li>
+              <li>
+                <strong>Cumprimento de obrigação legal:</strong> Quando exigido
+                por autoridades competentes.
+              </li>
+            </ul>
 
-          <h2>4. Compartilhamento de Dados</h2>
-          <p>Seus dados podem ser compartilhados com os seguintes parceiros:</p>
-          <ul>
-            <li>
-              <strong>Firebase (Google):</strong> Autenticação, banco de dados e
-              armazenamento;
-            </li>
-            <li>
-              <strong>Cloudinary:</strong> Armazenamento e otimização de
-              arquivos de mídia.
-            </li>
-          </ul>
-          <p>
-            Esses serviços estão localizados fora do Brasil, o que implica
-            transferência internacional de dados. Garantimos que essas
-            transferências seguem cláusulas contratuais específicas de segurança
-            e proteção adequadas.
-          </p>
+            <h2>4. Compartilhamento de Dados</h2>
+            <p>
+              Seus dados podem ser compartilhados com os seguintes parceiros:
+            </p>
+            <ul>
+              <li>
+                <strong>Firebase (Google):</strong> Autenticação, banco de dados
+                e armazenamento;
+              </li>
+              <li>
+                <strong>Cloudinary:</strong> Armazenamento e otimização de
+                arquivos de mídia.
+              </li>
+            </ul>
+            <p>
+              Esses serviços estão localizados fora do Brasil, o que implica
+              transferência internacional de dados. Garantimos que essas
+              transferências seguem cláusulas contratuais específicas de
+              segurança e proteção adequadas.
+            </p>
 
-          <!-- Nova seção 4.1 -->
-          <h2>4.1. Contato via WhatsApp</h2>
-          <p>
-            Para facilitar o atendimento e a comunicação com empresas listadas
-            em nosso site, a Nexonda pode exibir botões de contato via WhatsApp
-            com mensagens automáticas pré-preenchidas.
-          </p>
-          <p>
-            Ao clicar nesses botões, você será redirecionado para o aplicativo
-            do WhatsApp, onde poderá confirmar o envio da mensagem. Nenhuma
-            conversa ou informação trocada via WhatsApp é armazenada ou acessada
-            pela Nexonda.
-          </p>
-          <p>
-            O uso do WhatsApp está sujeito aos
-            <a
-              href="https://www.whatsapp.com/legal/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Termos de Serviço</a
-            >
-            e à
-            <a
-              href="https://www.whatsapp.com/legal/privacy-policy/"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Política de Privacidade do WhatsApp</a
-            >.
-          </p>
+            <!-- Nova seção 4.1 -->
+            <h2>4.1. Contato via WhatsApp</h2>
+            <p>
+              Para facilitar o atendimento e a comunicação com empresas listadas
+              em nosso site, a Nexonda pode exibir botões de contato via
+              WhatsApp com mensagens automáticas pré-preenchidas.
+            </p>
+            <p>
+              Ao clicar nesses botões, você será redirecionado para o aplicativo
+              do WhatsApp, onde poderá confirmar o envio da mensagem. Nenhuma
+              conversa ou informação trocada via WhatsApp é armazenada ou
+              acessada pela Nexonda.
+            </p>
+            <p>
+              O uso do WhatsApp está sujeito aos
+              <a
+                href="https://www.whatsapp.com/legal/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Termos de Serviço</a
+              >
+              e à
+              <a
+                href="https://www.whatsapp.com/legal/privacy-policy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Política de Privacidade do WhatsApp</a
+              >.
+            </p>
 
-          <!-- Nova seção 4.2 -->
-          <h2>4.2. Tratamento e Compartilhamento de Dados Públicos</h2>
-          <p>
-            Para exibir as informações dos clientes e empresas em nossa
-            plataforma, a Nexonda processa e compartilha apenas os dados
-            essenciais para a visualização pública, tais como nome fantasia,
-            categoria, imagens, localização aproximada (quando autorizada) e
-            contatos públicos (telefone, WhatsApp e redes sociais).
-          </p>
-          <p>
-            Dados sensíveis ou privados, como CNPJ, e-mails, informações
-            contratuais e dados pessoais que não são necessários para exibição
-            pública, são
-            <strong
-              >mantidos protegidos e não são compartilhados com
-              terceiros</strong
-            >
-            ou exibidos na plataforma.
-          </p>
-          <p>
-            Esse cuidado garante a privacidade dos dados e a conformidade com as
-            legislações vigentes, como a LGPD.
-          </p>
+            <!-- Nova seção 4.2 -->
+            <h2>4.2. Tratamento e Compartilhamento de Dados Públicos</h2>
+            <p>
+              Para exibir as informações dos clientes e empresas em nossa
+              plataforma, a Nexonda processa e compartilha apenas os dados
+              essenciais para a visualização pública, tais como nome fantasia,
+              categoria, imagens, localização aproximada (quando autorizada) e
+              contatos públicos (telefone, WhatsApp e redes sociais).
+            </p>
+            <p>
+              Dados sensíveis ou privados, como CNPJ, e-mails, informações
+              contratuais e dados pessoais que não são necessários para exibição
+              pública, são
+              <strong
+                >mantidos protegidos e não são compartilhados com
+                terceiros</strong
+              >
+              ou exibidos na plataforma.
+            </p>
+            <p>
+              Esse cuidado garante a privacidade dos dados e a conformidade com
+              as legislações vigentes, como a LGPD.
+            </p>
 
-          <h2>5. Armazenamento, Segurança e Retenção</h2>
-          <p>
-            Seus dados são armazenados em servidores seguros e protegidos com
-            medidas técnicas apropriadas.
-          </p>
-          <p>
-            Os dados cadastrais são mantidos enquanto sua conta estiver ativa.
-            Após a exclusão, manteremos os dados apenas pelo tempo necessário
-            para cumprir obrigações legais ou resolver disputas.
-          </p>
+            <h2>5. Armazenamento, Segurança e Retenção</h2>
+            <p>
+              Seus dados são armazenados em servidores seguros e protegidos com
+              medidas técnicas apropriadas.
+            </p>
+            <p>
+              Os dados cadastrais são mantidos enquanto sua conta estiver ativa.
+              Após a exclusão, manteremos os dados apenas pelo tempo necessário
+              para cumprir obrigações legais ou resolver disputas.
+            </p>
 
-          <h2>6. Uso de Cookies</h2>
-          <p>Utilizamos cookies para melhorar sua experiência:</p>
-          <ul>
-            <li>
-              <strong>Essenciais:</strong> Necessários para funcionamento do
-              site;
-            </li>
-            <li>
-              <strong>Analíticos:</strong> Para entender o uso da plataforma
-              (ex: Google Analytics);
-            </li>
-            <li>
-              <strong>Funcionais:</strong> Para lembrar preferências e facilitar
-              navegação.
-            </li>
-          </ul>
-          <p>
-            Você pode configurar seu navegador para recusar alguns ou todos os
-            cookies. Também disponibilizamos, quando aplicável, um banner de
-            consentimento.
-          </p>
+            <h2>6. Uso de Cookies</h2>
+            <p>Utilizamos cookies para melhorar sua experiência:</p>
+            <ul>
+              <li>
+                <strong>Essenciais:</strong> Necessários para funcionamento do
+                site;
+              </li>
+              <li>
+                <strong>Analíticos:</strong> Para entender o uso da plataforma
+                (ex: Google Analytics);
+              </li>
+              <li>
+                <strong>Funcionais:</strong> Para lembrar preferências e
+                facilitar navegação.
+              </li>
+            </ul>
+            <p>
+              Você pode configurar seu navegador para recusar alguns ou todos os
+              cookies. Também disponibilizamos, quando aplicável, um banner de
+              consentimento.
+            </p>
 
-          <h2>7. Seus Direitos</h2>
-          <p>De acordo com a LGPD, você pode exercer os seguintes direitos:</p>
-          <ul>
-            <li>Solicitar acesso, correção ou exclusão de seus dados;</li>
-            <li>Confirmar a existência de tratamento;</li>
-            <li>Solicitar a portabilidade dos dados;</li>
-            <li>Revogar o consentimento a qualquer momento;</li>
-            <li>Solicitar informações sobre o compartilhamento de dados.</li>
-          </ul>
-          <p>
-            <strong>Importante:</strong> Apenas os administradores têm acesso
-            direto aos dados. Solicitações devem ser feitas por e-mail e serão
-            atendidas em até 7 dias úteis.
-          </p>
-          <!-- <p><strong>Contato:</strong> privacidade@nexonda.com.br</p> -->
-          <p><strong>Contato:</strong>contato@nexonda.com.br</p>
-          <h2>8. Alterações na Política</h2>
-          <p>
-            Esta política pode ser atualizada a qualquer momento. Recomendamos a
-            revisão periódica desta página. Em caso de mudanças relevantes,
-            notificaremos os usuários por meio do site.
-          </p>
+            <h2>7. Seus Direitos</h2>
+            <p>
+              De acordo com a LGPD, você pode exercer os seguintes direitos:
+            </p>
+            <ul>
+              <li>Solicitar acesso, correção ou exclusão de seus dados;</li>
+              <li>Confirmar a existência de tratamento;</li>
+              <li>Solicitar a portabilidade dos dados;</li>
+              <li>Revogar o consentimento a qualquer momento;</li>
+              <li>Solicitar informações sobre o compartilhamento de dados.</li>
+            </ul>
+            <p>
+              <strong>Importante:</strong> Apenas os administradores têm acesso
+              direto aos dados. Solicitações devem ser feitas por e-mail e serão
+              atendidas em até 7 dias úteis.
+            </p>
+            <!-- <p><strong>Contato:</strong> privacidade@nexonda.com.br</p> -->
+            <p><strong>Contato:</strong>contato@nexonda.com.br</p>
+            <h2>8. Alterações na Política</h2>
+            <p>
+              Esta política pode ser atualizada a qualquer momento. Recomendamos
+              a revisão periódica desta página. Em caso de mudanças relevantes,
+              notificaremos os usuários por meio do site.
+            </p>
 
-          <h2>9. Fale Conosco</h2>
-          <p>
-            Dúvidas, sugestões ou reclamações? Entre em contato pelo e-mail
-            acima. Estamos à disposição para garantir a proteção da sua
-            privacidade.
-          </p>
-        </div>
+            <h2>9. Fale Conosco</h2>
+            <p>
+              Dúvidas, sugestões ou reclamações? Entre em contato pelo e-mail
+              acima. Estamos à disposição para garantir a proteção da sua
+              privacidade.
+            </p>
+          </div>
 
-        <a id="download-pdf-btn" class="download-pdf"
-          ><i class="fas fa-download"></i>Baixar PDF</a
-        >
-      </section>
+          <a id="download-pdf-btn" class="download-pdf"
+            ><i class="fas fa-download"></i>Baixar PDF</a
+          >
+        </section>
+      </div>
     </main>
 
     <!-- Substituir o footer antigo pelo novo componente reutilizável -->

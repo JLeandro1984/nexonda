@@ -113,71 +113,84 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // Estratégia para arquivos estáticos: Cache First
-  if (STATIC_FILES.includes(url.pathname) || 
-      STATIC_FILES.includes(url.pathname + url.search)) {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            return response;
-          }
-          return fetch(request)
-            .then((fetchResponse) => {
-              if (fetchResponse.status === 200) {
-                const responseClone = fetchResponse.clone();
-                caches.open(STATIC_CACHE)
-                  .then((cache) => {
-                    cache.put(request, responseClone);
-                  });
-              }
-              return fetchResponse;
-            });
-        })
-    );
-    return;
+  
+// Estratégia para arquivos estáticos: Cache First
+if (STATIC_FILES.includes(url.pathname) || 
+    STATIC_FILES.includes(url.pathname + url.search)) {
+  event.respondWith(
+    caches.match(request)
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(request)
+          .then((fetchResponse) => {
+            if (
+              fetchResponse.status === 200 &&
+              request.method === 'GET' &&
+              request.url.startsWith('http')
+            ) {
+              const responseClone = fetchResponse.clone();
+              caches.open(STATIC_CACHE)
+                .then((cache) => {
+                  cache.put(request, responseClone);
+                });
+            }
+            return fetchResponse;
+          });
+      })
+  );
+  return;
   }
   
   // Estratégia para recursos externos: Network First com fallback
-  if (EXTERNAL_RESOURCES.some(resource => request.url.includes(resource))) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                cache.put(request, responseClone);
-              });
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
-    return;
-  }
+if (EXTERNAL_RESOURCES.some(resource => request.url.includes(resource))) {
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (
+          response.status === 200 &&
+          request.method === 'GET' &&
+          request.url.startsWith('http')
+        ) {
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE)
+            .then((cache) => {
+              cache.put(request, responseClone);
+            });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(request);
+      })
+  );
+  return;
+}
   
-  // Estratégia para imagens: Cache First com fallback
-  if (request.destination === 'image') {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            return response;
-          }
-          return fetch(request)
-            .then((fetchResponse) => {
-              if (fetchResponse.status === 200) {
-                const responseClone = fetchResponse.clone();
-                caches.open(DYNAMIC_CACHE)
-                  .then((cache) => {
-                    cache.put(request, responseClone);
-                  });
-              }
-              return fetchResponse;
-            })
+ // Estratégia para imagens: Cache First com fallback
+if (request.destination === 'image') {
+  event.respondWith(
+    caches.match(request)
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(request)
+          .then((fetchResponse) => {
+            if (
+              fetchResponse.status === 200 &&
+              request.method === 'GET' &&
+              request.url.startsWith('http')
+            ) {
+              const responseClone = fetchResponse.clone();
+              caches.open(DYNAMIC_CACHE)
+                .then((cache) => {
+                  cache.put(request, responseClone);
+                });
+            }
+            return fetchResponse;
+          })
             .catch(() => {
               // Retorna uma imagem placeholder se não conseguir carregar
               return new Response(

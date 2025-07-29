@@ -2161,6 +2161,35 @@ body#index-page .company-name {
   color: var(--text-primary, #222);
 }
 
+body.dark-mode .plan-card {
+  background: var(--gray-800) !important;
+  border-color: var(--gray-700);
+  box-shadow: none !important;
+}
+
+body.dark-mode .plan-btn {
+  box-shadow: none !important;
+}
+
+body.dark-mode .plan-btn {
+  background: rgb(36 102 193);
+}
+
+body.dark-mode .plan-card.recommended .plan-btn {
+  background: rgb(11 94 41);
+}
+
+body.dark-mode #privacy-policy {
+  background: var(--card-bg-dark, #232a36) !important;
+  border-color: var(--gray-700);
+  color: var(--gray-600);
+}
+
+body.dark-mode .container-privacy-policy,
+body.dark-mode .main-content-privacy-policy {
+  background: var(--gray-700);
+}
+
 /*Início - Ajuste resoluções menores*/
 @media (max-width: 480px) {
   .container {

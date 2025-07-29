@@ -145,9 +145,14 @@ function createCarouselItem(ad) {
   const adItem = document.createElement('div');
   adItem.className = 'premium-ad-item';
   adItem.dataset.adDetails = encodeURIComponent(JSON.stringify(ad));
-  
+
+  // Adicione um fallback para imagens que não carregam
+  const imgTag = ad.mediaType === 'image'
+    ? `<img class="img-propaganda" src="${ad.mediaUrl}" alt="${ad.title}" loading="lazy" onerror="this.src='/images/placeholder.jpg';">`
+    : createMediaContent(ad);
+
   adItem.innerHTML = `
-    ${createMediaContent(ad)}
+    ${imgTag}
     <div class="premium-ad-content">
       <h3>${ad.title}</h3>
       <p title="${ad.description}">${truncateDescription(ad.description)}</p>
@@ -156,7 +161,7 @@ function createCarouselItem(ad) {
       </a>
     </div>
   `;
-  
+
   return adItem;
 }
 
