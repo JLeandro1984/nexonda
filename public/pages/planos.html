@@ -66,8 +66,11 @@
             <i class="fas fa-leaf plan-icon"></i>
           </div>
           <h3 class="plan-title">Básico</h3>
-          <div class="plan-price">R$00,00 <span>/mês</span></div>
-
+          <!-- <div class="plan-price">R$0,00 <span>/mês</span></div> -->
+          <div class="plan-price">
+            <span class="old-price"><s>R$ 19,90</s></span>
+            <span class="promo-price">R$0,00<span>/mês</span></span>
+          </div>
           <div class="plan-divider"></div>
 
           <ul class="plan-benefits">
@@ -84,7 +87,13 @@
               target="_blank"
               rel="noopener"
             >
-              <button class="plan-btn">Começar agora</button>
+              <button
+                class="plan-btn"
+                disabled
+                style="opacity: 0.6; cursor: not-allowed"
+              >
+                Plano Free
+              </button>
             </a>
           </div>
         </div>
@@ -95,7 +104,9 @@
             <i class="fas fa-crown plan-icon"></i>
           </div>
           <h3 class="plan-title">Premium</h3>
-          <div class="plan-price">R$49,90 <span>/mês</span></div>
+          <div class="plan-price">
+            <span class="premium-price">R$49,90<span>/mês</span></span>
+          </div>
 
           <div class="plan-divider"></div>
 
@@ -109,13 +120,9 @@
           </ul>
 
           <div class="plan-action">
-            <a
-              href="https://nexonda.com.br/pagamento/premium"
-              target="_blank"
-              rel="noopener"
-            >
-              <button class="plan-btn">Assinar Premium</button>
-            </a>
+            <button class="plan-btn" onclick="comprarPlano('premium')">
+              Assinar Premium
+            </button>
           </div>
         </div>
 
@@ -124,8 +131,9 @@
             <i class="fas fa-gem plan-icon"></i>
           </div>
           <h3 class="plan-title">Premium Plus</h3>
-          <div class="plan-price">R$79,90 <span>/mês</span></div>
-
+          <div class="plan-price">
+            <span class="premium-price">R$79,90<span>/mês</span></span>
+          </div>
           <div class="plan-divider"></div>
 
           <ul class="plan-benefits">
@@ -136,13 +144,9 @@
           </ul>
 
           <div class="plan-action">
-            <a
-              href="https://nexonda.com.br/pagamento/premium-plus"
-              target="_blank"
-              rel="noopener"
-            >
-              <button class="plan-btn">Quero Plus</button>
-            </a>
+            <button class="plan-btn" onclick="comprarPlano('premium-plus')">
+              Quero Plus
+            </button>
           </div>
         </div>
       </div>
@@ -152,11 +156,217 @@
       </div>
     </main>
 
+    <!-- Modal -->
+    <div class="modal" id="modalPagamento">
+      <div class="modal-content">
+        <span class="close" onclick="fecharModal()">&times;</span>
+        <h2>Finalizar Assinatura</h2>
+        <form id="formPagamento">
+          <input type="hidden" id="modalPlano" />
+
+          <label for="nome">Nome / Empresa</label>
+          <input type="text" id="nome" required />
+
+          <label for="cpfCnpj">CPF ou CNPJ</label>
+          <input type="text" id="cpfCnpj" required />
+
+          <label for="email">E-mail</label>
+          <input type="email" id="email" required />
+
+          <label for="anos">Quantidade de anos</label>
+          <select id="anos">
+            <option value="1">1 ano</option>
+            <option value="2">2 anos</option>
+            <option value="3">3 anos</option>
+            <option value="4">4 anos</option>
+            <option value="5">5 anos</option>
+          </select>
+
+          <button type="submit">Gerar pagamento</button>
+        </form>
+      </div>
+    </div>
+    <!-- Fim do Modal -->
+
     <!-- Substituir o footer antigo pelo novo componente reutilizável -->
     <div id="footer-placeholder"></div>
     <link rel="stylesheet" href="../css/footer.css" />
     <script src="../js/load-footer.js"></script>
 
     <script type="module" src="../js/main.js"></script>
+
+    <!-- SweetAlert2 (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      function comprarPlano(plano) {
+        document.getElementById("modalPlano").value = plano;
+        document.getElementById("modalPagamento").style.display = "block";
+      }
+
+      function fecharModal() {
+        const modal = document.getElementById("modalPagamento");
+        const form = document.getElementById("formPagamento");
+
+        // Oculta a modal
+        modal.style.display = "none";
+
+        // Limpa os campos do formulário
+        form.reset();
+
+        // Remove classes de erro, se existirem
+        const campos = form.querySelectorAll("input, select");
+        campos.forEach((campo) => {
+          campo.classList.remove("error");
+        });
+      }
+
+      document
+        .getElementById("formPagamento")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const inputCnpjCPF = document.getElementById("cpfCnpj");
+          inputCnpjCPF.classList.remove("error");
+
+          const plano = document.getElementById("modalPlano").value;
+          const nome = document.getElementById("nome").value.trim();
+          const cnpj = document.getElementById("cpfCnpj").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const anos = parseInt(document.getElementById("anos").value);
+
+          if (!nome || !cnpj || !email || anos < 1 || anos > 5) {
+            mostrarAlerta({
+              icon: "warning",
+              title: "Campos obrigatórios",
+              text: "Por favor, preencha todos os campos antes de continuar.",
+              confirmText: "Entendi",
+            });
+            return;
+          }
+          debugger;
+          if (!isCPFouCNPJ(cnpj)) {
+            mostrarAlerta({
+              icon: "error",
+              title: "CPF ou CNPJ inválido",
+              text: "Verifique se os números digitados estão corretos.",
+              confirmText: "Corrigir",
+              confirmColor: "#d33",
+            });
+
+            inputCnpjCPF.classList.add("error");
+            return;
+          }
+
+          try {
+            const response = await fetch(
+              "https://southamerica-east1-nexonda-281084.cloudfunctions.net/mercadoPago/criarPagamento",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ plano, nome, cnpj, email, anos }),
+              }
+            );
+
+            const data = await response.json();
+
+            if (data.init_point) {
+              window.location.href = data.init_point;
+            } else {
+              mostrarAlerta({
+                icon: "error",
+                title: "Erro ao gerar link de pagamento.",
+                text: "Entre em contato com suporte Nexonda.",
+                confirmText: "Ok",
+                confirmColor: "#d33",
+              });
+              return;
+            }
+          } catch (error) {
+            console.error("Erro ao gerar pagamento:", error);
+            mostrarAlerta({
+              icon: "error",
+              title: "Erro ao conectar com o sistema de pagamento.",
+              text: "Entre em contato com suporte Nexonda.",
+              confirmText: "Ok",
+              confirmColor: "#d33",
+            });
+          }
+        });
+
+      function mostrarAlerta({
+        icon = "info",
+        title = "",
+        text = "",
+        confirmText = "Ok",
+        confirmColor = "#3085d6",
+      }) {
+        Swal.fire({
+          icon,
+          title,
+          text,
+          confirmButtonColor: confirmColor,
+          confirmButtonText: confirmText,
+          customClass: {
+            popup: "swal-custom-zindex",
+          },
+          backdrop: true,
+          allowOutsideClick: false,
+          allowEscapeKey: true,
+          buttonsStyling: true,
+        });
+      }
+
+      function validarCPF(cpf) {
+        if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+        let soma = 0;
+        for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+        let resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        if (resto !== parseInt(cpf.charAt(9))) return false;
+
+        soma = 0;
+        for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+        resto = (soma * 10) % 11;
+        if (resto === 10 || resto === 11) resto = 0;
+        return resto === parseInt(cpf.charAt(10));
+      }
+
+      function validarCNPJ(cnpj) {
+        if (/^(\d)\1{13}$/.test(cnpj)) return false;
+
+        let tamanho = cnpj.length - 2;
+        let numeros = cnpj.substring(0, tamanho);
+        let digitos = cnpj.substring(tamanho);
+        let soma = 0;
+        let pos = tamanho - 7;
+
+        for (let i = tamanho; i >= 1; i--) {
+          soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+          if (pos < 2) pos = 9;
+        }
+
+        let resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+        tamanho += 1;
+        numeros = cnpj.substring(0, tamanho);
+        soma = 0;
+        pos = tamanho - 7;
+        for (let i = tamanho; i >= 1; i--) {
+          soma += parseInt(numeros.charAt(tamanho - i)) * pos--;
+          if (pos < 2) pos = 9;
+        }
+
+        resultado = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        return resultado === parseInt(digitos.charAt(1));
+      }
+
+      function isCPFouCNPJ(valor) {
+        const limpo = valor.replace(/[^\d]+/g, "");
+        if (limpo.length === 11) return validarCPF(limpo);
+        if (limpo.length === 14) return validarCNPJ(limpo);
+      }
+    </script>
   </body>
 </html>

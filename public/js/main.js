@@ -4,6 +4,7 @@ import { signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/fir
 import { ufs } from './ufs.js';
 import { updateLogoDisplay } from './screen-brand.js';
 import './youtube-api.js';
+import { formatarNumeroAbreviado, isCPFouCNPJ } from './utils.js';
 
 // Função para registrar visita única por sessão
 function trackVisit(city = null) {

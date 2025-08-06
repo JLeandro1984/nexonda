@@ -1,5 +1,7 @@
 const functions = require("firebase-functions/v2");
 const admin = require("firebase-admin");
+const express = require("express");
+const { MercadoPagoConfig, Preference } = require("mercadopago");
 const cors = require("cors")({
   origin: [
     "http://127.0.0.1:5500",
@@ -1895,3 +1897,142 @@ exports.sendPremiumVerificationCode = functions.https.onRequest(async (req, res)
     });
   }
 });
+
+
+// Configuração do Mercado Pago
+/*const client = new mercadopago.MercadoPagoConfig({
+  accessToken:  "APP_USR-2663300828598990-080416-10acdf8c58031ba2f29587e79b0ace9b-246873182" // Substitua pelo seu token real
+});*/
+
+// Configurar Mercado Pago
+// Inicializar o cliente do Mercado Pago (v2)
+const client = new MercadoPagoConfig({
+  accessToken:  "APP_USR-2663300828598990-080416-10acdf8c58031ba2f29587e79b0ace9b-246873182" // Substitua pelo seu token real
+});
+
+// App Express
+const paymentApp = express();
+paymentApp.use(cors);
+paymentApp.use(express.json());
+
+paymentApp.post("/criarPagamento", async (req, res) => {
+    const { plano, cnpj, email, nome, anos = 1 } = req.body;
+
+
+  const planos = {
+    basic: {
+      title: "Plano Básico - Nexonda",
+      price: 0.0
+    },
+    premium: {
+      title: "Plano Premium - Nexonda",
+      price: 598.80 * anos
+    },
+    premium_plus: {
+      title: "Plano Premium Plus - Nexonda",
+      price: 958.80 * anos
+    }
+  };
+
+  const item = planos[plano];
+  if (!item) {
+    return res.status(400).json({ error: "Plano inválido" });
+  }
+
+  const preferenceData = {
+    items: [
+      {
+        title: item.title + (anos > 1 ? ` (${anos} anos)` : ""),
+        quantity: 1,
+        unit_price: item.price,
+        currency_id: "BRL"
+      }
+    ],
+    back_urls: {
+      success: "https://nexonda.com.br/sucesso",
+      failure: "https://nexonda.com.br/erro",
+      pending: "https://nexonda.com.br/pagamento-pendente"
+    },
+    auto_return: "approved",
+    notification_url: "https://us-central1-nexonda-281084.cloudfunctions.net/webhookMP", // opcional
+    payment_methods: {
+      installments: 12 // Limita o parcelamento em até 12x
+   },
+    metadata: {
+      cnpj: cnpj || "",
+      email: email || "",
+      nome: nome || "",
+      plano,
+      anos
+    }
+  };
+
+ try {
+    const preference = new Preference(client);
+    const response = await preference.create({ body: preferenceData });
+    res.json({ init_point: response.init_point });
+  } catch (error) {
+    console.error("Erro ao criar pagamento:", error);
+    res.status(500).json({ error: "Erro ao criar link de pagamento" });
+  }
+});
+
+exports.mercadoPago = functions.https.onRequest(
+  {
+    region: "southamerica-east1",
+    memory: "1GiB",
+    timeoutSeconds: 60
+  },
+  paymentApp
+);
+
+// Função para processar notificações do Mercado Pago
+exports.webhookMP = functions.https.onRequest(
+  {
+    region: "southamerica-east1",
+    memory: "512MiB",
+    timeoutSeconds: 30
+  },
+  async (req, res) => {
+    // Mercado Pago envia notificações via POST
+    if (req.method !== "POST") {
+      return res.status(405).send("Método não permitido");
+    }
+
+    try {
+      // O body pode conter: { id, topic } ou { data: { id }, type }
+      const paymentId = req.body.data?.id || req.body.id;
+      if (!paymentId) {
+        console.error("ID do pagamento não encontrado no webhook:", req.body);
+        return res.status(400).json({ error: "ID do pagamento não encontrado" });
+      }
+
+      // Buscar detalhes do pagamento na API do Mercado Pago
+      const { Payment } = require("mercadopago");
+      const payment = await new Payment(client).get({ id: paymentId });
+
+      // Salvar no Firestore
+      await admin.firestore().collection("pagamentos").doc(String(paymentId)).set({
+        paymentId,
+        status: payment.status,
+        status_detail: payment.status_detail,
+        transaction_amount: payment.transaction_amount,
+        payment_type: payment.payment_type_id,
+        method: payment.payment_method_id,
+        payer_email: payment.payer?.email || "",
+        metadata: payment.metadata || {},
+        created_at: payment.date_created,
+        approved_at: payment.date_approved || null,
+        raw: payment, // salva tudo para auditoria
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      console.log("Pagamento salvo/atualizado:", paymentId, payment.status);
+
+      return res.status(200).send("OK");
+    } catch (error) {
+      console.error("Erro no webhookMP:", error);
+      return res.status(500).json({ error: "Erro ao processar webhook", details: error.message });
+    }
+  }
+);
