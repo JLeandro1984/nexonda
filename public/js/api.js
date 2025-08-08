@@ -111,56 +111,6 @@ const logosApi = {
         method: 'DELETE'
     }),
     
-    /*
-        // Upload de imagem para Cloudinary
-        uploadImageBase64: async (base64Image, publicId = null) => {
-            try {
-                const token = await getAuthToken();
-                if (!token) throw new Error('Token não encontrado');
-
-                const response = await fetch(`${API_BASE_URL}/uploadImage`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        base64Image,   // Envia a imagem inteira (com "data:image/png;base64,...")
-                        publicId       // Opcional: reescreve a imagem anterior
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error || 'Erro no upload');
-                }
-
-                const result = await response.json();
-                return result; // { secureUrl, publicId }
-            } catch (error) {
-                console.error('Erro no upload:', error);
-                throw error;
-            }
-        },
-
-        // Exclusão da imagem no Cloudinary
-        deleteImage: async (publicId) => {
-            const token = await getAuthToken();
-            const response = await fetch(`${API_BASE_URL}/deleteImage`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ publicId })
-            });
-
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || 'Erro ao deletar imagem');
-            }
-        }
-    */
 };
 
     

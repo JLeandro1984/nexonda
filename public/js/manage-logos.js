@@ -236,7 +236,7 @@ async function init() {
 // Renderiza os logos em uma tabela
 function renderLogos(list) {
     console.log('Renderizando logotipos:', list?.length || 0);
-    
+    debugger;
     if (!logosGrid) {
         console.error('Elemento logos-grid não encontrado');
         return;
@@ -301,7 +301,13 @@ function renderLogos(list) {
             
         const imageSrc = logo.imageUrl || logo.imagem || '';
         
-        const row = document.createElement('tr');
+      const row = document.createElement('tr');
+      row.classList.add('clickable-row');
+      row.addEventListener('click', () => {
+        editLogo(logo.id); // função personalizada para tratar o clique
+      });
+
+      
         row.innerHTML = `
             <td><img src="${imageSrc || ''}" alt="Logo de ${logo.clientName}" class="logo-thumbnail" /></td>
             <td>${logo.clientName || 'N/A'}</td>
@@ -374,6 +380,20 @@ logoForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     //adicionarHttpsNosUrls();  
     
+    const resultado = await mostrarAlertaConfirmacao({
+      icon: "question",
+      title: "Deseja salvar o cadastro?",
+      text: "Confirme para prosseguir com o salvamento.",
+      confirmText: "Sim",
+      cancelText: "Não"
+    });
+
+    if (!resultado.isConfirmed) {
+      // Usuário clicou em "Não"
+        document.getElementById("btn-cancelar").click();
+      return;
+    }
+
     const saveBtn = logoForm.querySelector('.save-btn');
     const btnText = saveBtn.querySelector('.btn-text');
     const spinner = saveBtn.querySelector('.spinner');
@@ -462,6 +482,34 @@ logoForm.addEventListener("submit", async (e) => {
         habilitarTodosOsHorarios();
     }
 });
+
+function mostrarAlertaConfirmacao({
+  icon = "info",
+  title = "",
+  text = "",
+  confirmText = "Sim",
+  cancelText = "Não",
+  confirmColor = "#3085d6",
+  cancelColor = "#d33",
+}) {
+  return Swal.fire({
+    icon,
+    title,
+    text,
+    showCancelButton: true,
+    confirmButtonColor: confirmColor,
+    cancelButtonColor: cancelColor,
+    confirmButtonText: confirmText,
+    cancelButtonText: cancelText,
+    customClass: {
+      popup: "swal-custom-zindex",
+    },
+    backdrop: true,
+    allowOutsideClick: false,
+    allowEscapeKey: true,
+    buttonsStyling: true,
+  });
+}
 
 function toCamelCase(str) {
     return str.replace(/[-_](.)/g, (_, char) => char.toUpperCase());
@@ -640,10 +688,12 @@ function aplicarMascaraTelefone(input, isCelular = false) {
 }
   
 document.addEventListener('DOMContentLoaded', function () {
+    const telefoneContatoInput = document.getElementById('phone-contact-nexonda');
     const telefoneInput = document.getElementById('telephone');
     const celularInput = document.getElementById('cellphone');
     const clientWhatsappInput = document.getElementById('client-whatsapp');
 
+   aplicarMascaraTelefone(telefoneContatoInput);
     aplicarMascaraTelefone(telefoneInput);
     aplicarMascaraTelefone(celularInput, true);
     aplicarMascaraTelefone(clientWhatsappInput, true);
@@ -770,6 +820,7 @@ function loadLogoForEdit(logo) {
   form.querySelector("#client-lng").value = logo.clientLng || '';
 
   // Contatos
+  form.querySelector("#phone-contact-nexonda").value = logo?.phoneContactNexonda || '';
   form.querySelector("#telephone").value = logo.telephone || '';
   form.querySelector("#cellphone").value = logo.cellphone || '';
   form.querySelector("#email").value = logo.email || '';
@@ -780,7 +831,8 @@ function loadLogoForEdit(logo) {
   form.querySelector("#client-instagramUrl").value = logo.instagramUrl || logo.clientInstagramUrl || '';
   form.querySelector("#client-facebookUrl").value = logo.facebookUrl || logo.clientFacebookUrl || '';
   form.querySelector("#client-whatsapp").value = logo.clientWhatsapp || '';
-
+  form.querySelector("#client-linkedinUrl").value = logo?.clientLinkedinUrl || '';
+  
   // Categoria e descrição
   form.querySelector("#logo-category").value = logo.logoCategory || '';
   form.querySelector("#logo-description").value = logo.description || logo.logoDescription || '';
@@ -1252,7 +1304,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-
 // Função para extrair o path do Firebase Storage da URL
 function extractFirebasePathFromUrl(url) {
   const decodedUrl = decodeURIComponent(url);
@@ -1260,3 +1311,50 @@ function extractFirebasePathFromUrl(url) {
   return matches ? matches[1] : null;
 }
  
+//Método para automatizar a replicação dos horários de segunda-feira para os outros dias úteis
+// Controle para só perguntar uma vez
+let jaPerguntouReplicar = false;
+
+// Ouve preenchimento do último campo de segunda-feira
+document.getElementById("monday-end").addEventListener("change", async () => {
+  const startValue = document.getElementById("monday-start").value;
+
+  // Só continua se o campo de início estiver preenchido
+  if (!jaPerguntouReplicar && startValue) {
+    jaPerguntouReplicar = true;
+    const confirmar = await perguntarSeDesejaReplicar();
+    if (confirmar) {
+      replicarHorariosDeSegunda();
+    }
+  }
+});
+
+function replicarHorariosDeSegunda() {
+  const campos = ["start", "lunch-start", "lunch-end", "end"];
+  const dias = ["tuesday", "wednesday", "thursday", "friday"];
+
+  campos.forEach((campo) => {
+    const valorSegunda = document.getElementById(`monday-${campo}`).value;
+    if (valorSegunda) {
+      dias.forEach((dia) => {
+        const campoDia = document.getElementById(`${dia}-${campo}`);
+        if (campoDia) campoDia.value = valorSegunda;
+      });
+    }
+  });
+}
+
+async function perguntarSeDesejaReplicar() {
+  const resultado = await Swal.fire({
+    title: "Deseja replicar os horários?",
+    text: "Você quer copiar os horários de segunda para os demais dias úteis?",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Sim",
+    cancelButtonText: "Não",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33"
+  });
+
+  return resultado.isConfirmed;
+}

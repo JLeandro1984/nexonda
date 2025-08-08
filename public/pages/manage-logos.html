@@ -362,6 +362,19 @@
             </div>
 
             <div class="form-group">
+              <label for="phone-contact-nexonda"
+                >Telefone para retorno da Nexonda:</label
+              >
+              <input
+                type="text"
+                id="phone-contact-nexonda"
+                name="phone-contact-nexonda"
+                placeholder="(XX) XXXX-XXXX"
+                required
+              />
+            </div>
+
+            <div class="form-group">
               <label for="telephone">Telefone:</label>
               <input
                 type="text"
@@ -445,7 +458,15 @@
                 placeholder="(XX) XXXXX-XXXX"
               />
             </div>
-
+            <div class="form-group">
+              <label for="client-linkedinUrl">LinkedIn:</label>
+              <input
+                type="url"
+                placeholder="ex: https://www.linkedin.com/in/usuario"
+                id="client-linkedinUrl"
+                name="client-linkedinUrl"
+              />
+            </div>
             <div class="form-group">
               <label for="logo-category">Categoria:</label>
               <select id="logo-category" name="logo_category" required>
@@ -454,11 +475,14 @@
             </div>
 
             <div class="form-group">
-              <label for="logo-description">Descrição:</label>
+              <label for="logo-description"
+                >Observação Nexonda - Pagamento:</label
+              >
               <textarea
                 id="logo-description"
                 name="logo_description"
                 maxlength="500"
+                readonly
               ></textarea>
             </div>
 
@@ -1234,6 +1258,8 @@
     <!-- Scripts -->
     <!-- jQuery (necessário para Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link
       href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
       rel="stylesheet"
