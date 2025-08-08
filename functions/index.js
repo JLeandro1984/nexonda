@@ -432,6 +432,7 @@ exports.publicLogos = functions.https.onRequest({
           clientFacebookUrl: data.clientFacebookUrl || "",
           clientWebsite: data.clientWebsite || "",
           videoUrl: data.clientVideoUrl || data.videoUrl || "",
+          clientLinkedinUrl: data?.clientLinkedinUrl || "",
 
           clientLat: showAddress ? data.clientLat || "" : "",
           clientLng: showAddress ? data.clientLng || "" : "",

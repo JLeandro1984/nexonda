@@ -2007,6 +2007,7 @@ body.dark-mode .premium-logo-item:hover {
 }
 
 /* ===== SOCIAL BUTTONS PADRÃO ===== */
+.linkedin-btn,
 .instagram-btn,
 .facebook-btn,
 .whatsapp-btn,
@@ -2029,6 +2030,9 @@ body.dark-mode .premium-logo-item:hover {
   text-decoration: none;
 }
 
+.linkedin-btn {
+  color: #0077b5;
+}
 .instagram-btn {
   color: #e1306c;
 }
@@ -2049,6 +2053,15 @@ body.dark-mode .premium-logo-item:hover {
   box-shadow: 0 4px 16px rgba(225, 48, 108, 0.18);
   transform: scale(1.08);
 }
+
+.linkedin-btn:hover,
+.linkedin-btn:focus {
+  background: #0077b5;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0, 119, 181, 0.18);
+  transform: scale(1.08);
+}
+
 .facebook-btn:hover,
 .facebook-btn:focus {
   background: #1877f3;

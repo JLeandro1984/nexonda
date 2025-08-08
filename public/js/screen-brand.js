@@ -103,7 +103,8 @@ function createLogoCard(logo) {
   const facebookUrl = logo.facebookUrl || logo.clientFacebookUrl;
   const youtubeUrl = logo.videoUrl || logo.clientVideoUrl;
   const websiteUrl = logo.clientWebsite || logo.websiteUrl || '';
-
+  const linkedinUrl = logo?.clientLinkedinUrl || '';
+  debugger;
   // Nome fantasia e CNPJ
   const companyName = logo.clientFantasyName || '';
  /* const companyCNPJ = logo.clientCNPJ || '';*/
@@ -118,9 +119,10 @@ function createLogoCard(logo) {
   let socialButtons = '';
   const isBasicPlan = (logo.planType || '').toLowerCase() === 'basico';
   
-  if (!isBasicPlan && (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl)) {
+  if (!isBasicPlan && (whatsappUrl || instagramUrl || facebookUrl || youtubeUrl || linkedinUrl)) {
     socialButtons = `<div class="btn-container" style="margin-top: 10px;">
-   
+
+   ${linkedinUrl ? `<a class="linkedin-btn" href="${linkedinUrl}" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>` : ''}
     ${whatsappUrl
       ? `<a class="whatsapp-btn" href="${
           whatsappUrl.startsWith('http')
