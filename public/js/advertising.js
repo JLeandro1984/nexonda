@@ -252,7 +252,7 @@ function scheduleNextUpdate() {
 // Funções para interação com a API
 async function getPremiumAdsFromFirebase() {
   try {
-    const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicPremiumAds');
+    const response = await fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/publicPremiumAds');
     if (!response.ok) throw new Error('Erro ao carregar propagandas');
     return await response.json();
   } catch (error) {
@@ -555,7 +555,7 @@ function trackImpressions(ads) {
   if (!ads || ads.length === 0) return;
 
   ads.forEach(ad => {
-    fetch('https://us-central1-nexonda-281084.cloudfunctions.net/trackAdEvent', {
+    fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/trackAdEvent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adId: ad.id, eventType: 'impression' })

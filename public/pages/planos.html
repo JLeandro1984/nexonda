@@ -257,6 +257,47 @@
             return;
           }
 
+          // --- NOVO: validar se CNPJ já está cadastrado ---
+          try {
+            const cleanCnpj = cnpj.replace(/\D/g, "");
+            const checkResponse = await fetch(
+              `https://southamerica-east1-nexonda-281084.cloudfunctions.net/validateCNPJ?cnpj=${cleanCnpj}`
+            );
+            const checkData = await checkResponse.json();
+
+            if (!checkData.exists) {
+              // Se não existe, mostrar alerta e opção para WhatsApp
+              Swal.fire({
+                icon: "info",
+                title: "CNPJ não cadastrado",
+                text: "Entre em contato com a Nexonda para fazer seu pré-cadastro.",
+                showCancelButton: true,
+                confirmButtonText: "Falar no WhatsApp",
+                cancelButtonText: "Fechar",
+                confirmButtonColor: "#25D366",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.open(
+                    "https://wa.me/5512992382918?text=Olá,%20quero%20fazer%20meu%20pré-cadastro%20na%20Nexonda",
+                    "_blank"
+                  );
+                }
+              });
+              return; // para não continuar para o pagamento
+            }
+          } catch (err) {
+            console.error("Erro ao validar CNPJ:", err);
+            mostrarAlerta({
+              icon: "error",
+              title: "Erro na verificação",
+              text: "Não foi possível verificar o CNPJ. Tente novamente.",
+              confirmText: "Ok",
+              confirmColor: "#d33",
+            });
+            return;
+          }
+          // --- FIM: validar se CNPJ já está cadastrado ---
+
           try {
             const response = await fetch(
               "https://southamerica-east1-nexonda-281084.cloudfunctions.net/mercadoPago/criarPagamento",

@@ -20,8 +20,8 @@ class Chatbot {
   async loadContextData() {
     try {
       const [logosRes, adsRes] = await Promise.all([
-        fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos'),
-        fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicPremiumAds')
+        fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/publicLogos'),
+        fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/publicPremiumAds')
       ]);
 
       const [logos, ads] = await Promise.all([logosRes.json(), adsRes.json()]);

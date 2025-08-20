@@ -17,7 +17,7 @@ function trackVisit(city = null) {
     payload.city = city;
   }
 
-  fetch('https://us-central1-nexonda-281084.cloudfunctions.net/logInsight', {
+  fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/logInsight', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ type: 'visit', payload: payload })
@@ -362,74 +362,153 @@ function getPremiumVideoUrls() {
   return propaganda;
 }
 
-function setupAdsVideoPlayer() {
-  const videoPlayer = document.getElementById('adsRandomVideo');
-  if (!videoPlayer) return;
+// function setupAdsVideoPlayer() {
+//   const videoElement = document.getElementById("ads-video");
+//   const videoPlayer = document.getElementById('adsRandomVideo');
+//   if (!videoElement || !videoPlayer) return;
 
-  let videoList = getPremiumVideoUrls();
-  if (!videoList.length) {
-    // fallback se não houver propagandas premium
-    videoList = [
-      "https://lf3-static.bytednsdoc.com/obj/eden-cn/bdeh7uhpsuht/Seedance1.0.mp4",
-      "https://www.w3schools.com/html/mov_bbb.mp4",
-      "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
-    ];
+//   let videoList = getPremiumVideoUrls();
+//   if (!videoList.length) {
+//     // fallback se não houver propagandas premium
+//     // videoList = [
+//     //   "https://lf3-static.bytednsdoc.com/obj/eden-cn/bdeh7uhpsuht/Seedance1.0.mp4",
+//     //   "https://www.w3schools.com/html/mov_bbb.mp4",
+//     //   "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
+//     // ];
+
+//     videoElement.classList.add("hide");
+//   }
+
+//   function playRandomVideo() {
+//     videoList = getPremiumVideoUrls();
+//     if (!videoList.length) {
+//       // videoList = [
+//       //   "https://lf3-static.bytednsdoc.com/obj/eden-cn/bdeh7uhpsuht/Seedance1.0.mp4",
+//       //   "https://www.w3schools.com/html/mov_bbb.mp4",
+//       //   "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
+//       // ];
+
+      
+//       videoElement.classList.add("hide");
+//       return;
+//     }
+
+//     videoElement.classList.remove("hide");
+
+//     const randomIndex = Math.floor(Math.random() * videoList.length);
+//     const selectedVideo = videoList[randomIndex];
+
+//     // Busca o objeto do anúncio correspondente
+//     const ad = (window.currentAds || []).find(ad => ad.mediaUrl === selectedVideo);
+
+//     // Atualiza os elementos da UI premium
+//     if (ad) {
+//       const titleEl = document.querySelector('.ad-title');
+//       const sloganEl = document.querySelector('.ad-slogan');
+//       const ctaBtn = document.querySelector('.ad-cta-btn');
+//       if (titleEl) titleEl.textContent = ad.title || '';
+//       if (sloganEl) sloganEl.textContent = ad.description || '';
+//       if (ctaBtn) {
+//         ctaBtn.href = ad.targetUrl || '#';
+//         ctaBtn.textContent = ad.ctaText || 'Saiba mais';
+//         ctaBtn.style.display = ad.targetUrl ? '' : 'none';
+//       }
+//     }
+
+//     // Suporte apenas para mp4 direto (não YouTube embed)
+//     if (selectedVideo.includes('youtube.com') || selectedVideo.includes('youtu.be')) {
+//       playRandomVideo();
+//       return;
+//     }
+//     videoPlayer.src = selectedVideo;
+//     videoPlayer.muted = true;
+//     videoPlayer.load();
+//     videoPlayer.play().catch(() => {});
+//   }
+
+//   // Força o mute permanentemente
+//   Object.defineProperty(videoPlayer, 'muted', {
+//     get: () => true,
+//     set: () => {},
+//     configurable: false
+//   });
+
+//   // Reproduz ao carregar
+//   playRandomVideo();
+//   // Troca ao terminar
+//   videoPlayer.addEventListener('ended', playRandomVideo);
+
+//   // Atualiza o vídeo quando as propagandas mudarem
+//   window.addEventListener('premiumAdsUpdated', playRandomVideo);
+// }
+
+function setupAdsVideoPlayer() {
+  const videoElement = document.getElementById("ads-video");
+  const videoPlayer = document.getElementById("adsRandomVideo");
+  if (!videoElement || !videoPlayer) return;
+
+  function hideVideo() {
+    videoElement.classList.add("hide");
+    videoPlayer.removeAttribute("src");
   }
 
   function playRandomVideo() {
-    videoList = getPremiumVideoUrls();
+    let videoList = getPremiumVideoUrls();
     if (!videoList.length) {
-      videoList = [
-        "https://lf3-static.bytednsdoc.com/obj/eden-cn/bdeh7uhpsuht/Seedance1.0.mp4",
-        "https://www.w3schools.com/html/mov_bbb.mp4",
-        "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
-      ];
+      hideVideo();
+      return;
     }
+
     const randomIndex = Math.floor(Math.random() * videoList.length);
     const selectedVideo = videoList[randomIndex];
 
-    // Busca o objeto do anúncio correspondente
-    const ad = (window.currentAds || []).find(ad => ad.mediaUrl === selectedVideo);
-
-    // Atualiza os elementos da UI premium
-    if (ad) {
-      const titleEl = document.querySelector('.ad-title');
-      const sloganEl = document.querySelector('.ad-slogan');
-      const ctaBtn = document.querySelector('.ad-cta-btn');
-      if (titleEl) titleEl.textContent = ad.title || '';
-      if (sloganEl) sloganEl.textContent = ad.description || '';
-      if (ctaBtn) {
-        ctaBtn.href = ad.targetUrl || '#';
-        ctaBtn.textContent = ad.ctaText || 'Saiba mais';
-        ctaBtn.style.display = ad.targetUrl ? '' : 'none';
-      }
-    }
-
-    // Suporte apenas para mp4 direto (não YouTube embed)
-    if (selectedVideo.includes('youtube.com') || selectedVideo.includes('youtu.be')) {
+    // ignora links YouTube
+    if (selectedVideo.includes("youtube.com") || selectedVideo.includes("youtu.be")) {
       playRandomVideo();
       return;
     }
+
+    videoElement.classList.remove("hide");
+
+    // Busca o objeto do anúncio correspondente
+    const ad = (window.currentAds || []).find(ad => ad.mediaUrl === selectedVideo);
+    if (ad) {
+      const titleEl = document.querySelector(".ad-title");
+      const sloganEl = document.querySelector(".ad-slogan");
+      const ctaBtn = document.querySelector(".ad-cta-btn");
+      if (titleEl) titleEl.textContent = ad.title || "";
+      if (sloganEl) sloganEl.textContent = ad.description || "";
+      if (ctaBtn) {
+        ctaBtn.href = ad.targetUrl || "#";
+        ctaBtn.textContent = ad.ctaText || "Saiba mais";
+        ctaBtn.style.display = ad.targetUrl ? "" : "none";
+      }
+    }
+
     videoPlayer.src = selectedVideo;
     videoPlayer.muted = true;
     videoPlayer.load();
-    videoPlayer.play().catch(() => {});
+    videoPlayer.play().catch(err => {
+      console.warn("Falha ao reproduzir anúncio:", err);
+    });
   }
 
   // Força o mute permanentemente
-  Object.defineProperty(videoPlayer, 'muted', {
+  Object.defineProperty(videoPlayer, "muted", {
     get: () => true,
     set: () => {},
-    configurable: false
+    configurable: false,
   });
 
-  // Reproduz ao carregar
+  // Inicializa
   playRandomVideo();
-  // Troca ao terminar
-  videoPlayer.addEventListener('ended', playRandomVideo);
 
-  // Atualiza o vídeo quando as propagandas mudarem
-  window.addEventListener('premiumAdsUpdated', playRandomVideo);
+  // Garantir que listeners não se acumulem
+  videoPlayer.removeEventListener("ended", playRandomVideo);
+  videoPlayer.addEventListener("ended", playRandomVideo);
+
+  window.removeEventListener("premiumAdsUpdated", playRandomVideo);
+  window.addEventListener("premiumAdsUpdated", playRandomVideo);
 }
 
 document.addEventListener('DOMContentLoaded', setupAdsVideoPlayer);
@@ -437,7 +516,7 @@ document.addEventListener('DOMContentLoaded', setupAdsVideoPlayer);
 // ===== PREMIUM LOGOS SECTION =====
 async function loadPremiumLogos() {
   try {
-    const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos', {
+    const response = await fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/publicLogos', {
       method: 'GET',
       headers: {
         'Accept': 'application/json'

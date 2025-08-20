@@ -362,6 +362,7 @@ exports.getGalleryStats = functions.https.onRequest({
 
 // --- API pública para logos ---
 exports.publicLogos = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -455,8 +456,51 @@ exports.publicLogos = functions.https.onRequest({
   }
 }));
 
+// --- API pública para validar CNPJ ---
+exports.validateCNPJ = functions.https.onRequest(
+  {
+    region: 'southamerica-east1',
+    cors: true,
+    maxInstances: 10,
+  },
+  handleCors(async (req, res) => {
+    try {
+      if (req.method !== "GET") {
+        return res.status(405).json({ error: "Método não permitido" });
+      }
+
+      const { cnpj } = req.query;
+
+      if (!cnpj) {
+        return res.status(400).json({ error: "CNPJ não informado" });
+      }
+
+      // Limpar o CNPJ de caracteres não numéricos
+      const cleanCNPJ = cnpj.replace(/\D/g, "");
+
+      if (cleanCNPJ.length !== 14) {
+        return res.status(400).json({ error: "CNPJ inválido" });
+      }
+
+      const snapshot = await db.collection("logos")
+        .where("clientCNPJ", "==", cleanCNPJ)
+        .limit(1)
+        .get();
+
+      const exists = !snapshot.empty;
+
+      return res.status(200).json({ exists });
+
+    } catch (error) {
+      console.error("Erro ao validar CNPJ:", error);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  })
+);
+
 // --- API principal (logos) ---
 exports.api = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(authenticateMiddleware(async (req, res) => {
@@ -738,6 +782,7 @@ exports.health = functions.https.onRequest({
 
 // --- API contacts ---
 exports.contacts = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, handleCors(authenticateMiddleware(async (req, res) => {
@@ -840,6 +885,7 @@ const premiumAdsAuthMiddleware = (handler) => async (req, res) => {
 
 // --- API premiumAds ---
 exports.premiumAds = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, handleCors(premiumAdsAuthMiddleware(async (req, res) => {
@@ -1027,6 +1073,7 @@ exports.premiumAds = functions.https.onRequest({
 
 // --- API authorized users ---
 exports.authorizedUsers = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, handleCors(authenticateMiddleware(async (req, res) => {
@@ -1170,6 +1217,7 @@ exports.authorizedUsers = functions.https.onRequest({
 
 // --- API pública para contatos ---
 exports.publicContacts = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -1210,9 +1258,16 @@ exports.publicContacts = functions.https.onRequest({
   }
 }));
 
+// Função auxiliar para normalizar datas (Timestamp ou string)
+function normalizeDate(value) {
+  if (!value) return null;
+  if (value.toDate) return value.toDate(); // Firestore Timestamp
+  return new Date(value); // string ou number
+}
 
 // --- API pública para propagandas ---
 exports.publicPremiumAds = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -1253,17 +1308,19 @@ exports.publicPremiumAds = functions.https.onRequest({
             const logo = logosMap.get(adData.clientCNPJ) || {};
 
             // Validação: isActive e datas válidas
-            if (!adData.isActive || !adData.startDate || !adData.endDate) {
-              return null;
-            }
+           if (!adData.isActive || !adData.startDate || !adData.endDate) {
+             return null;
+           }
 
-            const startDate = new Date(adData.startDate);
-            const endDate = new Date(adData.endDate);
-            endDate.setHours(23, 59, 59, 999); // garante cobertura até o fim do dia
+            const startDate = normalizeDate(adData.startDate);
+            const endDate = normalizeDate(adData.endDate);
+            if (!startDate || !endDate) return null;
+
+            endDate.setHours(23, 59, 59, 999);
 
             const ativo = startDate <= today && endDate >= today;
             if (!ativo) return null;
-
+            
             // Monta o objeto final do anúncio
             return {
               id: adData.id,
@@ -1288,7 +1345,7 @@ exports.publicPremiumAds = functions.https.onRequest({
             };
           })
           .filter(Boolean); // remove nulos (anúncios inativos ou com datas inválidas)
-
+       console.log("publicPremiumAds - Ads ativos:", ads);
       return res.status(200).json(ads);
     }
     if (req.method === "POST" && req.path.endsWith("/track")) {
@@ -1328,6 +1385,7 @@ exports.publicPremiumAds = functions.https.onRequest({
 
 // --- API de autenticação ---
 exports.authenticate = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, async (req, res) => {
@@ -1418,6 +1476,7 @@ exports.authenticate = functions.https.onRequest({
 
 // --- API de autenticação premium ---
 exports.authenticatePremium = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, (req, res) => {
@@ -1498,6 +1557,7 @@ exports.authenticatePremium = functions.https.onRequest({
 
 // --- API para listar usuários autorizados ---
 exports.listAuthorizedUsers = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, (req, res) => {
@@ -1526,6 +1586,7 @@ exports.listAuthorizedUsers = functions.https.onRequest({
 
 // --- Função para adicionar usuário autorizado
 exports.addAuthorizedUser = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, (req, res) => {
@@ -1556,6 +1617,7 @@ exports.addAuthorizedUser = functions.https.onRequest({
 
 // --- Função para remover usuário autorizado
 exports.removeAuthorizedUser = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, (req, res) => {
@@ -1582,6 +1644,7 @@ exports.removeAuthorizedUser = functions.https.onRequest({
 
 // --- Função para inicializar o primeiro admin
 exports.initializeAdmin = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, (req, res) => {
@@ -1629,6 +1692,7 @@ exports.initializeAdmin = functions.https.onRequest({
 
 // --- API de verificação de autenticação ---
 exports.checkAuth = functions.https.onRequest({
+  region: 'us-central1',
   cors: true,
   maxInstances: 10,
 }, async (req, res) => {
@@ -1672,6 +1736,7 @@ exports.checkAuth = functions.https.onRequest({
 
 // --- API para Insights (Cliques e Visitas) ---
 exports.logInsight = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -1736,6 +1801,7 @@ exports.logInsight = functions.https.onRequest({
 
 // --- API para rastrear eventos de anúncios (impressões e cliques) ---
 exports.trackAdEvent = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -1784,6 +1850,7 @@ exports.trackAdEvent = functions.https.onRequest({
 
 // --- API para rastrear cliques nos logos ---
 exports.trackLogoClick = functions.https.onRequest({
+  region: 'southamerica-east1',
   cors: true,
   maxInstances: 10,
 }, handleCors(async (req, res) => {
@@ -1900,11 +1967,6 @@ exports.sendPremiumVerificationCode = functions.https.onRequest(async (req, res)
 });
 
 
-// Configuração do Mercado Pago
-/*const client = new mercadopago.MercadoPagoConfig({
-  accessToken:  "APP_USR-2663300828598990-080416-10acdf8c58031ba2f29587e79b0ace9b-246873182" // Substitua pelo seu token real
-});*/
-
 // Configurar Mercado Pago
 // Inicializar o cliente do Mercado Pago (v2)
 const client = new MercadoPagoConfig({
@@ -1955,7 +2017,7 @@ paymentApp.post("/criarPagamento", async (req, res) => {
       pending: "https://nexonda.com.br/pagamento-pendente"
     },
     auto_return: "approved",
-    notification_url: "https://us-central1-nexonda-281084.cloudfunctions.net/webhookMP", // opcional
+    notification_url: "https://southamerica-east1-nexonda-281084.cloudfunctions.net/webhookMP", // opcional
     payment_methods: {
       installments: 12 // Limita o parcelamento em até 12x
    },

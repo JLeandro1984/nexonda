@@ -1,6 +1,6 @@
 // Configuração base da API
-const API_BASE_URL = 'https://us-central1-nexonda-281084.cloudfunctions.net';
-
+const API_BASE_URL = 'https://southamerica-east1-nexonda-281084.cloudfunctions.net';
+const API_BASE_URL_CENTRAL1 = 'https://us-central1-nexonda-281084.cloudfunctions.net';
 // Função para obter o token de autenticação
 async function getAuthToken() {
     try {
@@ -42,9 +42,9 @@ async function apiRequest(endpoint, options = {}) {
         let url = `${API_BASE_URL}/api/${endpoint}`;
 
         if (!endpoint.includes('logos')) {
-            url = `${API_BASE_URL}/${endpoint}`;
+            url = `${API_BASE_URL_CENTRAL1}/${endpoint}`;
         }
-
+        
         console.log('URL da requisição:', url);
 
         const requestOptions = {
@@ -138,7 +138,7 @@ const premiumAdsApi = {
     getAll: async () => {      
         try {         
             // Força a chamada direta para o endpoint premiumAds
-            const response = await fetch(`${API_BASE_URL}/premiumAds`, {
+            const response = await fetch(`${API_BASE_URL_CENTRAL1}/premiumAds`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${await getAuthToken()}`,

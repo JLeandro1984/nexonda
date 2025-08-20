@@ -10,7 +10,7 @@ const categorySelect = document.getElementById("category-select");
 // Carrega logos do Firebase Functions
 async function loadLogosFromStorage() {
     try {
-        const response = await fetch('https://us-central1-nexonda-281084.cloudfunctions.net/publicLogos', {
+        const response = await fetch('https://southamerica-east1-nexonda-281084.cloudfunctions.net/publicLogos', {
             method: 'GET',
             headers: {
                 'Accept': 'application/json'
